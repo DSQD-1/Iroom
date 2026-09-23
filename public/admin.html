@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  >
+
+  <title>iroom — Админ-панель</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link
+    rel="stylesheet"
+    href="/admin.css"
+  >
+</head>
+
+<body>
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    id="loadingScreen"
+    class="screen-center"
+  >
+    <div class="loader"></div>
+
+    <div class="loading-text">
+      Проверяем доступ...
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       DENIED
+  ====================================================== -->
+
+  <div
+    id="deniedScreen"
+    class="screen-center hidden"
+  >
+
+    <div class="denied-icon">
+      ×
+    </div>
+
+    <h2>
+      Нет доступа
+    </h2>
+
+    <p id="deniedText">
+      У вас нет доступа
+      к админ-панели.
+    </p>
+
+    <button
+      id="closeDeniedButton"
+      class="primary-button"
+      type="button"
+    >
+      Вернуться в магазин
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       ADMIN
+  ====================================================== -->
+
+  <main
+    id="adminContent"
+    class="admin-page hidden"
+  >
+
+    <!-- TOPBAR -->
+
+    <header class="admin-topbar">
+
+      <button
+        id="adminLogo"
+        class="admin-logo"
+        type="button"
+      >
+        <span class="logo-pink">
+          IR
+        </span>
+
+        <span class="logo-white">
+          oom
+        </span>
+      </button>
+
+      <div class="admin-title">
+        Админ-панель
+      </div>
+
+      <button
+        id="closeAdminButton"
+        class="close-button"
+        type="button"
+        aria-label="Закрыть"
+      >
+        ×
+      </button>
+
+    </header>
+
+
+    <!-- =================================================
+         STATS
+    ================================================== -->
+
+    <section class="stats-grid">
+
+      <div class="stat-card">
+
+        <span class="stat-label">
+          Товары
+        </span>
+
+        <strong id="totalProducts">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <span class="stat-label">
+          Новинки
+        </span>
+
+        <strong id="totalNew">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <span class="stat-label">
+          Категории
+        </span>
+
+        <strong id="totalCategories">
+          0
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         TABS
+    ================================================== -->
+
+    <nav class="tabs">
+
+      <button
+        class="tab active"
+        type="button"
+        data-tab="products"
+      >
+        Товары
+      </button>
+
+      <button
+        class="tab"
+        type="button"
+        data-tab="categories"
+      >
+        Категории
+      </button>
+
+    </nav>
+
+
+    <!-- =================================================
+         PRODUCTS TAB
+    ================================================== -->
+
+    <section
+      id="productsTab"
+      class="admin-tab"
+    >
+
+      <div class="section-header">
+
+        <div>
+          <h2>
+            Товары
+          </h2>
+
+          <p>
+            Управление товарами магазина
+          </p>
+        </div>
+
+        <button
+          id="addProductButton"
+          class="add-button"
+          type="button"
+        >
+          + Товар
+        </button>
+
+      </div>
+
+
+      <div
+        id="productsList"
+        class="items-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         CATEGORIES TAB
+    ================================================== -->
+
+    <section
+      id="categoriesTab"
+      class="admin-tab hidden"
+    >
+
+      <div class="section-header">
+
+        <div>
+          <h2>
+            Категории
+          </h2>
+
+          <p>
+            Управление категориями
+          </p>
+        </div>
+
+        <button
+          id="addCategoryButton"
+          class="add-button"
+          type="button"
+        >
+          + Категория
+        </button>
+
+      </div>
+
+
+      <div
+        id="categoriesList"
+        class="items-list"
+      ></div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       PRODUCT MODAL
+  ====================================================== -->
+
+  <div
+    id="productModal"
+    class="modal hidden"
+  >
+
+    <div
+      class="modal-overlay"
+      data-close-product
+    ></div>
+
+    <div class="modal-card">
+
+      <div class="modal-header">
+
+        <div>
+
+          <div
+            id="productModalTitle"
+            class="modal-title"
+          >
+            Новый товар
+          </div>
+
+          <div class="modal-subtitle">
+            Информация о товаре
+          </div>
+
+        </div>
+
+        <button
+          class="close-button"
+          type="button"
+          data-close-product
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- PHOTO -->
+
+      <div class="form-section">
+
+        <label class="form-label">
+          Фото товара
+        </label>
+
+        <div
+          id="productImagePreview"
+          class="product-image-preview empty"
+        >
+
+          <div class="photo-placeholder">
+
+            <svg viewBox="0 0 24 24">
+              <rect
+                x="3"
+                y="4"
+                width="18"
+                height="16"
+                rx="2"
+              ></rect>
+
+              <circle
+                cx="8.5"
+                cy="9"
+                r="1.5"
+              ></circle>
+
+              <path
+                d="M21 15l-4-4-5 5-2-2-5 5"
+              ></path>
+            </svg>
+
+            <span>
+              Фото товара
+            </span>
+
+          </div>
+
+        </div>
+
+        <input
+          id="productImageInput"
+          type="file"
+          accept="image/*"
+          hidden
+        >
+
+        <div
+          id="productImageActions"
+          class="image-actions"
+        >
+
+          <button
+            id="chooseImageButton"
+            class="secondary-button"
+            type="button"
+          >
+            Выбрать фото
+          </button>
+
+          <button
+            id="cancelImageButton"
+            class="secondary-button hidden"
+            type="button"
+          >
+            Отменить
+          </button>
+
+          <button
+            id="deleteImageButton"
+            class="danger-button hidden"
+            type="button"
+          >
+            Удалить фото
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- NAME -->
+
+      <div class="form-section">
+
+        <label
+          class="form-label"
+          for="productName"
+        >
+          Название
+        </label>
+
+        <input
+          id="productName"
+          class="form-input"
+          type="text"
+          placeholder="iPhone 17 Pro Max"
+        >
+
+      </div>
+
+
+      <!-- MEMORY -->
+
+      <div class="form-section">
+
+        <label
+          class="form-label"
+          for="productMemory"
+        >
+          Память
+        </label>
+
+        <input
+          id="productMemory"
+          class="form-input"
+          type="text"
+          placeholder="512GB"
+        >
+
+      </div>
+
+
+      <!-- COLOR -->
+
+      <div class="form-section">
+
+        <label
+          class="form-label"
+          for="productColor"
+        >
+          Цвет
+        </label>
+
+        <input
+          id="productColor"
+          class="form-input"
+          type="text"
+          placeholder="Orange"
+        >
+
+      </div>
+
+
+      <!-- VERSION -->
+
+      <div class="form-section">
+
+        <label
+          class="form-label"
+          for="productVersion"
+        >
+          Версия
+        </label>
+
+        <input
+          id="productVersion"
+          class="form-input"
+          type="text"
+          placeholder="eSIM"
+        >
+
+      </div>
+
+
+      <!-- PRICE -->
+
+      <div class="form-section">
+
+        <label
+          class="form-label"
+          for="productPrice"
+        >
+          Цена
+        </label>
+
+        <input
+          id="productPrice"
+          class="form-input"
+          type="number"
+          inputmode="numeric"
+          placeholder="100000"
+        >
+
+      </div>
+
+
+      <!-- CATEGORY -->
+
+      <div class="form-section">
+
+        <label
+          class="form-label"
+          for="productCategory"
+        >
+          Категория
+        </label>
+
+        <select
+          id="productCategory"
+          class="form-input"
+        >
+          <option value="">
+            Без категории
+          </option>
+        </select>
+
+      </div>
+
+
+      <!-- NEW -->
+
+      <div class="form-section">
+
+        <label class="checkbox-row">
+
+          <input
+            id="productIsNew"
+            type="checkbox"
+          >
+
+          <span>
+            Новинка
+          </span>
+
+        </label>
+
+      </div>
+
+
+      <!-- NEW ORDER -->
+
+      <div
+        id="newOrderRow"
+        class="form-section"
+      >
+
+        <label
+          class="form-label"
+          for="productNewOrder"
+        >
+          Позиция новинки
+        </label>
+
+        <input
+          id="productNewOrder"
+          class="form-input"
+          type="number"
+          inputmode="numeric"
+          value="0"
+          placeholder="0"
+        >
+
+      </div>
+
+
+      <!-- ACTIVE -->
+
+      <div class="form-section">
+
+        <label class="checkbox-row">
+
+          <input
+            id="productActive"
+            type="checkbox"
+            checked
+          >
+
+          <span>
+            Товар активен
+          </span>
+
+        </label>
+
+      </div>
+
+
+      <!-- BUTTONS -->
+
+      <div class="modal-actions">
+
+        <button
+          id="saveProductButton"
+          class="primary-button"
+          type="button"
+        >
+          Сохранить товар
+        </button>
+
+        <button
+          id="deleteProductButton"
+          class="danger-button hidden"
+          type="button"
+        >
+          Удалить товар
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       CATEGORY MODAL
+  ====================================================== -->
+
+  <div
+    id="categoryModal"
+    class="modal hidden"
+  >
+
+    <div
+      class="modal-overlay"
+      data-close-category
+    ></div>
+
+    <div class="modal-card">
+
+      <div class="modal-header">
+
+        <div>
+
+          <div
+            id="categoryModalTitle"
+            class="modal-title"
+          >
+            Новая категория
+          </div>
+
+          <div class="modal-subtitle">
+            Информация о категории
+          </div>
+
+        </div>
+
+        <button
+          class="close-button"
+          type="button"
+          data-close-category
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- NAME -->
+
+      <div class="form-section">
+
+        <label
+          class="form-label"
+          for="categoryName"
+        >
+          Название
+        </label>
+
+        <input
+          id="categoryName"
+          class="form-input"
+          type="text"
+          placeholder="iPhone"
+        >
+
+      </div>
+
+
+      <!-- SLUG -->
+
+      <div class="form-section">
+
+        <label
+          class="form-label"
+          for="categorySlug"
+        >
+          Slug
+        </label>
+
+        <input
+          id="categorySlug"
+          class="form-input"
+          type="text"
+          placeholder="iphone"
+        >
+
+      </div>
+
+
+      <!-- ORDER -->
+
+      <div class="form-section">
+
+        <label
+          class="form-label"
+          for="categorySortOrder"
+        >
+          Позиция
+        </label>
+
+        <input
+          id="categorySortOrder"
+          class="form-input"
+          type="number"
+          inputmode="numeric"
+          value="0"
+        >
+
+      </div>
+
+
+      <!-- ACTIVE -->
+
+      <div class="form-section">
+
+        <label class="checkbox-row">
+
+          <input
+            id="categoryActive"
+            type="checkbox"
+            checked
+          >
+
+          <span>
+            Категория активна
+          </span>
+
+        </label>
+
+      </div>
+
+
+      <!-- BUTTONS -->
+
+      <div class="modal-actions">
+
+        <button
+          id="saveCategoryButton"
+          class="primary-button"
+          type="button"
+        >
+          Сохранить категорию
+        </button>
+
+        <button
+          id="deleteCategoryButton"
+          class="danger-button hidden"
+          type="button"
+        >
+          Удалить категорию
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       TOAST
+  ====================================================== -->
+
+  <div
+    id="toast"
+    class="toast"
+  ></div>
+
+
+  <!-- =====================================================
+       JS
+  ====================================================== -->
+
+  <script src="/admin.js"></script>
+
+</body>
+</html>
