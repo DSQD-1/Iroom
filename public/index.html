@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#050505">
+
+  <title>IRoom</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+  <!-- =====================================================
+       STARTUP
+  ====================================================== -->
+
+  <div id="startupScreen" class="startup-screen">
+    <div class="startup-content">
+
+      <div class="startup-logo">
+        <span class="pink">I</span><span class="white">Room</span>
+      </div>
+
+      <div class="startup-loader">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       APP
+  ====================================================== -->
+
+  <div id="app" class="app hidden">
+
+    <!-- ===================================================
+         TOPBAR
+    ==================================================== -->
+
+    <header class="topbar">
+
+      <button
+        id="logoButton"
+        class="logo-button"
+        type="button"
+      >
+        <span class="logo-pink">I</span><span class="logo-white">Room</span>
+      </button>
+
+      <button
+        id="searchButton"
+        class="search-button"
+        type="button"
+        aria-label="Поиск"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="21"
+          height="21"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-4-4"></path>
+        </svg>
+      </button>
+
+    </header>
+
+
+    <!-- ===================================================
+         SEARCH
+    ==================================================== -->
+
+    <div
+      id="searchPanel"
+      class="search-panel hidden"
+    >
+
+      <div class="search-panel-inner">
+
+        <button
+          id="closeSearchButton"
+          class="search-close"
+          type="button"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          >
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+        </button>
+
+        <input
+          id="searchInput"
+          class="search-input"
+          type="search"
+          placeholder="Поиск товаров"
+          autocomplete="off"
+        >
+
+      </div>
+
+      <div id="searchResults" class="search-results"></div>
+
+    </div>
+
+
+    <!-- ===================================================
+         MAIN
+    ==================================================== -->
+
+    <main id="mainContent" class="main-content">
+
+      <!-- ================================================
+           HOME
+      ================================================= -->
+
+      <section
+        id="homePage"
+        class="page"
+      >
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+          <div class="hero-content">
+
+            <div class="hero-label">
+              IROOM STORE
+            </div>
+
+            <h1>
+              Техника,<br>
+              которую хочется.
+            </h1>
+
+            <p>
+              Apple и другая техника<br>
+              с подбором под тебя.
+            </p>
+
+            <button
+              id="heroCatalogButton"
+              class="hero-button"
+              type="button"
+            >
+              Смотреть каталог
+            </button>
+
+          </div>
+
+        </section>
+
+
+        <!-- NEW -->
+
+        <section
+          id="newSection"
+          class="section"
+        >
+
+          <div class="section-heading">
+
+            <div>
+              <div class="section-kicker">
+                IROOM
+              </div>
+
+              <h2>
+                Новинки
+              </h2>
+            </div>
+
+          </div>
+
+          <div
+            id="newProducts"
+            class="products-row"
+          ></div>
+
+        </section>
+
+
+        <!-- CATEGORIES -->
+
+        <section
+          id="categoriesSection"
+          class="section categories-section"
+        >
+
+          <div class="section-heading">
+
+            <div>
+              <div class="section-kicker">
+                КАТАЛОГ
+              </div>
+
+              <h2>
+                Категории
+              </h2>
+            </div>
+
+          </div>
+
+          <div
+            id="categories"
+            class="categories-row"
+          ></div>
+
+        </section>
+
+
+        <!-- CATALOG -->
+
+        <section
+          id="catalogSection"
+          class="section catalog-section"
+        >
+
+          <div class="section-heading">
+
+            <div>
+              <div class="section-kicker">
+                IROOM STORE
+              </div>
+
+              <h2>
+                Каталог
+              </h2>
+            </div>
+
+          </div>
+
+          <div
+            id="catalog"
+            class="catalog-grid"
+          ></div>
+
+        </section>
+
+
+        <!-- CONTACT -->
+
+        <section class="contact-section">
+
+          <div class="contact-card">
+
+            <div class="contact-card-kicker">
+              НУЖНА ПОМОЩЬ?
+            </div>
+
+            <h3>
+              Не нашли нужную модель?
+            </h3>
+
+            <p>
+              Напишите менеджеру — поможем подобрать
+              устройство и комплектацию.
+            </p>
+
+            <button
+              id="contactManagerButton"
+              class="secondary-button"
+              type="button"
+            >
+              Связаться с менеджером
+            </button>
+
+          </div>
+
+        </section>
+
+
+        <!-- FOOTER -->
+
+        <footer class="footer">
+
+          <div class="footer-logo">
+            <span class="logo-pink">I</span><span class="logo-white">Room</span>
+          </div>
+
+          <div class="footer-links">
+
+            <a
+              href="https://t.me/iroom_market"
+              target="_blank"
+              rel="noopener"
+            >
+              Telegram
+            </a>
+
+            <a
+              href="https://t.me/iroom_24"
+              target="_blank"
+              rel="noopener"
+            >
+              Менеджер
+            </a>
+
+          </div>
+
+          <div class="footer-copy">
+            IRoom Store
+          </div>
+
+        </footer>
+
+      </section>
+
+
+      <!-- ================================================
+           CATALOG PAGE
+      ================================================= -->
+
+      <section
+        id="catalogPage"
+        class="page hidden"
+      >
+
+        <div class="inner-page-header">
+
+          <div>
+            <div class="section-kicker">
+              IROOM STORE
+            </div>
+
+            <h1>
+              Каталог
+            </h1>
+          </div>
+
+        </div>
+
+        <div
+          id="catalogPageCategories"
+          class="categories-row"
+        ></div>
+
+        <div
+          id="catalogPageProducts"
+          class="catalog-grid"
+        ></div>
+
+      </section>
+
+
+      <!-- ================================================
+           ORDERS PAGE
+      ================================================= -->
+
+      <section
+        id="ordersPage"
+        class="page hidden"
+      >
+
+        <div class="inner-page-header">
+
+          <div>
+            <div class="section-kicker">
+              IROOM
+            </div>
+
+            <h1>
+              Мои заказы
+            </h1>
+          </div>
+
+        </div>
+
+
+        <div
+          id="ordersLoading"
+          class="orders-loading hidden"
+        >
+          <div class="small-loader"></div>
+          <span>Загрузка заказов...</span>
+        </div>
+
+
+        <div
+          id="ordersEmpty"
+          class="empty-state hidden"
+        >
+
+          <div class="empty-state-icon">
+            <svg
+              viewBox="0 0 24 24"
+              width="34"
+              height="34"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M6 2h12l2 5H4l2-5Z"></path>
+              <path d="M4 7h16v13H4z"></path>
+              <path d="M9 11h6"></path>
+            </svg>
+          </div>
+
+          <h3>
+            Заказов пока нет
+          </h3>
+
+          <p>
+            Выберите товар в каталоге и оформите бронь.
+          </p>
+
+          <button
+            id="emptyOrdersCatalogButton"
+            class="primary-button"
+            type="button"
+          >
+            Перейти в каталог
+          </button>
+
+        </div>
+
+
+        <div
+          id="ordersList"
+          class="orders-list"
+        ></div>
+
+      </section>
+
+
+      <!-- ================================================
+           ORDER DETAIL PAGE
+      ================================================= -->
+
+      <section
+        id="orderPage"
+        class="page hidden"
+      >
+
+        <div class="product-page-header">
+
+          <button
+            id="orderBackButton"
+            class="back-button"
+            type="button"
+          >
+
+            <svg
+              class="back-arrow"
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+
+            <span>
+              Заказы
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <div
+          id="orderDetails"
+          class="order-details"
+        ></div>
+
+      </section>
+
+
+      <!-- ================================================
+           PROFILE PAGE
+      ================================================= -->
+
+      <section
+        id="profilePage"
+        class="page hidden"
+      >
+
+        <div class="inner-page-header">
+
+          <div>
+            <div class="section-kicker">
+              IROOM
+            </div>
+
+            <h1>
+              Профиль
+            </h1>
+          </div>
+
+        </div>
+
+
+        <div class="profile-card">
+
+          <div
+            id="profileAvatar"
+            class="profile-avatar"
+          >
+            I
+          </div>
+
+          <div class="profile-info">
+
+            <div
+              id="profileName"
+              class="profile-name"
+            >
+              Покупатель
+            </div>
+
+            <div
+              id="profileUsername"
+              class="profile-username"
+            >
+              Telegram
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="profile-menu">
+
+          <button
+            id="profileOrdersButton"
+            class="profile-menu-item"
+            type="button"
+          >
+
+            <span class="profile-menu-icon">
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M6 2h12l2 5H4l2-5Z"></path>
+                <path d="M4 7h16v13H4z"></path>
+              </svg>
+            </span>
+
+            <span class="profile-menu-text">
+              Мои заказы
+            </span>
+
+            <svg
+              class="profile-menu-arrow"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+
+          </button>
+
+
+          <button
+            id="profileManagerButton"
+            class="profile-menu-item"
+            type="button"
+          >
+
+            <span class="profile-menu-icon">
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.8 9.8 0 0 1-4.2-1L3 21l1.8-4.4A8.4 8.4 0 0 1 3 11.5 8.6 8.6 0 0 1 12 3a8.6 8.6 0 0 1 9 8.5Z"></path>
+              </svg>
+            </span>
+
+            <span class="profile-menu-text">
+              Связаться с менеджером
+            </span>
+
+            <svg
+              class="profile-menu-arrow"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+
+          </button>
+
+        </div>
+
+
+        <div
+          id="adminProfileButton"
+          class="admin-profile-button hidden"
+        >
+
+          <button
+            id="adminButton"
+            class="primary-button"
+            type="button"
+          >
+            Панель администратора
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================
+           PRODUCT PAGE
+      ================================================= -->
+
+      <section
+        id="productPage"
+        class="page hidden"
+      >
+
+        <div class="product-page-header">
+
+          <button
+            id="productBackButton"
+            class="back-button"
+            type="button"
+          >
+
+            <svg
+              class="back-arrow"
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+
+            <span>
+              Назад
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <div
+          id="productDetails"
+          class="product-details"
+        ></div>
+
+      </section>
+
+    </main>
+
+
+    <!-- ===================================================
+         BOTTOM NAVIGATION
+    ==================================================== -->
+
+    <nav
+      id="bottomNavigation"
+      class="bottom-navigation"
+    >
+
+      <button
+        id="navHome"
+        class="bottom-nav-item active"
+        type="button"
+        data-page="home"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          width="21"
+          height="21"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="m3 10 9-7 9 7"></path>
+          <path d="M5 9v11h14V9"></path>
+          <path d="M9 20v-6h6v6"></path>
+        </svg>
+
+        <span>
+          Главная
+        </span>
+
+      </button>
+
+
+      <button
+        id="navCatalog"
+        class="bottom-nav-item"
+        type="button"
+        data-page="catalog"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          width="21"
+          height="21"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="4" y="4" width="6" height="6" rx="1"></rect>
+          <rect x="14" y="4" width="6" height="6" rx="1"></rect>
+          <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+          <rect x="14" y="14" width="6" height="6" rx="1"></rect>
+        </svg>
+
+        <span>
+          Каталог
+        </span>
+
+      </button>
+
+
+      <button
+        id="navOrders"
+        class="bottom-nav-item"
+        type="button"
+        data-page="orders"
+      >
+
+        <span class="nav-icon-wrapper">
+
+          <svg
+            viewBox="0 0 24 24"
+            width="21"
+            height="21"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M6 2h12l2 5H4l2-5Z"></path>
+            <path d="M4 7h16v13H4z"></path>
+          </svg>
+
+          <span
+            id="ordersBadge"
+            class="orders-badge hidden"
+          >
+            0
+          </span>
+
+        </span>
+
+        <span>
+          Заказы
+        </span>
+
+      </button>
+
+
+      <button
+        id="navProfile"
+        class="bottom-nav-item"
+        type="button"
+        data-page="profile"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          width="21"
+          height="21"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="8" r="4"></circle>
+          <path d="M4 21a8 8 0 0 1 16 0"></path>
+        </svg>
+
+        <span>
+          Профиль
+        </span>
+
+      </button>
+
+    </nav>
+
+
+    <!-- ===================================================
+         TOAST
+    ==================================================== -->
+
+    <div
+      id="toast"
+      class="toast"
+    ></div>
+
+
+    <!-- ===================================================
+         LEGACY LOADER
+    ==================================================== -->
+
+    <div
+      id="loader"
+      class="hidden"
+    ></div>
+
+  </div>
+
+
+  <!-- =====================================================
+       SCRIPTS
+  ====================================================== -->
+
+  <script src="/app.js"></script>
+
+
+  <script>
+    (function () {
+
+      function showApp() {
+        const startup =
+          document.getElementById("startupScreen");
+
+        const app =
+          document.getElementById("app");
+
+        if (startup) {
+          startup.classList.add("hidden");
+        }
+
+        if (app) {
+          app.classList.remove("hidden");
+        }
+      }
+
+      window.addEventListener(
+        "load",
+        function () {
+          setTimeout(showApp, 350);
+        }
+      );
+
+      setTimeout(showApp, 4000);
+
+    })();
+  </script>
+
+</body>
+</html>
