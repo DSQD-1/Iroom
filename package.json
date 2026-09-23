@@ -1,0 +1,17 @@
+{
+  "name": "iroom",
+  "version": "1.0.0",
+  "description": "iroom Telegram Mini App store",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "24.x"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.15.15",
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}
