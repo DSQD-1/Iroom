@@ -1,8 +1,7 @@
 {
   "name": "iroom",
   "version": "1.0.0",
-  "description": "IRoom Telegram Mini App Store",
-  "type": "module",
+  "private": true,
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
