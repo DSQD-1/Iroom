@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+  >
+
+  <title>IRoom</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+
+      <button
+        id="storeLogo"
+        class="logo"
+        type="button"
+        aria-label="На главную"
+      >
+        <span class="logo-pink">IR</span><span class="logo-white">oom</span>
+      </button>
+
+      <button
+        id="searchButton"
+        class="search-button"
+        type="button"
+        aria-label="Поиск"
+      >
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="6.5"></circle>
+          <path d="M16 16L21 21"></path>
+        </svg>
+      </button>
+
+    </header>
+
+
+    <!-- SEARCH -->
+    <div id="searchBox" class="search-box">
+
+      <div class="search-field">
+
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="6.5"></circle>
+          <path d="M16 16L21 21"></path>
+        </svg>
+
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Поиск товаров"
+          autocomplete="off"
+        >
+
+        <button
+          id="closeSearch"
+          type="button"
+          aria-label="Закрыть поиск"
+        >
+          ×
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- HOME -->
+    <main id="homePage">
+
+      <!-- HERO -->
+      <section class="hero">
+
+        <div class="hero-content">
+          <div class="hero-label">IRoom</div>
+
+          <h1>
+            Техника Apple
+            <span>рядом.</span>
+          </h1>
+
+          <p>
+            iPhone, iPad, Mac, AirPods<br>
+            и Apple Watch.
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- NEW -->
+      <section class="section">
+
+        <div class="section-head">
+          <h2>Новинки</h2>
+          <span>Свайп →</span>
+        </div>
+
+        <div
+          id="newProducts"
+          class="products-slider"
+        ></div>
+
+      </section>
+
+
+      <!-- CATEGORIES -->
+      <section class="section">
+
+        <div class="section-head">
+          <h2>Категории</h2>
+        </div>
+
+        <div
+          id="categories"
+          class="categories"
+        ></div>
+
+      </section>
+
+
+      <!-- SEARCH RESULTS -->
+      <section
+        id="searchResultsSection"
+        class="section hidden"
+      >
+
+        <div class="section-head">
+          <h2>Результаты</h2>
+        </div>
+
+        <div
+          id="searchResults"
+          class="catalog"
+        ></div>
+
+      </section>
+
+
+      <!-- CATALOG -->
+      <section
+        id="catalogSection"
+        class="section"
+      >
+
+        <div class="section-head">
+          <h2>Каталог</h2>
+        </div>
+
+        <div
+          id="catalog"
+          class="catalog"
+        ></div>
+
+      </section>
+
+    </main>
+
+
+    <!-- PRODUCT -->
+    <section
+      id="productPage"
+      class="product-page hidden"
+    >
+
+      <button
+        id="backButton"
+        class="back-button"
+        type="button"
+      >
+        <span>‹</span>
+        Назад
+      </button>
+
+
+      <div class="product-main-image">
+        <img
+          id="productImage"
+          src=""
+          alt=""
+        >
+      </div>
+
+
+      <div class="product-info">
+
+        <div
+          id="productCategory"
+          class="product-category"
+        ></div>
+
+        <h1 id="productName"></h1>
+
+        <div
+          id="productMeta"
+          class="product-meta"
+        ></div>
+
+        <div
+          id="productPrice"
+          class="product-price"
+        ></div>
+
+
+        <div class="product-actions">
+
+          <button
+            id="bookButton"
+            class="primary-button"
+            type="button"
+          >
+            Забронировать
+          </button>
+
+          <button
+            id="consultButton"
+            class="secondary-button"
+            type="button"
+          >
+            Проконсультироваться
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ADMIN -->
+    <button
+      id="adminBottomButton"
+      class="admin-bottom-button hidden"
+      type="button"
+    >
+      Админ-панель
+    </button>
+
+
+    <!-- TOAST -->
+    <div
+      id="toast"
+      class="toast"
+    ></div>
+
+  </div>
+
+
+  <script src="/app.js"></script>
+
+</body>
+</html>
