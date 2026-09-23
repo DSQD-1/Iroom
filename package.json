@@ -1,7 +1,7 @@
 {
   "name": "iroom",
   "version": "1.0.0",
-  "description": "IRoom Telegram Mini App Apple Store",
+  "description": "IRoom Telegram Mini App Store",
   "type": "module",
   "main": "server.js",
   "scripts": {
