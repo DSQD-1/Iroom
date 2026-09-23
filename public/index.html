@@ -5,302 +5,285 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
   >
 
-  <meta name="theme-color" content="#080808">
+  <meta name="theme-color" content="#08080a">
 
-  <title>iroom</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  >
-
-  <link rel="stylesheet" href="/style.css">
+  <title>IRoom</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
 
-  <div id="app">
+  <div class="app">
 
     <!-- HEADER -->
-
-    <header class="header">
+    <header class="topbar">
 
       <div class="brand">
-        <div class="brand-title">iroom</div>
-        <div class="brand-subtitle">техника, которую хочется</div>
+        <div class="logo" id="storeLogo">
+          <span class="logo-pink">IR</span><span class="logo-white">oom</span>
+        </div>
       </div>
 
       <button
-        class="icon-button"
-        id="searchButton"
-        aria-label="Поиск"
+        id="adminButton"
+        class="admin-button hidden"
+        type="button"
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle
-            cx="11"
-            cy="11"
-            r="6.5"
-            stroke="currentColor"
-            stroke-width="1.8"
-          />
-
-          <path
-            d="M16 16L21 21"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          />
-        </svg>
+        Админ
       </button>
 
     </header>
 
 
     <!-- SEARCH -->
+    <section class="search-section">
 
-    <section
-      class="search-panel hidden"
-      id="searchPanel"
-    >
+      <div class="search-box">
 
-      <div class="search-input-wrap">
-
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle
-            cx="11"
-            cy="11"
-            r="6.5"
-            stroke="currentColor"
-            stroke-width="1.8"
-          />
-
-          <path
-            d="M16 16L21 21"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          />
-        </svg>
+        <span class="search-icon">⌕</span>
 
         <input
           id="searchInput"
           type="search"
-          placeholder="Поиск товара"
+          placeholder="Поиск товаров"
           autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
         >
-
-        <button
-          id="closeSearch"
-          class="search-close"
-          type="button"
-        >
-          Закрыть
-        </button>
 
       </div>
-
-      <div id="searchResults"></div>
 
     </section>
 
 
-    <!-- HOME -->
+    <!-- HERO -->
+    <section class="hero">
 
-    <main id="homePage">
+      <div class="hero-content">
 
-
-      <!-- HERO -->
-
-      <section class="hero">
-
-        <div class="hero-content">
-
-          <span class="hero-label">
-            iroom
-          </span>
-
-          <h1>
-            Техника,<br>
-            которую хочется.
-          </h1>
-
-          <p>
-            Актуальные модели<br>
-            в наличии и под заказ.
-          </p>
-
+        <div class="hero-label">
+          IRoom
         </div>
 
-      </section>
+        <h1>
+          Техника,<br>
+          которую хочется
+        </h1>
+
+        <p>
+          Apple и другие устройства<br>
+          в одном месте.
+        </p>
+
+      </div>
+
+    </section>
 
 
-      <!-- NEW PRODUCTS -->
+    <!-- НОВИНКИ -->
+    <section class="section">
 
-      <section class="section">
+      <div class="section-header">
 
-        <div class="section-header">
+        <h2>
+          Новинки
+        </h2>
 
-          <div>
-            <span class="section-overline">
-              Свежее поступление
-            </span>
-
-            <h2>
-              Новинки
-            </h2>
-          </div>
+        <div class="slider-controls">
 
           <button
-            class="section-arrow"
-            id="newProductsNext"
-            aria-label="Следующие новинки"
+            id="newPrev"
+            type="button"
+            aria-label="Предыдущие товары"
           >
-            →
+            ‹
+          </button>
+
+          <button
+            id="newNext"
+            type="button"
+            aria-label="Следующие товары"
+          >
+            ›
           </button>
 
         </div>
 
+      </div>
 
-        <div
-          class="products-slider"
-          id="newProducts"
-        >
+      <div
+        id="newProducts"
+        class="new-products"
+      ></div>
 
-          <div class="loading-card">
-            Загрузка...
-          </div>
-
-        </div>
-
-      </section>
+    </section>
 
 
-      <!-- CATEGORIES -->
+    <!-- КАТЕГОРИИ -->
+    <section class="section">
 
-      <section class="section categories-section">
+      <div class="section-header">
 
-        <div class="section-header">
+        <h2>
+          Категории
+        </h2>
 
-          <div>
-            <span class="section-overline">
-              Выберите категорию
-            </span>
+      </div>
 
-            <h2>
-              Категории
-            </h2>
-          </div>
+      <div
+        id="categories"
+        class="categories"
+      ></div>
 
-        </div>
-
-
-        <div
-          class="categories"
-          id="categories"
-        >
-
-          <div class="category-loading">
-            Загрузка...
-          </div>
-
-        </div>
-
-      </section>
+    </section>
 
 
-      <!-- ALL PRODUCTS -->
+    <!-- РЕЗУЛЬТАТЫ ПОИСКА -->
+    <section
+      id="searchResultsSection"
+      class="section hidden"
+    >
 
-      <section class="section catalog-section">
+      <div class="section-header">
 
-        <div class="section-header">
+        <h2>
+          Результаты поиска
+        </h2>
 
-          <div>
-            <span class="section-overline">
-              Весь каталог
-            </span>
+      </div>
 
-            <h2>
-              Товары
-            </h2>
-          </div>
+      <div
+        id="searchResults"
+        class="catalog"
+      ></div>
 
-        </div>
-
-
-        <div
-          class="products-grid"
-          id="products"
-        >
-
-          <div class="loading-card">
-            Загрузка...
-          </div>
-
-        </div>
-
-      </section>
+    </section>
 
 
-    </main>
+    <!-- КАТАЛОГ -->
+    <section
+      id="catalogSection"
+      class="section"
+    >
+
+      <div class="section-header">
+
+        <h2>
+          Все товары
+        </h2>
+
+      </div>
+
+      <div
+        id="catalog"
+        class="catalog"
+      ></div>
+
+    </section>
 
 
-    <!-- PRODUCT PAGE -->
-
-    <main
+    <!-- СТРАНИЦА ТОВАРА -->
+    <section
       id="productPage"
       class="product-page hidden"
     >
 
       <button
-        class="back-button"
         id="backButton"
+        class="back-button"
         type="button"
       >
-
-        <span>←</span>
-
-        <span>
-          Назад
-        </span>
-
+        ← Назад
       </button>
 
 
-      <div
-        id="productDetails"
-        class="product-details"
-      ></div>
+      <div class="product-detail">
 
-    </main>
+        <!-- ФОТО -->
+        <div class="product-detail-image-wrap">
+
+          <img
+            id="productImage"
+            class="product-detail-image"
+            src=""
+            alt=""
+          >
+
+        </div>
 
 
-    <!-- TOAST -->
+        <!-- ИНФОРМАЦИЯ -->
+        <div class="product-detail-info">
 
-    <div
-      id="toast"
-      class="toast"
-    ></div>
+          <div
+            id="productCategory"
+            class="product-category"
+          ></div>
 
+
+          <h1
+            id="productName"
+            class="product-detail-name"
+          ></h1>
+
+
+          <div
+            id="productMeta"
+            class="product-meta"
+          ></div>
+
+
+          <div
+            id="productPrice"
+            class="product-detail-price"
+          ></div>
+
+
+          <!-- ДЕЙСТВИЯ -->
+          <div class="product-actions">
+
+            <button
+              id="bookButton"
+              class="primary-button"
+              type="button"
+            >
+              Забронировать
+            </button>
+
+
+            <button
+              id="consultButton"
+              class="secondary-button"
+              type="button"
+            >
+              Проконсультироваться
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
 
   </div>
 
 
+  <!-- TOAST -->
+  <div
+    id="toast"
+    class="toast"
+  ></div>
+
+
+  <!-- APP -->
   <script src="/app.js"></script>
 
 </body>
