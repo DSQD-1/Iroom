@@ -4,7 +4,8 @@
   "description": "iroom Telegram Mini App store",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "import": "node import-products.js"
   },
   "engines": {
     "node": "24.x"
