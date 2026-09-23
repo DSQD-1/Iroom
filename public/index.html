@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#08080a"
+  >
+
+  <meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+  >
+
+  <title>IRoom</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link
+    rel="stylesheet"
+    href="/style.css"
+  >
+</head>
+
+<body>
+
+  <!-- =====================================================
+       APP
+  ====================================================== -->
+
+  <div id="app">
+
+    <!-- ===================================================
+         HEADER
+    ==================================================== -->
+
+    <header class="store-header">
+
+      <button
+        id="storeLogo"
+        class="store-logo"
+        type="button"
+        aria-label="IRoom"
+      >
+        <span class="logo-pink">IR</span><span>oom</span>
+      </button>
+
+      <button
+        id="searchButton"
+        class="search-button"
+        type="button"
+        aria-label="Поиск"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            cx="11"
+            cy="11"
+            r="6.5"
+          ></circle>
+
+          <path
+            d="M16 16L21 21"
+          ></path>
+        </svg>
+      </button>
+
+    </header>
+
+
+    <!-- ===================================================
+         SEARCH
+    ==================================================== -->
+
+    <div
+      id="searchBox"
+      class="search-box"
+    >
+
+      <div class="search-inner">
+
+        <svg
+          class="search-input-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            cx="11"
+            cy="11"
+            r="6.5"
+          ></circle>
+
+          <path
+            d="M16 16L21 21"
+          ></path>
+        </svg>
+
+        <input
+          id="searchInput"
+          type="search"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="Поиск по каталогу"
+        >
+
+        <button
+          id="closeSearch"
+          class="search-close"
+          type="button"
+          aria-label="Закрыть поиск"
+        >
+          ×
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         HOME
+    ==================================================== -->
+
+    <main
+      id="homePage"
+      class="home-page"
+    >
+
+      <!-- HERO -->
+
+      <section class="hero-section">
+
+        <div class="hero-glow"></div>
+
+        <div class="hero-content">
+
+          <div class="hero-kicker">
+            IROOM
+          </div>
+
+          <h1>
+            Техника Apple
+            <br>
+            в одном месте
+          </h1>
+
+          <p>
+            Актуальные модели,
+            цвета и конфигурации.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- SEARCH RESULTS -->
+
+      <section
+        id="searchResultsSection"
+        class="content-section hidden"
+      >
+
+        <div class="section-heading">
+
+          <div>
+            <span class="section-eyebrow">
+              Результаты
+            </span>
+
+            <h2>
+              Поиск
+            </h2>
+          </div>
+
+        </div>
+
+        <div
+          id="searchResults"
+          class="product-grid"
+        ></div>
+
+      </section>
+
+
+      <!-- NEW -->
+
+      <section
+        id="newSection"
+        class="content-section"
+      >
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-eyebrow">
+              Сейчас
+            </span>
+
+            <h2>
+              Новинки
+            </h2>
+
+          </div>
+
+        </div>
+
+        <div
+          id="newProducts"
+          class="new-products-carousel"
+        ></div>
+
+      </section>
+
+
+      <!-- CATEGORIES -->
+
+      <section
+        id="categoriesSection"
+        class="content-section"
+      >
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-eyebrow">
+              Каталог
+            </span>
+
+            <h2>
+              Категории
+            </h2>
+
+          </div>
+
+        </div>
+
+        <div
+          id="categories"
+          class="category-row"
+        ></div>
+
+      </section>
+
+
+      <!-- CATALOG -->
+
+      <section
+        id="catalogSection"
+        class="content-section"
+      >
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-eyebrow">
+              IRoom
+            </span>
+
+            <h2>
+              Каталог
+            </h2>
+
+          </div>
+
+          <span
+            id="catalogCount"
+            class="section-count"
+          ></span>
+
+        </div>
+
+        <div
+          id="catalog"
+          class="product-grid"
+        ></div>
+
+      </section>
+
+
+      <!-- EMPTY -->
+
+      <div
+        id="emptyState"
+        class="empty-state hidden"
+      >
+
+        <div class="empty-icon">
+          <span></span>
+        </div>
+
+        <h3>
+          Ничего не найдено
+        </h3>
+
+        <p>
+          Попробуйте изменить запрос
+          или выбрать другую категорию.
+        </p>
+
+        <button
+          id="emptyResetButton"
+          class="primary-button"
+          type="button"
+        >
+          Показать весь каталог
+        </button>
+
+      </div>
+
+    </main>
+
+
+    <!-- ===================================================
+         PRODUCT PAGE
+    ==================================================== -->
+
+    <main
+      id="productPage"
+      class="product-page hidden"
+    >
+
+      <button
+        id="backButton"
+        class="back-button"
+        type="button"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            d="M15 18L9 12L15 6"
+          ></path>
+        </svg>
+
+        <span>
+          Назад
+        </span>
+
+      </button>
+
+
+      <!-- PRODUCT IMAGE -->
+
+      <section class="product-detail-image-section">
+
+        <div class="product-detail-image-wrap">
+
+          <img
+            id="productImage"
+            class="product-detail-image"
+            src=""
+            alt=""
+          >
+
+          <div
+            id="productImagePlaceholder"
+            class="product-image-placeholder"
+          >
+            IRoom
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PRODUCT INFO -->
+
+      <section class="product-detail-info">
+
+        <div
+          id="productCategory"
+          class="product-detail-category"
+        ></div>
+
+        <h1
+          id="productName"
+          class="product-detail-name"
+        ></h1>
+
+        <p
+          id="productMeta"
+          class="product-detail-description"
+        ></p>
+
+
+        <!-- ===============================================
+             VARIANT SELECTORS
+        ================================================ -->
+
+        <div
+          id="variantSelectors"
+          class="variant-selectors"
+        >
+
+          <!-- COLOR -->
+
+          <div
+            id="colorSelector"
+            class="variant-selector hidden"
+          >
+
+            <div class="variant-selector-heading">
+
+              <span>
+                Цвет
+              </span>
+
+              <strong
+                id="selectedColor"
+              ></strong>
+
+            </div>
+
+            <div
+              id="colorOptions"
+              class="variant-options"
+            ></div>
+
+          </div>
+
+
+          <!-- MEMORY -->
+
+          <div
+            id="memorySelector"
+            class="variant-selector hidden"
+          >
+
+            <div class="variant-selector-heading">
+
+              <span>
+                Память
+              </span>
+
+              <strong
+                id="selectedMemory"
+              ></strong>
+
+            </div>
+
+            <div
+              id="memoryOptions"
+              class="variant-options"
+            ></div>
+
+          </div>
+
+
+          <!-- COUNTRY -->
+
+          <div
+            id="countrySelector"
+            class="variant-selector hidden"
+          >
+
+            <div class="variant-selector-heading">
+
+              <span>
+                Страна
+              </span>
+
+              <strong
+                id="selectedCountry"
+              ></strong>
+
+            </div>
+
+            <div
+              id="countryOptions"
+              class="variant-options"
+            ></div>
+
+          </div>
+
+
+          <!-- SIM -->
+
+          <div
+            id="simSelector"
+            class="variant-selector hidden"
+          >
+
+            <div class="variant-selector-heading">
+
+              <span>
+                SIM
+              </span>
+
+              <strong
+                id="selectedSim"
+              ></strong>
+
+            </div>
+
+            <div
+              id="simOptions"
+              class="variant-options"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PRICE -->
+
+        <div class="product-price-block">
+
+          <span class="product-price-label">
+            Цена
+          </span>
+
+          <div
+            id="productPrice"
+            class="product-price"
+          >
+            —
+          </div>
+
+          <div
+            id="productStock"
+            class="product-stock"
+          ></div>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="product-actions">
+
+          <button
+            id="bookButton"
+            class="primary-button product-action-button"
+            type="button"
+          >
+            Забронировать
+          </button>
+
+          <button
+            id="consultButton"
+            class="secondary-button product-action-button"
+            type="button"
+          >
+            Проконсультироваться
+          </button>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- ===================================================
+         MESSAGE MODAL
+    ==================================================== -->
+
+    <div
+      id="messageModal"
+      class="modal hidden"
+    >
+
+      <div
+        class="modal-backdrop"
+        data-close-modal="true"
+      ></div>
+
+      <div class="modal-card">
+
+        <button
+          id="closeMessageModal"
+          class="modal-close"
+          type="button"
+          aria-label="Закрыть"
+        >
+          ×
+        </button>
+
+        <div class="modal-kicker">
+          IROOM
+        </div>
+
+        <h2 id="messageModalTitle">
+          Сообщение
+        </h2>
+
+        <p id="messageModalText"></p>
+
+        <div
+          id="messageModalActions"
+          class="modal-actions"
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         TOAST
+    ==================================================== -->
+
+    <div
+      id="toast"
+      class="toast"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+
+    <!-- ===================================================
+         FOOTER
+    ==================================================== -->
+
+    <footer class="store-footer">
+
+      <div class="store-footer-brand">
+        <span class="footer-pink">
+          IR
+        </span><span>
+          oom
+        </span>
+      </div>
+
+      <div class="store-footer-links">
+
+        <a
+          href="https://t.me/iroom_market"
+          class="store-footer-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span>
+            Канал
+          </span>
+
+          <strong>
+            @iroom_market
+          </strong>
+        </a>
+
+        <a
+          href="https://t.me/iroom_24"
+          class="store-footer-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span>
+            Связь
+          </span>
+
+          <strong>
+            @iroom_24
+          </strong>
+        </a>
+
+      </div>
+
+      <div class="store-footer-copy">
+        IRoom · Apple техника
+      </div>
+
+    </footer>
+
+
+    <!-- ===================================================
+         ADMIN BUTTON
+    ==================================================== -->
+
+    <button
+      id="adminBottomButton"
+      class="admin-bottom-button hidden"
+      type="button"
+    >
+      <span class="admin-button-dot"></span>
+      Админ-панель
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       APP JS
+  ====================================================== -->
+
+  <script src="/app.js"></script>
+
+</body>
+</html>
