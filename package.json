@@ -1,11 +1,11 @@
 {
   "name": "iroom",
   "version": "1.0.0",
-  "description": "iroom Telegram Mini App store",
+  "description": "IRoom Telegram Mini App Apple Store",
+  "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "import": "node import-products.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": "24.x"
