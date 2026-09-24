@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  >
+
+  <title>Фотографии товара — IRoom</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #080808;
+      color: #fff;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        Arial,
+        sans-serif;
+    }
+
+    .page {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      color: #8d8d8d;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .upload-button {
+      width: 100%;
+      min-height: 54px;
+      border: 0;
+      border-radius: 16px;
+      background: #ff2d8d;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .upload-button:active {
+      transform: scale(.98);
+    }
+
+    .file-info {
+      margin-top: 12px;
+      color: #777;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .photo {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 1;
+      border-radius: 18px;
+      background: #151515;
+    }
+
+    .photo img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .photo-number {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+
+      min-width: 28px;
+      height: 28px;
+
+      padding: 0 8px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 9px;
+      background: rgba(0, 0, 0, .75);
+
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .delete-button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+
+      width: 32px;
+      height: 32px;
+
+      border: 0;
+      border-radius: 50%;
+
+      background: rgba(0, 0, 0, .8);
+      color: #fff;
+
+      font-size: 20px;
+      line-height: 32px;
+
+      cursor: pointer;
+    }
+
+    .empty {
+      padding: 40px 20px;
+
+      border: 1px dashed #292929;
+      border-radius: 18px;
+
+      text-align: center;
+      color: #666;
+
+      margin-top: 20px;
+    }
+
+    .save-button {
+      width: 100%;
+      min-height: 54px;
+
+      margin-top: 20px;
+
+      border: 0;
+      border-radius: 16px;
+
+      background: #fff;
+      color: #000;
+
+      font-size: 16px;
+      font-weight: 800;
+
+      cursor: pointer;
+    }
+
+    .save-button:disabled {
+      opacity: .35;
+      cursor: default;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 14px;
+
+      border-radius: 14px;
+
+      background: #141414;
+      color: #aaa;
+
+      font-size: 14px;
+      text-align: center;
+
+      display: none;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    @media (min-width: 600px) {
+      .gallery {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="page">
+
+  <h1>Фотографии товара</h1>
+
+  <div class="subtitle">
+    Выберите несколько фотографий из галереи iPhone
+  </div>
+
+  <input
+    id="imageInput"
+    type="file"
+    accept="image/*"
+    multiple
+    hidden
+  >
+
+  <button
+    id="chooseButton"
+    class="upload-button"
+    type="button"
+  >
+    Выбрать фотографии
+  </button>
+
+  <div id="fileInfo" class="file-info">
+    Можно выбрать несколько фотографий
+  </div>
+
+  <div id="gallery" class="gallery"></div>
+
+  <div id="empty" class="empty">
+    Фотографии ещё не выбраны
+  </div>
+
+  <button
+    id="saveButton"
+    class="save-button"
+    type="button"
+    disabled
+  >
+    Загрузить фотографии
+  </button>
+
+  <div id="status" class="status"></div>
+
+</div>
+
+<script>
+  const imageInput = document.getElementById("imageInput");
+  const chooseButton = document.getElementById("chooseButton");
+  const gallery = document.getElementById("gallery");
+  const empty = document.getElementById("empty");
+  const saveButton = document.getElementById("saveButton");
+  const fileInfo = document.getElementById("fileInfo");
+  const status = document.getElementById("status");
+
+  let selectedFiles = [];
+
+
+  // =========================================================
+  // ОТКРЫТЬ ГАЛЕРЕЮ
+  // =========================================================
+
+  chooseButton.addEventListener("click", () => {
+    imageInput.click();
+  });
+
+
+  // =========================================================
+  // ВЫБОР ФАЙЛОВ
+  // =========================================================
+
+  imageInput.addEventListener("change", () => {
+
+    const files = Array.from(imageInput.files || []);
+
+    if (!files.length) {
+      return;
+    }
+
+    for (const file of files) {
+
+      if (!file.type.startsWith("image/")) {
+        continue;
+      }
+
+      if (file.size > 15 * 1024 * 1024) {
+        alert(
+          `Фото "${file.name}" больше 15 МБ`
+        );
+
+        continue;
+      }
+
+      const duplicate = selectedFiles.some(item =>
+        item.name === file.name &&
+        item.size === file.size &&
+        item.lastModified === file.lastModified
+      );
+
+      if (duplicate) {
+        continue;
+      }
+
+      selectedFiles.push(file);
+    }
+
+    imageInput.value = "";
+
+    render();
+  });
+
+
+  // =========================================================
+  // ОТОБРАЖЕНИЕ
+  // =========================================================
+
+  function render() {
+
+    gallery.innerHTML = "";
+
+    if (!selectedFiles.length) {
+
+      empty.style.display = "block";
+
+      saveButton.disabled = true;
+
+      fileInfo.textContent =
+        "Можно выбрать несколько фотографий";
+
+      return;
+    }
+
+    empty.style.display = "none";
+
+    saveButton.disabled = false;
+
+    fileInfo.textContent =
+      `Выбрано фотографий: ${selectedFiles.length}`;
+
+    selectedFiles.forEach((file, index) => {
+
+      const wrapper =
+        document.createElement("div");
+
+      wrapper.className = "photo";
+
+      const image =
+        document.createElement("img");
+
+      image.src =
+        URL.createObjectURL(file);
+
+      image.onload = () => {
+        URL.revokeObjectURL(image.src);
+      };
+
+      const number =
+        document.createElement("div");
+
+      number.className = "photo-number";
+
+      number.textContent =
+        index + 1;
+
+      const deleteButton =
+        document.createElement("button");
+
+      deleteButton.className =
+        "delete-button";
+
+      deleteButton.type =
+        "button";
+
+      deleteButton.textContent =
+        "×";
+
+      deleteButton.addEventListener(
+        "click",
+        () => {
+
+          selectedFiles.splice(index, 1);
+
+          render();
+        }
+      );
+
+      wrapper.appendChild(image);
+      wrapper.appendChild(number);
+      wrapper.appendChild(deleteButton);
+
+      gallery.appendChild(wrapper);
+    });
+  }
+
+
+  // =========================================================
+  // ЗАГРУЗКА
+  // =========================================================
+
+  saveButton.addEventListener("click", async () => {
+
+    if (!selectedFiles.length) {
+      return;
+    }
+
+    saveButton.disabled = true;
+
+    chooseButton.disabled = true;
+
+    showStatus("Загрузка фотографий…");
+
+    try {
+
+      const formData =
+        new FormData();
+
+      for (const file of selectedFiles) {
+
+        formData.append(
+          "images",
+          file
+        );
+      }
+
+
+      const initData =
+        window.Telegram?.WebApp?.initData || "";
+
+
+      const response =
+        await fetch(
+          "/api/admin/upload",
+          {
+            method: "POST",
+
+            headers: {
+              "x-telegram-init-data":
+                initData
+            },
+
+            body: formData
+          }
+        );
+
+
+      let data = {};
+
+      try {
+        data =
+          await response.json();
+      } catch {
+        data = {};
+      }
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.error ||
+          data.message ||
+          "Ошибка загрузки"
+        );
+      }
+
+
+      showStatus(
+        "Фотографии успешно загружены"
+      );
+
+
+      console.log(
+        "Ответ сервера:",
+        data
+      );
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showStatus(
+        error.message ||
+        "Не удалось загрузить фотографии"
+      );
+
+    } finally {
+
+      saveButton.disabled =
+        selectedFiles.length === 0;
+
+      chooseButton.disabled =
+        false;
+    }
+
+  });
+
+
+  // =========================================================
+  // СТАТУС
+  // =========================================================
+
+  function showStatus(text) {
+
+    status.textContent =
+      text;
+
+    status.classList.add(
+      "show"
+    );
+  }
+
+
+  // =========================================================
+  // ПЕРВЫЙ РЕНДЕР
+  // =========================================================
+
+  render();
+</script>
+
+</body>
+</html>
