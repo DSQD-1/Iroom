@@ -5091,7 +5091,8 @@ app.post(
         ) {
           await sendTelegramMessage(
             message.chat.id,
-            "Откройте магазин IRoom:",
+            " Добро пожаловать
+            Откройте магазин IRoom :",
             {
               reply_markup: {
                 inline_keyboard: [
