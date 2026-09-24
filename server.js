@@ -964,128 +964,61 @@ async function getDefaultReservationCard() {
 
   Пользователь определяется по telegram_user_id.
 */
-async function ensureUser(
-  tgUser
-) {
-  if (
-    !tgUser ||
-    !tgUser.id
-  ) {
+async function ensureUser(tgUser) {
+  if (!tgUser || !tgUser.id) {
     return null;
   }
 
-  const telegramUserId =
-    String(tgUser.id);
+  const telegramUserId = String(tgUser.id);
+  const firstName = String(tgUser.first_name || "");
+  const lastName = String(tgUser.last_name || "");
+  const username = String(tgUser.username || "");
+  const now = new Date().toISOString();
 
-  const firstName =
-    String(
-      tgUser.first_name || ""
-    );
+  const columns = await getUserColumns();
 
-  const lastName =
-    String(
-      tgUser.last_name || ""
-    );
-
-  const username =
-    String(
-      tgUser.username || ""
-    );
-
-  const columns =
-    await getUserColumns();
-
-  /*
-    telegram_user_id должен
-    существовать после миграции.
-  */
-  if (
-    !columns.includes(
-      "telegram_user_id"
-    )
-  ) {
+  if (!columns.includes("telegram_user_id")) {
     throw new Error(
       "В таблице users отсутствует telegram_user_id"
     );
   }
 
-  const existing =
-    await db.execute({
-      sql: `
-        SELECT telegram_user_id
-        FROM users
-        WHERE telegram_user_id = ?
-        LIMIT 1
-      `,
-      args: [
-        telegramUserId
-      ]
-    });
+  const existing = await db.execute({
+    sql: `
+      SELECT telegram_user_id
+      FROM users
+      WHERE telegram_user_id = ?
+      LIMIT 1
+    `,
+    args: [telegramUserId]
+  });
 
-  if (
-    existing.rows.length
-  ) {
+  if (existing.rows.length) {
     const updateParts = [];
     const updateArgs = [];
 
-    if (
-      columns.includes(
-        "first_name"
-      )
-    ) {
-      updateParts.push(
-        "first_name = ?"
-      );
-
-      updateArgs.push(
-        firstName
-      );
+    if (columns.includes("first_name")) {
+      updateParts.push("first_name = ?");
+      updateArgs.push(firstName);
     }
 
-    if (
-      columns.includes(
-        "last_name"
-      )
-    ) {
-      updateParts.push(
-        "last_name = ?"
-      );
-
-      updateArgs.push(
-        lastName
-      );
+    if (columns.includes("last_name")) {
+      updateParts.push("last_name = ?");
+      updateArgs.push(lastName);
     }
 
-    if (
-      columns.includes(
-        "username"
-      )
-    ) {
-      updateParts.push(
-        "username = ?"
-      );
-
-      updateArgs.push(
-        username
-      );
+    if (columns.includes("username")) {
+      updateParts.push("username = ?");
+      updateArgs.push(username);
     }
 
-    if (
-      columns.includes(
-        "updated_at"
-      )
-    ) {
-      updateParts.push(
-        "updated_at = CURRENT_TIMESTAMP"
-      );
+    if (columns.includes("updated_at")) {
+      updateParts.push("updated_at = ?");
+      updateArgs.push(now);
     }
 
-    if (
-      updateParts.length
-    ) {
-      updateArgs.push(
-        telegramUserId
-      );
+    if (updateParts.length) {
+      updateArgs.push(telegramUserId);
 
       await db.execute({
         sql: `
@@ -1112,52 +1045,34 @@ async function ensureUser(
     telegramUserId
   ];
 
-  if (
-    columns.includes(
-      "first_name"
-    )
-  ) {
-    insertColumns.push(
-      "first_name"
-    );
-
+  if (columns.includes("first_name")) {
+    insertColumns.push("first_name");
     insertValues.push("?");
-
-    insertArgs.push(
-      firstName
-    );
+    insertArgs.push(firstName);
   }
 
-  if (
-    columns.includes(
-      "last_name"
-    )
-  ) {
-    insertColumns.push(
-      "last_name"
-    );
-
+  if (columns.includes("last_name")) {
+    insertColumns.push("last_name");
     insertValues.push("?");
-
-    insertArgs.push(
-      lastName
-    );
+    insertArgs.push(lastName);
   }
 
-  if (
-    columns.includes(
-      "username"
-    )
-  ) {
-    insertColumns.push(
-      "username"
-    );
-
+  if (columns.includes("username")) {
+    insertColumns.push("username");
     insertValues.push("?");
+    insertArgs.push(username);
+  }
 
-    insertArgs.push(
-      username
-    );
+  if (columns.includes("created_at")) {
+    insertColumns.push("created_at");
+    insertValues.push("?");
+    insertArgs.push(now);
+  }
+
+  if (columns.includes("updated_at")) {
+    insertColumns.push("updated_at");
+    insertValues.push("?");
+    insertArgs.push(now);
   }
 
   await db.execute({
@@ -1174,7 +1089,6 @@ async function ensureUser(
 
   return telegramUserId;
 }
-
 /* =========================================================
    TELEGRAM API
 ========================================================= */
