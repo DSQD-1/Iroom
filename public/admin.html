@@ -1,0 +1,3413 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no"
+  >
+
+  <meta
+    name="theme-color"
+    content="#050505"
+  >
+
+  <title>IRoom — Admin</title>
+
+  <style>
+
+    :root{
+      --bg:#050505;
+      --panel:#101012;
+      --panel2:#151518;
+      --line:rgba(255,255,255,.08);
+      --text:#f7f7f8;
+      --muted:#8c8c95;
+
+      --pink:#ff2d8d;
+      --pink2:#ff4da5;
+
+      --green:#39d98a;
+      --red:#ff6868;
+
+      --ease:cubic-bezier(.22,.8,.25,1);
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "Segoe UI",
+        sans-serif;
+    }
+
+    button,
+    input,
+    textarea,
+    select{
+      font:inherit;
+    }
+
+    button{
+      border:0;
+      color:inherit;
+      cursor:pointer;
+    }
+
+    body{
+      min-height:100vh;
+    }
+
+    .app{
+      max-width:1180px;
+      margin:auto;
+
+      padding:
+        calc(16px + env(safe-area-inset-top))
+        16px
+        calc(30px + env(safe-area-inset-bottom));
+    }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+
+      margin-bottom:16px;
+    }
+
+    .brand{
+      font-size:22px;
+      font-weight:850;
+      letter-spacing:-.7px;
+    }
+
+    .brand b{
+      color:var(--pink);
+    }
+
+    .top-actions{
+      display:flex;
+      gap:8px;
+    }
+
+    .btn{
+      min-height:42px;
+      padding:0 15px;
+
+      border-radius:14px;
+
+      background:#18181b;
+      color:#ddd;
+
+      border:1px solid var(--line);
+
+      font-weight:750;
+    }
+
+    .btn.primary{
+      background:
+        linear-gradient(
+          135deg,
+          #ff2d8d,
+          #ff4da5
+        );
+
+      color:#fff;
+      border:0;
+    }
+
+    .btn.danger{
+      color:#ff8585;
+    }
+
+    .btn:active{
+      transform:scale(.97);
+    }
+
+    .tabs{
+      display:flex;
+      gap:7px;
+
+      overflow:auto;
+
+      padding-bottom:5px;
+      margin-bottom:14px;
+    }
+
+    .tab{
+      white-space:nowrap;
+
+      padding:10px 14px;
+
+      border-radius:13px;
+
+      background:#0e0e10;
+      color:#888;
+
+      border:1px solid var(--line);
+
+      font-size:12px;
+      font-weight:750;
+    }
+
+    .tab.active{
+      background:rgba(255,45,141,.13);
+
+      border-color:rgba(255,45,141,.3);
+
+      color:#ff70ad;
+    }
+
+    .panel{
+      background:
+        linear-gradient(
+          180deg,
+          #111113,
+          #0d0d0f
+        );
+
+      border:1px solid var(--line);
+
+      border-radius:22px;
+
+      padding:16px;
+
+      margin-bottom:14px;
+
+      box-shadow:
+        0 18px 60px rgba(0,0,0,.2);
+    }
+
+    .panel h2{
+      margin:0 0 13px;
+
+      font-size:16px;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .grid{
+      display:grid;
+
+      grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+      gap:10px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .field.full{
+      grid-column:1/-1;
+    }
+
+    .field label{
+      font-size:10px;
+      color:#777780;
+
+      font-weight:800;
+
+      text-transform:uppercase;
+
+      letter-spacing:.8px;
+    }
+
+    .field input,
+    .field textarea,
+    .field select{
+      width:100%;
+
+      border:1px solid var(--line);
+
+      outline:0;
+
+      background:#09090b;
+      color:#fff;
+
+      border-radius:13px;
+
+      padding:12px;
+
+      font-size:13px;
+    }
+
+    .field textarea{
+      min-height:90px;
+      resize:vertical;
+    }
+
+    .check{
+      display:flex;
+      align-items:center;
+      gap:8px;
+
+      font-size:12px;
+      color:#bbb;
+    }
+
+    .check input{
+      accent-color:var(--pink);
+    }
+
+    .actions{
+      display:flex;
+      gap:8px;
+
+      flex-wrap:wrap;
+
+      margin-top:12px;
+    }
+
+    .media-pick{
+      position:relative;
+
+      border:1px dashed rgba(255,255,255,.14);
+
+      background:#09090b;
+
+      border-radius:17px;
+
+      padding:16px;
+
+      text-align:center;
+
+      color:#aaa;
+    }
+
+    .media-pick input{
+      position:absolute;
+
+      inset:0;
+
+      width:100%;
+      height:100%;
+
+      opacity:0;
+    }
+
+    .media-list{
+      display:grid;
+
+      grid-template-columns:
+        repeat(3,1fr);
+
+      gap:8px;
+
+      margin-top:10px;
+    }
+
+    .media-item{
+      position:relative;
+
+      aspect-ratio:1;
+
+      background:#08080a;
+
+      border-radius:14px;
+
+      overflow:hidden;
+
+      border:1px solid var(--line);
+    }
+
+    .media-item img,
+    .media-item video{
+      width:100%;
+      height:100%;
+
+      object-fit:contain;
+    }
+
+    .media-item .x{
+      position:absolute;
+
+      right:5px;
+      top:5px;
+
+      width:26px;
+      height:26px;
+
+      border-radius:50%;
+
+      background:rgba(0,0,0,.75);
+
+      color:#fff;
+    }
+
+    .cards{
+      display:grid;
+      gap:9px;
+    }
+
+    .item{
+      padding:13px;
+
+      border:1px solid var(--line);
+
+      background:#0a0a0c;
+
+      border-radius:16px;
+    }
+
+    .item-head{
+      display:flex;
+
+      justify-content:space-between;
+
+      gap:10px;
+    }
+
+    .item-title{
+      font-weight:800;
+    }
+
+    .pill{
+      font-size:10px;
+
+      border-radius:99px;
+
+      padding:5px 8px;
+
+      background:#19191c;
+
+      color:#aaa;
+    }
+
+    .pill.pending{
+      color:#ffc06b;
+    }
+
+    .pill.wait{
+      color:#ffad52;
+    }
+
+    .pill.ok{
+      color:#56df9c;
+    }
+
+    .pill.bad{
+      color:#ff7777;
+    }
+
+    .row{
+      display:flex;
+
+      justify-content:space-between;
+
+      gap:10px;
+
+      padding:6px 0;
+
+      color:#aaa;
+
+      font-size:12px;
+    }
+
+    .row strong{
+      color:#eee;
+      text-align:right;
+    }
+
+    .empty{
+      padding:28px;
+
+      text-align:center;
+
+      color:#777;
+    }
+
+    .login{
+      min-height:80vh;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .login .panel{
+      width:min(440px,100%);
+
+      text-align:center;
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    .toast{
+      position:fixed;
+
+      left:50%;
+
+      bottom:
+        calc(
+          18px +
+          env(safe-area-inset-bottom)
+        );
+
+      transform:
+        translate(-50%,20px);
+
+      opacity:0;
+
+      pointer-events:none;
+
+      background:#19191d;
+
+      border:1px solid var(--line);
+
+      padding:12px 16px;
+
+      border-radius:14px;
+
+      font-size:12px;
+
+      z-index:99;
+
+      transition:.3s var(--ease);
+    }
+
+    .toast.show{
+      opacity:1;
+
+      transform:
+        translate(-50%,0);
+    }
+
+    .order-media{
+      width:56px;
+      height:56px;
+
+      object-fit:contain;
+
+      background:transparent;
+
+      border-radius:10px;
+    }
+
+    .order{
+      display:grid;
+
+      grid-template-columns:auto 1fr;
+
+      gap:12px;
+    }
+
+    .order-main{
+      min-width:0;
+    }
+
+    .option-groups{
+      display:grid;
+
+      gap:12px;
+
+      margin-top:2px;
+    }
+
+    .option-group{
+      padding:13px;
+
+      border:1px solid var(--line);
+
+      background:#09090b;
+
+      border-radius:16px;
+    }
+
+    .option-group-head{
+      display:flex;
+
+      align-items:center;
+
+      justify-content:space-between;
+
+      gap:8px;
+
+      margin-bottom:9px;
+    }
+
+    .option-group-title{
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .option-group-sub{
+      font-size:10px;
+      color:#666;
+    }
+
+    .option-add{
+      display:grid;
+
+      grid-template-columns:
+        minmax(0,1fr)
+        105px
+        42px;
+
+      gap:7px;
+    }
+
+    .option-add input{
+      width:100%;
+
+      border:1px solid var(--line);
+
+      outline:0;
+
+      background:#101012;
+      color:#fff;
+
+      border-radius:11px;
+
+      padding:10px;
+
+      font-size:13px;
+    }
+
+    .option-add input[type=number]{
+      text-align:right;
+    }
+
+    .option-add button{
+      border:0;
+
+      border-radius:11px;
+
+      background:var(--pink);
+
+      color:#fff;
+
+      font-weight:800;
+    }
+
+    .option-chips{
+      display:flex;
+
+      flex-wrap:wrap;
+
+      gap:7px;
+
+      margin-bottom:9px;
+    }
+
+    .option-chip{
+      display:inline-flex;
+
+      align-items:center;
+
+      gap:6px;
+
+      min-height:32px;
+
+      padding:
+        0
+        8px
+        0
+        11px;
+
+      border:1px solid rgba(255,45,141,.24);
+
+      border-radius:10px;
+
+      background:rgba(255,45,141,.08);
+
+      color:#eee;
+
+      font-size:11px;
+    }
+
+    .option-chip small{
+      color:#ff77b1;
+    }
+
+    .option-chip button{
+      width:20px;
+      height:20px;
+
+      border-radius:7px;
+
+      background:rgba(255,255,255,.07);
+
+      color:#aaa;
+
+      padding:0;
+    }
+
+    @media(max-width:650px){
+
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .field.full{
+        grid-column:auto;
+      }
+
+      .app{
+        padding-left:12px;
+        padding-right:12px;
+      }
+
+      .top{
+        align-items:flex-start;
+      }
+
+      .brand{
+        font-size:19px;
+      }
+
+      .top-actions .btn{
+        padding:0 11px;
+      }
+
+      .media-list{
+        grid-template-columns:
+          repeat(3,1fr);
+      }
+
+      .option-add{
+        grid-template-columns:
+          minmax(0,1fr)
+          85px
+          42px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div
+    id="login"
+    class="login hidden"
+  >
+
+    <div class="panel">
+
+      <div class="brand">
+        IR<span style="color:#ff2d8d">oom</span>
+        <small style="color:#777">
+          ADMIN
+        </small>
+      </div>
+
+      <p class="muted">
+        Откройте админ-панель из Telegram.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div
+    id="app"
+    class="app hidden"
+  >
+
+    <header class="top">
+
+      <div class="brand">
+
+        IR<span>oom</span>
+
+        <small
+          style="
+            color:#666;
+            font-size:10px;
+          "
+        >
+          ADMIN
+        </small>
+
+      </div>
+
+
+      <div class="top-actions">
+
+        <button
+          class="btn primary"
+          id="aiAdminBtn"
+          type="button"
+        >
+          ✦ IRoom AI
+        </button>
+
+        <button
+          class="btn"
+          id="closeBtn"
+          type="button"
+        >
+          Закрыть
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <nav
+      class="tabs"
+      id="tabs"
+    >
+
+      <button
+        class="tab active"
+        data-tab="orders"
+        type="button"
+      >
+        Заказы
+      </button>
+
+      <button
+        class="tab"
+        data-tab="products"
+        type="button"
+      >
+        Товары
+      </button>
+
+      <button
+        class="tab"
+        data-tab="deposit"
+        type="button"
+      >
+        Залог
+      </button>
+
+      <button
+        class="tab"
+        data-tab="settings"
+        type="button"
+      >
+        Настройки
+      </button>
+
+    </nav>
+
+
+    <main id="content"></main>
+
+  </div>
+
+
+  <div
+    id="toast"
+    class="toast"
+  ></div>
+
+
+  <!-- =====================================================
+       IROOM AI
+  ====================================================== -->
+
+  <div
+    id="aiAdminOverlay"
+    class="ai-admin-overlay hidden"
+  >
+
+    <div
+      class="ai-admin-backdrop"
+      id="aiAdminBackdrop"
+    ></div>
+
+    <section
+      class="ai-admin-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-label="IRoom AI"
+    >
+
+      <header class="ai-admin-header">
+
+        <div class="ai-admin-avatar">
+          ✦
+        </div>
+
+        <div class="ai-admin-title">
+
+          <strong>
+            IRoom AI
+          </strong>
+
+          <span>
+            Управление магазином
+          </span>
+
+        </div>
+
+        <button
+          class="ai-admin-close"
+          id="aiAdminClose"
+          type="button"
+        >
+          ×
+        </button>
+
+      </header>
+
+
+      <div
+        id="aiAdminMessages"
+        class="ai-admin-messages"
+      ></div>
+
+
+      <div
+        class="ai-admin-quick"
+        id="aiAdminQuick"
+      >
+
+        <button
+          type="button"
+          data-ai-command="Покажи список товаров"
+        >
+          📦 Товары
+        </button>
+
+        <button
+          type="button"
+          data-ai-command="Покажи категории"
+        >
+          🗂 Категории
+        </button>
+
+        <button
+          type="button"
+          data-ai-command="Поставь цену выбранному товару"
+        >
+          💰 Цена
+        </button>
+
+        <button
+          type="button"
+          data-ai-command="Создай новый товар"
+        >
+          ➕ Создать
+        </button>
+
+      </div>
+
+
+      <form
+        class="ai-admin-input-wrap"
+        id="aiAdminForm"
+      >
+
+        <textarea
+          id="aiAdminInput"
+          class="ai-admin-input"
+          rows="1"
+          maxlength="4000"
+          placeholder="Напиши команду для IRoom AI..."
+        ></textarea>
+
+        <button
+          class="ai-admin-send"
+          id="aiAdminSend"
+          type="submit"
+          aria-label="Отправить"
+        >
+          ➤
+        </button>
+
+      </form>
+
+    </section>
+
+  </div>
+
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+
+    const tg =
+      window.Telegram?.WebApp || null;
+
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+
+    /* =====================================================
+       CONFIG
+    ====================================================== */
+
+    const ADMIN_IDS = new Set([
+      "5082864281",
+      "5975037118"
+    ]);
+
+
+    let currentUser = null;
+    let currentTab = "orders";
+
+    let products = [];
+    let categories = [];
+    let orders = [];
+
+    let currentProduct = null;
+
+
+    /* =====================================================
+       HELPERS
+    ====================================================== */
+
+    function getInitData(){
+
+      return String(
+        tg?.initData || ""
+      );
+
+    }
+
+
+    function telegramUser(){
+
+      try{
+
+        return tg?.initDataUnsafe?.user || null;
+
+      }catch{
+
+        return null;
+
+      }
+
+    }
+
+
+    function isAdmin(){
+
+      const user = telegramUser();
+
+      if(!user){
+        return false;
+      }
+
+      return ADMIN_IDS.has(
+        String(user.id)
+      );
+
+    }
+
+
+    async function api(
+      url,
+      options = {}
+    ){
+
+      const headers = {
+        "Content-Type":"application/json",
+        ...(options.headers || {})
+      };
+
+
+      const initData =
+        getInitData();
+
+
+      if(initData){
+
+        headers[
+          "x-telegram-init-data"
+        ] = initData;
+
+      }
+
+
+      const response =
+        await fetch(
+          url,
+          {
+            ...options,
+            headers
+          }
+        );
+
+
+      let data = null;
+
+
+      try{
+
+        data =
+          await response.json();
+
+      }catch{
+
+        data = {};
+
+      }
+
+
+      if(!response.ok){
+
+        throw new Error(
+          data?.error ||
+          data?.message ||
+          `HTTP ${response.status}`
+        );
+
+      }
+
+
+      return data;
+
+    }
+
+
+    function esc(value){
+
+      return String(
+        value ?? ""
+      )
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+    }
+
+
+    function money(value){
+
+      const number =
+        Number(value || 0);
+
+      return number.toLocaleString(
+        "ru-RU"
+      ) + " ₽";
+
+    }
+
+
+    function toast(message){
+
+      const el =
+        document.getElementById(
+          "toast"
+        );
+
+      if(!el){
+        return;
+      }
+
+      el.textContent =
+        message;
+
+      el.classList.add("show");
+
+      clearTimeout(
+        toast.timer
+      );
+
+      toast.timer =
+        setTimeout(
+          () => {
+            el.classList.remove(
+              "show"
+            );
+          },
+          2600
+        );
+
+    }
+
+
+    function json(value){
+
+      try{
+
+        return JSON.stringify(
+          value
+        );
+
+      }catch{
+
+        return "{}";
+
+      }
+
+    }
+
+
+    /* =====================================================
+       ACCESS
+    ====================================================== */
+
+    async function checkAccess(){
+
+      try{
+
+        const data =
+          await api(
+            "/api/admin/me"
+          );
+
+        currentUser =
+          data?.user || telegramUser();
+
+
+        if(
+          !isAdmin() &&
+          data?.isAdmin !== true
+        ){
+
+          throw new Error(
+            "Нет доступа"
+          );
+
+        }
+
+
+        document
+          .getElementById("login")
+          .classList.add("hidden");
+
+        document
+          .getElementById("app")
+          .classList.remove("hidden");
+
+
+        await loadAll();
+
+
+      }catch(error){
+
+        console.error(
+          error
+        );
+
+        document
+          .getElementById("app")
+          .classList.add("hidden");
+
+        document
+          .getElementById("login")
+          .classList.remove("hidden");
+
+      }
+
+    }
+
+
+    /* =====================================================
+       LOAD DATA
+    ====================================================== */
+
+    async function loadAll(){
+
+      await Promise.all([
+        loadOrders(),
+        loadProducts(),
+        loadCategories()
+      ]);
+
+      renderTab();
+
+    }
+
+
+    async function loadOrders(){
+
+      try{
+
+        const data =
+          await api(
+            "/api/admin/orders"
+          );
+
+        orders =
+          Array.isArray(
+            data?.orders
+          )
+            ? data.orders
+            : Array.isArray(data)
+              ? data
+              : [];
+
+      }catch(error){
+
+        console.error(
+          "orders:",
+          error
+        );
+
+        orders = [];
+
+      }
+
+    }
+
+
+    async function loadProducts(){
+
+      try{
+
+        const data =
+          await api(
+            "/api/admin/products"
+          );
+
+        products =
+          Array.isArray(
+            data?.products
+          )
+            ? data.products
+            : Array.isArray(data)
+              ? data
+              : [];
+
+      }catch(error){
+
+        console.error(
+          "products:",
+          error
+        );
+
+        products = [];
+
+      }
+
+    }
+
+
+    async function loadCategories(){
+
+      try{
+
+        const data =
+          await api(
+            "/api/admin/categories"
+          );
+
+        categories =
+          Array.isArray(
+            data?.categories
+          )
+            ? data.categories
+            : Array.isArray(data)
+              ? data
+              : [];
+
+      }catch(error){
+
+        console.error(
+          "categories:",
+          error
+        );
+
+        categories = [];
+
+      }
+
+    }
+
+
+    /* =====================================================
+       TABS
+    ====================================================== */
+
+    document
+      .querySelectorAll(".tab")
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            () => {
+
+              currentTab =
+                button.dataset.tab;
+
+              document
+                .querySelectorAll(".tab")
+                .forEach(
+                  item => {
+
+                    item.classList.toggle(
+                      "active",
+                      item === button
+                    );
+
+                  }
+                );
+
+
+              renderTab();
+
+            }
+          );
+
+        }
+      );
+
+
+    function renderTab(){
+
+      const content =
+        document.getElementById(
+          "content"
+        );
+
+
+      if(!content){
+        return;
+      }
+
+
+      if(currentTab === "orders"){
+
+        renderOrders(
+          content
+        );
+
+        return;
+
+      }
+
+
+      if(currentTab === "products"){
+
+        renderProducts(
+          content
+        );
+
+        return;
+
+      }
+
+
+      if(currentTab === "deposit"){
+
+        renderDeposit(
+          content
+        );
+
+        return;
+
+      }
+
+
+      if(currentTab === "settings"){
+
+        renderSettings(
+          content
+        );
+
+        return;
+
+      }
+
+    }
+
+
+    /* =====================================================
+       ORDERS
+    ====================================================== */
+
+    function renderOrders(container){
+
+      container.innerHTML = `
+
+        <section class="panel">
+
+          <div
+            style="
+              display:flex;
+              align-items:center;
+              justify-content:space-between;
+              gap:10px;
+              margin-bottom:13px;
+            "
+          >
+
+            <div>
+
+              <h2 style="margin-bottom:4px">
+                Заказы
+              </h2>
+
+              <div class="muted">
+                Всего:
+                ${orders.length}
+              </div>
+
+            </div>
+
+            <button
+              class="btn"
+              id="refreshOrders"
+              type="button"
+            >
+              Обновить
+            </button>
+
+          </div>
+
+
+          <div
+            class="cards"
+            id="ordersList"
+          ></div>
+
+        </section>
+
+      `;
+
+
+      const list =
+        document.getElementById(
+          "ordersList"
+        );
+
+
+      if(!orders.length){
+
+        list.innerHTML = `
+          <div class="empty">
+            Заказов пока нет.
+          </div>
+        `;
+
+      }else{
+
+        list.innerHTML =
+          orders
+            .map(
+              order =>
+                orderMarkup(
+                  order
+                )
+            )
+            .join("");
+
+      }
+
+
+      document
+        .getElementById(
+          "refreshOrders"
+        )
+        ?.addEventListener(
+          "click",
+          async () => {
+
+            await loadOrders();
+
+            renderOrders(
+              container
+            );
+
+            toast(
+              "Заказы обновлены"
+            );
+
+          }
+        );
+
+
+      list
+        .querySelectorAll(
+          "[data-order-id]"
+        )
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                openOrder(
+                  button.dataset.orderId
+                );
+
+              }
+            );
+
+          }
+        );
+
+    }
+
+
+    function orderMarkup(order){
+
+      const id =
+        order.id ??
+        order.order_id ??
+        "";
+
+
+      const status =
+        String(
+          order.status ||
+          "new"
+        );
+
+
+      const title =
+        order.product_name ||
+        order.title ||
+        `Заказ #${id}`;
+
+
+      return `
+
+        <button
+          class="item"
+          data-order-id="${esc(id)}"
+          type="button"
+          style="
+            width:100%;
+            text-align:left;
+          "
+        >
+
+          <div class="item-head">
+
+            <div>
+
+              <div class="item-title">
+                ${esc(title)}
+              </div>
+
+              <div
+                class="muted"
+                style="margin-top:4px"
+              >
+                Заказ #${esc(id)}
+              </div>
+
+            </div>
+
+            <span
+              class="pill ${
+                status === "completed"
+                  ? "ok"
+                  : status === "cancelled"
+                    ? "bad"
+                    : "pending"
+              }"
+            >
+              ${esc(status)}
+            </span>
+
+          </div>
+
+
+          <div class="row">
+
+            <span>
+              Сумма
+            </span>
+
+            <strong>
+              ${money(
+                order.total ||
+                order.amount ||
+                0
+              )}
+            </strong>
+
+          </div>
+
+
+          <div class="row">
+
+            <span>
+              Клиент
+            </span>
+
+            <strong>
+              ${esc(
+                order.customer_name ||
+                order.username ||
+                "—"
+              )}
+            </strong>
+
+          </div>
+
+        </button>
+
+      `;
+
+    }
+
+
+    async function openOrder(id){
+
+      const order =
+        orders.find(
+          item =>
+            String(
+              item.id ??
+              item.order_id
+            ) === String(id)
+        );
+
+
+      if(!order){
+
+        toast(
+          "Заказ не найден"
+        );
+
+        return;
+
+      }
+
+
+      const status =
+        prompt(
+          `Изменить статус заказа #${id}\n\n` +
+          `Введите новый статус:`,
+          order.status || "new"
+        );
+
+
+      if(
+        status === null ||
+        !status.trim()
+      ){
+
+        return;
+
+      }
+
+
+      try{
+
+        await api(
+          `/api/admin/orders/${encodeURIComponent(id)}`,
+          {
+            method:"PATCH",
+
+            body:JSON.stringify({
+              status:
+                status.trim()
+            })
+          }
+        );
+
+
+        toast(
+          "Статус изменён"
+        );
+
+
+        await loadOrders();
+
+        renderTab();
+
+
+      }catch(error){
+
+        toast(
+          error.message
+        );
+
+      }
+
+    }
+
+
+    /* =====================================================
+       PRODUCTS
+    ====================================================== */
+
+    function renderProducts(container){
+
+      container.innerHTML = `
+
+        <section class="panel">
+
+          <div
+            style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:10px;
+              margin-bottom:13px;
+            "
+          >
+
+            <div>
+
+              <h2 style="margin-bottom:4px">
+                Товары
+              </h2>
+
+              <div class="muted">
+                ${products.length}
+                товаров
+              </div>
+
+            </div>
+
+
+            <button
+              class="btn primary"
+              id="newProductBtn"
+              type="button"
+            >
+              + Товар
+            </button>
+
+          </div>
+
+
+          <div
+            class="cards"
+            id="productsList"
+          ></div>
+
+        </section>
+
+
+        <section
+          class="panel hidden"
+          id="productEditor"
+        ></section>
+
+      `;
+
+
+      const list =
+        document.getElementById(
+          "productsList"
+        );
+
+
+      if(!products.length){
+
+        list.innerHTML = `
+          <div class="empty">
+            Товаров пока нет.
+          </div>
+        `;
+
+      }else{
+
+        list.innerHTML =
+          products
+            .map(
+              product =>
+                productMarkup(
+                  product
+                )
+            )
+            .join("");
+
+      }
+
+
+      document
+        .getElementById(
+          "newProductBtn"
+        )
+        ?.addEventListener(
+          "click",
+          () => {
+
+            editProduct(
+              null
+            );
+
+          }
+        );
+
+
+      list
+        .querySelectorAll(
+          "[data-product-id]"
+        )
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                const product =
+                  products.find(
+                    item =>
+                      String(
+                        item.id
+                      ) === String(
+                        button.dataset.productId
+                      )
+                  );
+
+
+                if(product){
+
+                  editProduct(
+                    product
+                  );
+
+                }
+
+              }
+            );
+
+          }
+        );
+
+    }
+
+
+    function productMarkup(product){
+
+      const image =
+        product.image_url ||
+        product.image ||
+        "";
+
+
+      return `
+
+        <button
+          class="item"
+          data-product-id="${esc(product.id)}"
+          type="button"
+          style="
+            width:100%;
+            text-align:left;
+          "
+        >
+
+          <div
+            style="
+              display:flex;
+              align-items:center;
+              gap:12px;
+            "
+          >
+
+            ${
+              image
+                ? `
+                  <img
+                    class="order-media"
+                    src="${esc(image)}"
+                    alt=""
+                  >
+                `
+                : `
+                  <div
+                    class="order-media"
+                    style="
+                      display:flex;
+                      align-items:center;
+                      justify-content:center;
+                      color:#555;
+                      background:#151518;
+                    "
+                  >
+                    📦
+                  </div>
+                `
+            }
+
+
+            <div
+              style="
+                min-width:0;
+                flex:1;
+              "
+            >
+
+              <div class="item-title">
+                ${esc(
+                  product.name ||
+                  "Без названия"
+                )}
+              </div>
+
+              <div
+                class="muted"
+                style="margin-top:4px"
+              >
+                ${money(
+                  product.price
+                )}
+              </div>
+
+            </div>
+
+
+            ${
+              product.is_new
+                ? `
+                  <span class="pill ok">
+                    NEW
+                  </span>
+                `
+                : ""
+            }
+
+          </div>
+
+        </button>
+
+      `;
+
+    }
+
+
+    /* =====================================================
+       PRODUCT EDITOR
+    ====================================================== */
+
+    function editProduct(product){
+
+      currentProduct =
+        product
+          ? {...product}
+          : {
+              id:null,
+              name:"",
+              description:"",
+              price:"",
+              old_price:"",
+              category_id:"",
+              image_url:"",
+              is_new:false
+            };
+
+
+      const editor =
+        document.getElementById(
+          "productEditor"
+        );
+
+
+      editor.classList.remove(
+        "hidden"
+      );
+
+
+      editor.innerHTML = `
+
+        <h2>
+          ${
+            currentProduct.id
+              ? "Редактирование товара"
+              : "Новый товар"
+          }
+        </h2>
+
+
+        <div class="grid">
+
+          <div class="field full">
+
+            <label>
+              Название
+            </label>
+
+            <input
+              id="productName"
+              value="${esc(
+                currentProduct.name
+              )}"
+              placeholder="Например: iPhone 17 Pro Max"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Цена
+            </label>
+
+            <input
+              id="productPrice"
+              type="number"
+              inputmode="decimal"
+              value="${esc(
+                currentProduct.price
+              )}"
+              placeholder="149990"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Старая цена
+            </label>
+
+            <input
+              id="productOldPrice"
+              type="number"
+              inputmode="decimal"
+              value="${esc(
+                currentProduct.old_price
+              )}"
+              placeholder="169990"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Категория
+            </label>
+
+            <select id="productCategory">
+
+              <option value="">
+                Без категории
+              </option>
+
+              ${categories
+                .map(
+                  category => `
+                    <option
+                      value="${esc(category.id)}"
+                      ${
+                        String(
+                          category.id
+                        ) ===
+                        String(
+                          currentProduct.category_id
+                        )
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${esc(
+                        category.name
+                      )}
+                    </option>
+                  `
+                )
+                .join("")}
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Изображение URL
+            </label>
+
+            <input
+              id="productImage"
+              value="${esc(
+                currentProduct.image_url
+              )}"
+              placeholder="https://..."
+            >
+
+          </div>
+
+
+          <div class="field full">
+
+            <label>
+              Описание
+            </label>
+
+            <textarea
+              id="productDescription"
+              placeholder="Описание товара"
+            >${esc(
+              currentProduct.description
+            )}</textarea>
+
+          </div>
+
+
+          <div class="field full">
+
+            <label>
+              Дополнительно
+            </label>
+
+            <label class="check">
+
+              <input
+                id="productNew"
+                type="checkbox"
+                ${
+                  currentProduct.is_new
+                    ? "checked"
+                    : ""
+                }
+              >
+
+              Новый товар
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <div class="actions">
+
+          <button
+            class="btn primary"
+            id="saveProduct"
+            type="button"
+          >
+            ${
+              currentProduct.id
+                ? "Сохранить"
+                : "Создать товар"
+            }
+          </button>
+
+
+          <button
+            class="btn"
+            id="cancelProduct"
+            type="button"
+          >
+            Отмена
+          </button>
+
+        </div>
+
+      `;
+
+
+      document
+        .getElementById(
+          "saveProduct"
+        )
+        .addEventListener(
+          "click",
+          saveProduct
+        );
+
+
+      document
+        .getElementById(
+          "cancelProduct"
+        )
+        .addEventListener(
+          "click",
+          () => {
+
+            editor.classList.add(
+              "hidden"
+            );
+
+          }
+        );
+
+    }
+
+
+    async function saveProduct(){
+
+      const payload = {
+
+        name:
+          document
+            .getElementById(
+              "productName"
+            )
+            .value
+            .trim(),
+
+        description:
+          document
+            .getElementById(
+              "productDescription"
+            )
+            .value
+            .trim(),
+
+        price:
+          Number(
+            document
+              .getElementById(
+                "productPrice"
+              )
+              .value
+          ),
+
+        old_price:
+          Number(
+            document
+              .getElementById(
+                "productOldPrice"
+              )
+              .value
+          ) || null,
+
+        category_id:
+          Number(
+            document
+              .getElementById(
+                "productCategory"
+              )
+              .value
+          ) || null,
+
+        image_url:
+          document
+            .getElementById(
+              "productImage"
+            )
+            .value
+            .trim(),
+
+        is_new:
+          document
+            .getElementById(
+              "productNew"
+            )
+            .checked
+
+      };
+
+
+      if(!payload.name){
+
+        toast(
+          "Введите название"
+        );
+
+        return;
+
+      }
+
+
+      if(
+        !Number.isFinite(
+          payload.price
+        ) ||
+        payload.price <= 0
+      ){
+
+        toast(
+          "Введите корректную цену"
+        );
+
+        return;
+
+      }
+
+
+      try{
+
+        if(
+          currentProduct &&
+          currentProduct.id
+        ){
+
+          await api(
+            `/api/admin/products/${currentProduct.id}`,
+            {
+              method:"PUT",
+              body:JSON.stringify(
+                payload
+              )
+            }
+          );
+
+          toast(
+            "Товар сохранён"
+          );
+
+        }else{
+
+          await api(
+            "/api/admin/products",
+            {
+              method:"POST",
+              body:JSON.stringify(
+                payload
+              )
+            }
+          );
+
+          toast(
+            "Товар создан"
+          );
+
+        }
+
+
+        await loadProducts();
+
+        renderTab();
+
+
+      }catch(error){
+
+        toast(
+          error.message
+        );
+
+      }
+
+    }
+
+  </script>
+<!-- =========================================================
+     3 ЧАСТЬ — DEPOSIT / SETTINGS / IROOM AI / INIT
+========================================================= -->
+
+<style>
+  .section-card {
+    background: #0d0d0f;
+    border: 1px solid #202024;
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .section-subtitle {
+    color: #85858c;
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 16px;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: #85858c;
+    margin-bottom: 7px;
+  }
+
+  .field input,
+  .field textarea,
+  .field select {
+    width: 100%;
+    box-sizing: border-box;
+    background: #151518;
+    border: 1px solid #29292f;
+    border-radius: 12px;
+    color: #fff;
+    padding: 12px;
+    outline: none;
+    font-size: 14px;
+  }
+
+  .field textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    border-color: #ff3b91;
+  }
+
+  .primary-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 13px;
+    padding: 13px 16px;
+    background: #ff3b91;
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .secondary-btn {
+    width: 100%;
+    border: 1px solid #29292f;
+    border-radius: 13px;
+    padding: 13px 16px;
+    background: #151518;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .danger-btn {
+    width: 100%;
+    border: 1px solid #572332;
+    border-radius: 13px;
+    padding: 13px 16px;
+    background: #251116;
+    color: #ff6b9f;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .deposit-preview {
+    background: #151518;
+    border: 1px solid #29292f;
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+
+  .deposit-preview-title {
+    color: #85858c;
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+
+  .deposit-preview-value {
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  /* =======================================================
+     AI ADMIN
+  ======================================================= */
+
+  .ai-admin-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+  }
+
+  .ai-admin-overlay.active {
+    display: block;
+  }
+
+  .ai-admin-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.72);
+    backdrop-filter: blur(8px);
+  }
+
+  .ai-admin-sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: min(760px, 94vh);
+    background: #08080a;
+    border: 1px solid #25252b;
+    border-bottom: 0;
+    border-radius: 24px 24px 0 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .ai-admin-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 16px;
+    border-bottom: 1px solid #202024;
+  }
+
+  .ai-admin-head-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ai-admin-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: rgba(255,59,145,.13);
+    color: #ff3b91;
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .ai-admin-title {
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  .ai-admin-status {
+    font-size: 11px;
+    color: #70d49a;
+    margin-top: 2px;
+  }
+
+  .ai-admin-close {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 11px;
+    background: #151518;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .ai-admin-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ai-admin-message {
+    max-width: 88%;
+    padding: 11px 13px;
+    border-radius: 15px;
+    font-size: 14px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .ai-admin-message.user {
+    align-self: flex-end;
+    background: #ff3b91;
+    color: #fff;
+    border-bottom-right-radius: 5px;
+  }
+
+  .ai-admin-message.assistant {
+    align-self: flex-start;
+    background: #151518;
+    border: 1px solid #27272c;
+    color: #eee;
+    border-bottom-left-radius: 5px;
+  }
+
+  .ai-admin-message.system {
+    align-self: center;
+    color: #77777f;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .ai-admin-quick {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 9px 12px;
+    border-top: 1px solid #18181c;
+  }
+
+  .ai-admin-quick button {
+    flex: 0 0 auto;
+    border: 1px solid #29292f;
+    background: #111114;
+    color: #ddd;
+    border-radius: 20px;
+    padding: 8px 11px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .ai-admin-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid #202024;
+    background: #09090b;
+  }
+
+  .ai-admin-input {
+    flex: 1;
+    min-height: 44px;
+    max-height: 130px;
+    resize: none;
+    background: #151518;
+    color: #fff;
+    border: 1px solid #29292f;
+    border-radius: 14px;
+    outline: none;
+    padding: 12px 13px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+
+  .ai-admin-input:focus {
+    border-color: #ff3b91;
+  }
+
+  .ai-admin-send {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border: 0;
+    border-radius: 14px;
+    background: #ff3b91;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .ai-admin-send:disabled {
+    opacity: .45;
+  }
+
+  .ai-admin-typing {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .ai-admin-typing span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #888;
+    animation: aiTyping 1s infinite ease-in-out;
+  }
+
+  .ai-admin-typing span:nth-child(2) {
+    animation-delay: .15s;
+  }
+
+  .ai-admin-typing span:nth-child(3) {
+    animation-delay: .3s;
+  }
+
+  @keyframes aiTyping {
+    0%, 60%, 100% {
+      transform: translateY(0);
+      opacity: .4;
+    }
+
+    30% {
+      transform: translateY(-3px);
+      opacity: 1;
+    }
+  }
+
+  .product-edit-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #77777f;
+  }
+
+  .empty-state strong {
+    display: block;
+    color: #fff;
+    margin-bottom: 6px;
+    font-size: 16px;
+  }
+</style>
+
+<script>
+/* =========================================================
+   DEPOSIT
+========================================================= */
+
+function renderDeposit(container) {
+  container.innerHTML = `
+    <div class="section-card">
+      <div class="section-title">Получение товара</div>
+      <div class="section-subtitle">
+        Настройте информацию, которую пользователь увидит
+        после оформления заказа.
+      </div>
+
+      <div class="field">
+        <label>Текст инструкции</label>
+        <textarea id="depositInstruction"
+          placeholder="Переведите залог по указанным реквизитам..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Номер карты / реквизиты</label>
+        <input
+          id="depositCard"
+          placeholder="0000 0000 0000 0000"
+        >
+      </div>
+
+      <div class="field">
+        <label>Имя получателя</label>
+        <input
+          id="depositReceiver"
+          placeholder="Получатель"
+        >
+      </div>
+
+      <button
+        class="primary-btn"
+        id="saveDepositBtn"
+      >
+        Сохранить настройки
+      </button>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">Как это работает</div>
+
+      <div class="deposit-preview">
+        <div class="deposit-preview-title">
+          Шаг 1
+        </div>
+        <div class="deposit-preview-value">
+          Переведите залог
+        </div>
+      </div>
+
+      <div class="deposit-preview">
+        <div class="deposit-preview-title">
+          Шаг 2
+        </div>
+        <div class="deposit-preview-value">
+          Нажмите «Перевёл»
+        </div>
+      </div>
+
+      <div class="deposit-preview">
+        <div class="deposit-preview-title">
+          Шаг 3
+        </div>
+        <div class="deposit-preview-value">
+          Администратор проверит перевод
+        </div>
+      </div>
+    </div>
+  `;
+
+  const saveBtn = document.getElementById("saveDepositBtn");
+
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      const instruction =
+        document.getElementById("depositInstruction")?.value || "";
+
+      const card =
+        document.getElementById("depositCard")?.value || "";
+
+      const receiver =
+        document.getElementById("depositReceiver")?.value || "";
+
+      try {
+        await api("/api/admin/settings", {
+          method: "POST",
+          body: JSON.stringify({
+            deposit_instruction: instruction,
+            deposit_card: card,
+            deposit_receiver: receiver
+          })
+        });
+
+        toast("Настройки сохранены");
+      } catch (error) {
+        toast(error.message || "Не удалось сохранить");
+      }
+    });
+  }
+}
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+function renderSettings(container) {
+  container.innerHTML = `
+    <div class="section-card">
+      <div class="section-title">Настройки магазина</div>
+      <div class="section-subtitle">
+        Основные параметры IRoom.
+      </div>
+
+      <div class="field">
+        <label>Название магазина</label>
+        <input
+          id="shopName"
+          value="IRoom"
+        >
+      </div>
+
+      <div class="field">
+        <label>Описание</label>
+        <textarea
+          id="shopDescription"
+          placeholder="Описание магазина..."
+        ></textarea>
+      </div>
+
+      <div class="field">
+        <label>Username менеджера</label>
+        <input
+          id="managerUsername"
+          placeholder="@manager"
+        >
+      </div>
+
+      <div class="field">
+        <label>Telegram-канал</label>
+        <input
+          id="channelUsername"
+          placeholder="@channel"
+        >
+      </div>
+
+      <button
+        class="primary-btn"
+        id="saveSettingsBtn"
+      >
+        Сохранить
+      </button>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">Администраторы</div>
+      <div class="section-subtitle">
+        Доступ к этой панели имеют только указанные
+        Telegram ID.
+      </div>
+
+      <div class="deposit-preview">
+        <div class="deposit-preview-title">
+          Администратор 1
+        </div>
+        <div class="deposit-preview-value">
+          5082864281
+        </div>
+      </div>
+
+      <div class="deposit-preview">
+        <div class="deposit-preview-title">
+          Администратор 2
+        </div>
+        <div class="deposit-preview-value">
+          5975037118
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">IRoom AI</div>
+      <div class="section-subtitle">
+        ИИ может работать с каталогом прямо из панели.
+        Любой из двух администраторов может самостоятельно
+        менять товары и цены.
+      </div>
+
+      <button
+        class="primary-btn"
+        id="openAIFromSettings"
+      >
+        ✦ Открыть IRoom AI
+      </button>
+    </div>
+  `;
+
+  const aiBtn = document.getElementById("openAIFromSettings");
+
+  if (aiBtn) {
+    aiBtn.addEventListener("click", openAdminAI);
+  }
+
+  const saveBtn = document.getElementById("saveSettingsBtn");
+
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      const name =
+        document.getElementById("shopName")?.value || "";
+
+      const description =
+        document.getElementById("shopDescription")?.value || "";
+
+      const manager =
+        document.getElementById("managerUsername")?.value || "";
+
+      const channel =
+        document.getElementById("channelUsername")?.value || "";
+
+      try {
+        await api("/api/admin/settings", {
+          method: "POST",
+          body: JSON.stringify({
+            shop_name: name,
+            shop_description: description,
+            manager_username: manager,
+            channel_username: channel
+          })
+        });
+
+        toast("Настройки сохранены");
+      } catch (error) {
+        toast(error.message || "Ошибка сохранения");
+      }
+    });
+  }
+}
+
+
+/* =========================================================
+   AI ADMIN
+========================================================= */
+
+let aiAdminHistory = [];
+
+function openAdminAI() {
+  const overlay =
+    document.getElementById("aiAdminOverlay");
+
+  if (!overlay) return;
+
+  overlay.classList.add("active");
+
+  setTimeout(() => {
+    document
+      .getElementById("aiAdminInput")
+      ?.focus();
+  }, 100);
+}
+
+function closeAdminAI() {
+  const overlay =
+    document.getElementById("aiAdminOverlay");
+
+  if (!overlay) return;
+
+  overlay.classList.remove("active");
+}
+
+function appendAdminAIMessage(
+  role,
+  text
+) {
+  const messages =
+    document.getElementById("aiAdminMessages");
+
+  if (!messages) return;
+
+  const el =
+    document.createElement("div");
+
+  el.className =
+    `ai-admin-message ${role}`;
+
+  el.textContent =
+    String(text || "");
+
+  messages.appendChild(el);
+
+  messages.scrollTop =
+    messages.scrollHeight;
+}
+
+function setAdminAITyping(show) {
+  const messages =
+    document.getElementById("aiAdminMessages");
+
+  if (!messages) return;
+
+  const existing =
+    document.getElementById("aiAdminTyping");
+
+  if (show) {
+    if (existing) return;
+
+    const el =
+      document.createElement("div");
+
+    el.id = "aiAdminTyping";
+
+    el.className =
+      "ai-admin-message assistant";
+
+    el.innerHTML = `
+      <span class="ai-admin-typing">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    `;
+
+    messages.appendChild(el);
+
+    messages.scrollTop =
+      messages.scrollHeight;
+  } else {
+    existing?.remove();
+  }
+}
+
+async function sendAdminAIMessage(
+  forcedText = null
+) {
+  const input =
+    document.getElementById("aiAdminInput");
+
+  const send =
+    document.getElementById("aiAdminSend");
+
+  if (!input) return;
+
+  const text =
+    String(
+      forcedText !== null
+        ? forcedText
+        : input.value
+    ).trim();
+
+  if (!text) return;
+
+  if (send) {
+    send.disabled = true;
+  }
+
+  if (forcedText === null) {
+    input.value = "";
+  }
+
+  appendAdminAIMessage(
+    "user",
+    text
+  );
+
+  aiAdminHistory.push({
+    role: "user",
+    content: text
+  });
+
+  setAdminAITyping(true);
+
+  try {
+    const response =
+      await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-telegram-init-data":
+            getInitData()
+        },
+        body: JSON.stringify({
+          message: text,
+          history: aiAdminHistory.slice(-12)
+        })
+      });
+
+    let data = {};
+
+    try {
+      data =
+        await response.json();
+    } catch {
+      data = {};
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Ошибка IRoom AI"
+      );
+    }
+
+    const answer =
+      data.reply ||
+      data.message ||
+      "Готово.";
+
+    setAdminAITyping(false);
+
+    appendAdminAIMessage(
+      "assistant",
+      answer
+    );
+
+    aiAdminHistory.push({
+      role: "assistant",
+      content: answer
+    });
+
+    /*
+      Если AI изменил каталог —
+      сразу обновляем товары.
+    */
+
+    if (
+      data.changed ||
+      data.action === "create_product" ||
+      data.action === "update_product" ||
+      data.action === "set_price"
+    ) {
+      await loadProducts();
+
+      if (currentTab === "products") {
+        const content =
+          document.getElementById("content");
+
+        if (content) {
+          renderProducts(content);
+        }
+      }
+
+      toast("Каталог обновлён");
+    }
+
+  } catch (error) {
+    setAdminAITyping(false);
+
+    appendAdminAIMessage(
+      "assistant",
+      error.message ||
+      "Не удалось связаться с IRoom AI."
+    );
+
+  } finally {
+    if (send) {
+      send.disabled = false;
+    }
+
+    input.focus();
+  }
+}
+
+
+/* =========================================================
+   AI EVENTS
+========================================================= */
+
+const aiAdminBtn =
+  document.getElementById("aiAdminBtn");
+
+if (aiAdminBtn) {
+  aiAdminBtn.addEventListener(
+    "click",
+    openAdminAI
+  );
+}
+
+const aiAdminClose =
+  document.getElementById("aiAdminClose");
+
+if (aiAdminClose) {
+  aiAdminClose.addEventListener(
+    "click",
+    closeAdminAI
+  );
+}
+
+const aiAdminBackdrop =
+  document.getElementById("aiAdminBackdrop");
+
+if (aiAdminBackdrop) {
+  aiAdminBackdrop.addEventListener(
+    "click",
+    closeAdminAI
+  );
+}
+
+const aiAdminForm =
+  document.getElementById("aiAdminForm");
+
+if (aiAdminForm) {
+  aiAdminForm.addEventListener(
+    "submit",
+    event => {
+      event.preventDefault();
+      sendAdminAIMessage();
+    }
+  );
+}
+
+const aiAdminInput =
+  document.getElementById("aiAdminInput");
+
+if (aiAdminInput) {
+  aiAdminInput.addEventListener(
+    "keydown",
+    event => {
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
+        event.preventDefault();
+        sendAdminAIMessage();
+      }
+    }
+  );
+}
+
+document
+  .querySelectorAll(
+    "[data-ai-admin-prompt]"
+  )
+  .forEach(button => {
+    button.addEventListener(
+      "click",
+      () => {
+        const prompt =
+          button.dataset.aiAdminPrompt;
+
+        if (prompt) {
+          sendAdminAIMessage(prompt);
+        }
+      }
+    );
+  });
+
+
+/* =========================================================
+   FINAL TAB RENDER
+========================================================= */
+
+function renderCurrentTab() {
+  const content =
+    document.getElementById("content");
+
+  if (!content) return;
+
+  if (currentTab === "orders") {
+    renderOrders(content);
+    return;
+  }
+
+  if (currentTab === "products") {
+    renderProducts(content);
+    return;
+  }
+
+  if (currentTab === "deposit") {
+    renderDeposit(content);
+    return;
+  }
+
+  if (currentTab === "settings") {
+    renderSettings(content);
+    return;
+  }
+
+  renderProducts(content);
+}
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+async function initAdmin() {
+  try {
+    if (
+      window.Telegram &&
+      window.Telegram.WebApp
+    ) {
+      tg =
+        window.Telegram.WebApp;
+
+      tg.ready();
+      tg.expand();
+
+      try {
+        tg.setHeaderColor("#050505");
+        tg.setBackgroundColor("#050505");
+      } catch {}
+    }
+
+    await checkAccess();
+
+    await loadAll();
+
+    renderCurrentTab();
+
+  } catch (error) {
+    console.error(
+      "Admin initialization error:",
+      error
+    );
+
+    const login =
+      document.getElementById("login");
+
+    if (login) {
+      login.style.display =
+        "flex";
+
+      login.innerHTML = `
+        <div class="section-card"
+             style="max-width:420px;width:calc(100% - 32px);text-align:center;">
+          <div class="section-title">
+            Ошибка доступа
+          </div>
+
+          <div class="section-subtitle">
+            ${
+              esc(
+                error.message ||
+                "Не удалось открыть админ-панель."
+              )
+            }
+          </div>
+        </div>
+      `;
+    }
+  }
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+initAdmin();
+</script>
+
+</body>
+</html>
