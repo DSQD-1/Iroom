@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#08080a"
+  >
+
+  <title>IRoom — Админ-панель</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="stylesheet" href="/admin.css">
+</head>
+
+<body>
+
+<div id="app">
+
+  <!-- HEADER -->
+  <header class="admin-header">
+
+    <div class="header-left">
+      <div class="brand-mark">I</div>
+
+      <div class="brand-info">
+        <div class="brand-name">IRoom</div>
+        <div class="brand-subtitle">Админ-панель</div>
+      </div>
+    </div>
+
+    <div class="header-right">
+
+      <button
+        id="refreshAllButton"
+        class="icon-button"
+        type="button"
+        aria-label="Обновить"
+      >
+        ↻
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- ACCESS -->
+  <section
+    id="accessScreen"
+    class="access-screen"
+  >
+
+    <div class="access-card">
+
+      <div class="access-icon">I</div>
+
+      <h1>IRoom</h1>
+
+      <p>
+        Проверяем доступ к панели управления…
+      </p>
+
+      <div
+        id="accessError"
+        class="access-error hidden"
+      ></div>
+
+      <button
+        id="accessRetryButton"
+        class="primary-button hidden"
+        type="button"
+      >
+        Повторить
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ADMIN -->
+  <main
+    id="adminScreen"
+    class="admin-screen hidden"
+  >
+
+    <!-- DASHBOARD -->
+    <section class="dashboard-section">
+
+      <div class="section-heading">
+
+        <div>
+          <div class="eyebrow">
+            IROOM STORE
+          </div>
+
+          <h1>
+            Управление магазином
+          </h1>
+        </div>
+
+      </div>
+
+
+      <div class="dashboard-grid">
+
+        <button
+          class="dashboard-card"
+          data-tab-target="products"
+          type="button"
+        >
+          <span class="dashboard-card-icon">◫</span>
+
+          <span class="dashboard-card-content">
+            <strong>Товары</strong>
+            <small id="dashboardProducts">0</small>
+          </span>
+        </button>
+
+
+        <button
+          class="dashboard-card"
+          data-tab-target="categories"
+          type="button"
+        >
+          <span class="dashboard-card-icon">◌</span>
+
+          <span class="dashboard-card-content">
+            <strong>Категории</strong>
+            <small id="dashboardCategories">0</small>
+          </span>
+        </button>
+
+
+        <button
+          class="dashboard-card"
+          data-tab-target="banners"
+          type="button"
+        >
+          <span class="dashboard-card-icon">▣</span>
+
+          <span class="dashboard-card-content">
+            <strong>Баннеры</strong>
+            <small id="dashboardBanners">0</small>
+          </span>
+        </button>
+
+
+        <button
+          class="dashboard-card"
+          data-tab-target="orders"
+          type="button"
+        >
+          <span class="dashboard-card-icon">#</span>
+
+          <span class="dashboard-card-content">
+            <strong>Заказы</strong>
+            <small id="dashboardOrders">0</small>
+          </span>
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- TABS -->
+    <nav
+      id="adminTabs"
+      class="admin-tabs"
+    >
+
+      <button
+        class="admin-tab active"
+        data-tab="products"
+        type="button"
+      >
+        Товары
+      </button>
+
+      <button
+        class="admin-tab"
+        data-tab="categories"
+        type="button"
+      >
+        Категории
+      </button>
+
+      <button
+        class="admin-tab"
+        data-tab="banners"
+        type="button"
+      >
+        Баннеры
+      </button>
+
+      <button
+        class="admin-tab"
+        data-tab="reservation"
+        type="button"
+      >
+        Залог
+      </button>
+
+      <button
+        class="admin-tab"
+        data-tab="pickup"
+        type="button"
+      >
+        Выдача
+      </button>
+
+      <button
+        class="admin-tab"
+        data-tab="orders"
+        type="button"
+      >
+        Заказы
+      </button>
+
+      <button
+        class="admin-tab"
+        data-tab="settings"
+        type="button"
+      >
+        Настройки
+      </button>
+
+    </nav>
+
+
+    <!-- =================================================
+         PRODUCTS
+    ================================================== -->
+
+    <section
+      class="admin-tab-content active"
+      data-content="products"
+    >
+
+      <div class="content-header">
+
+        <div>
+          <div class="eyebrow">CATALOG</div>
+
+          <h2>Товары</h2>
+
+          <p>
+            Управление товарами, ценами и характеристиками.
+          </p>
+        </div>
+
+        <button
+          id="addProductButton"
+          class="primary-button"
+          type="button"
+        >
+          + Добавить
+        </button>
+
+      </div>
+
+
+      <div class="list-toolbar">
+
+        <input
+          id="productSearch"
+          class="form-input"
+          type="search"
+          placeholder="Поиск товара…"
+        >
+
+      </div>
+
+
+      <div
+        id="productsList"
+        class="admin-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         CATEGORIES
+    ================================================== -->
+
+    <section
+      class="admin-tab-content"
+      data-content="categories"
+    >
+
+      <div class="content-header">
+
+        <div>
+          <div class="eyebrow">CATALOG</div>
+
+          <h2>Категории</h2>
+
+          <p>
+            Разделы каталога магазина.
+          </p>
+        </div>
+
+        <button
+          id="addCategoryButton"
+          class="primary-button"
+          type="button"
+        >
+          + Добавить
+        </button>
+
+      </div>
+
+
+      <div
+        id="categoriesList"
+        class="admin-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         BANNERS
+    ================================================== -->
+
+    <section
+      class="admin-tab-content"
+      data-content="banners"
+    >
+
+      <div class="content-header">
+
+        <div>
+          <div class="eyebrow">HOME</div>
+
+          <h2>Баннеры</h2>
+
+          <p>
+            Управление баннерами главной страницы.
+          </p>
+        </div>
+
+        <button
+          id="addBannerButton"
+          class="primary-button"
+          type="button"
+        >
+          + Добавить
+        </button>
+
+      </div>
+
+
+      <div
+        id="bannersList"
+        class="admin-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         RESERVATION
+    ================================================== -->
+
+    <section
+      class="admin-tab-content"
+      data-content="reservation"
+    >
+
+      <div class="content-header">
+
+        <div>
+          <div class="eyebrow">CHECKOUT</div>
+
+          <h2>Залог</h2>
+
+          <p>
+            Управление суммой залога и реквизитами.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="settings-card">
+
+        <div class="settings-card-heading">
+
+          <div>
+            <strong>
+              Сумма залога
+            </strong>
+
+            <span>
+              Сумма, которую клиент оплачивает перед подтверждением заказа.
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="reservationAmount">
+            Сумма, ₽
+          </label>
+
+          <input
+            id="reservationAmount"
+            class="form-input"
+            type="number"
+            min="0"
+            step="1"
+            placeholder="1000"
+          >
+
+        </div>
+
+
+        <button
+          id="saveReservationAmountButton"
+          class="primary-button full-width"
+          type="button"
+        >
+          Сохранить сумму
+        </button>
+
+      </div>
+
+
+      <div class="subsection-header">
+
+        <div>
+          <h3>Реквизиты</h3>
+
+          <p>
+            Карты и другие реквизиты для оплаты залога.
+          </p>
+        </div>
+
+        <button
+          id="addReservationCardButton"
+          class="secondary-button"
+          type="button"
+        >
+          + Реквизиты
+        </button>
+
+      </div>
+
+
+      <div
+        id="reservationCardsList"
+        class="admin-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         PICKUP
+    ================================================== -->
+
+    <section
+      class="admin-tab-content"
+      data-content="pickup"
+    >
+
+      <div class="content-header">
+
+        <div>
+          <div class="eyebrow">DELIVERY</div>
+
+          <h2>Пункты выдачи</h2>
+
+          <p>
+            Адреса, график работы, карта и видео.
+          </p>
+        </div>
+
+        <button
+          id="addPickupButton"
+          class="primary-button"
+          type="button"
+        >
+          + Добавить
+        </button>
+
+      </div>
+
+
+      <div
+        id="pickupPointsList"
+        class="admin-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         ORDERS
+    ================================================== -->
+
+    <section
+      class="admin-tab-content"
+      data-content="orders"
+    >
+
+      <div class="content-header">
+
+        <div>
+          <div class="eyebrow">SALES</div>
+
+          <h2>Заказы</h2>
+
+          <p>
+            Заказы клиентов и проверка залогов.
+          </p>
+        </div>
+
+        <button
+          id="refreshOrdersButton"
+          class="secondary-button"
+          type="button"
+        >
+          ↻ Обновить
+        </button>
+
+      </div>
+
+
+      <!-- ORDER COUNTERS -->
+
+      <div class="orders-dashboard">
+
+        <div class="order-counter">
+          <span>Всего</span>
+          <strong id="ordersCountAll">0</strong>
+        </div>
+
+        <div class="order-counter">
+          <span>Новые</span>
+          <strong id="ordersCountNew">0</strong>
+        </div>
+
+        <div class="order-counter">
+          <span>В работе</span>
+          <strong id="ordersCountProcessing">0</strong>
+        </div>
+
+        <div class="order-counter">
+          <span>На проверке</span>
+          <strong id="ordersCountReservation">0</strong>
+        </div>
+
+      </div>
+
+
+      <!-- ORDER FILTERS -->
+
+      <div
+        id="orderFilters"
+        class="orders-filters"
+      >
+
+        <button
+          class="filter-button active"
+          data-order-filter="all"
+          type="button"
+        >
+          Все
+        </button>
+
+        <button
+          class="filter-button"
+          data-order-filter="new"
+          type="button"
+        >
+          Новые
+        </button>
+
+        <button
+          class="filter-button"
+          data-order-filter="confirmed"
+          type="button"
+        >
+          Подтверждены
+        </button>
+
+        <button
+          class="filter-button"
+          data-order-filter="processing"
+          type="button"
+        >
+          В работе
+        </button>
+
+        <button
+          class="filter-button"
+          data-order-filter="ready"
+          type="button"
+        >
+          Готовы
+        </button>
+
+        <button
+          class="filter-button"
+          data-order-filter="completed"
+          type="button"
+        >
+          Завершены
+        </button>
+
+      </div>
+
+
+      <!-- RESERVATION FILTER -->
+
+      <div
+        id="reservationFilters"
+        class="orders-filters"
+      >
+
+        <button
+          class="filter-button active"
+          data-reservation-filter="all"
+          type="button"
+        >
+          Все залоги
+        </button>
+
+        <button
+          class="filter-button"
+          data-reservation-filter="pending_payment"
+          type="button"
+        >
+          🟡 Ждут оплаты
+        </button>
+
+        <button
+          class="filter-button"
+          data-reservation-filter="awaiting_confirmation"
+          type="button"
+        >
+          🟠 На проверке
+        </button>
+
+        <button
+          class="filter-button"
+          data-reservation-filter="confirmed"
+          type="button"
+        >
+          🟢 Подтверждены
+        </button>
+
+        <button
+          class="filter-button"
+          data-reservation-filter="rejected"
+          type="button"
+        >
+          🔴 Отклонены
+        </button>
+
+      </div>
+
+
+      <div
+        id="ordersList"
+        class="admin-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         SETTINGS
+    ================================================== -->
+
+    <section
+      class="admin-tab-content"
+      data-content="settings"
+    >
+
+      <div class="content-header">
+
+        <div>
+          <div class="eyebrow">CONFIGURATION</div>
+
+          <h2>Настройки</h2>
+
+          <p>
+            Основная информация магазина.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- STORE -->
+
+      <div class="settings-card">
+
+        <div class="settings-card-heading">
+
+          <div>
+            <strong>Магазин</strong>
+
+            <span>
+              Основная информация.
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="settingStoreName">
+            Название магазина
+          </label>
+
+          <input
+            id="settingStoreName"
+            class="form-input"
+            type="text"
+            placeholder="IRoom"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- CONTACTS -->
+
+      <div class="settings-card">
+
+        <div class="settings-card-heading">
+
+          <div>
+            <strong>Контакты</strong>
+
+            <span>
+              Контакты магазина и менеджера.
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="settingContactUsername">
+            Username менеджера
+          </label>
+
+          <input
+            id="settingContactUsername"
+            class="form-input"
+            type="text"
+            placeholder="@iroom_24"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="settingContactUrl">
+            Ссылка на менеджера
+          </label>
+
+          <input
+            id="settingContactUrl"
+            class="form-input"
+            type="url"
+            placeholder="https://t.me/iroom_24"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="settingChannelUsername">
+            Username канала
+          </label>
+
+          <input
+            id="settingChannelUsername"
+            class="form-input"
+            type="text"
+            placeholder="@iroom_market"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="settingChannelUrl">
+            Ссылка на канал
+          </label>
+
+          <input
+            id="settingChannelUrl"
+            class="form-input"
+            type="url"
+            placeholder="https://t.me/iroom_market"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- CHECKOUT -->
+
+      <div class="settings-card">
+
+        <div class="settings-card-heading">
+
+          <div>
+            <strong>Оформление заказа</strong>
+
+            <span>
+              Информация для покупателя.
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="settingReservationText">
+            Текст о залоге
+          </label>
+
+          <textarea
+            id="settingReservationText"
+            class="form-textarea"
+            rows="4"
+            placeholder="Для оформления заказа необходимо внести залог..."
+          ></textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="settingPickupText">
+            Текст самовывоза
+          </label>
+
+          <textarea
+            id="settingPickupText"
+            class="form-textarea"
+            rows="4"
+            placeholder="Выберите удобный пункт выдачи..."
+          ></textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="settingDeliveryText">
+            Текст доставки
+          </label>
+
+          <textarea
+            id="settingDeliveryText"
+            class="form-textarea"
+            rows="4"
+            placeholder="Укажите адрес доставки..."
+          ></textarea>
+
+        </div>
+
+
+        <button
+          id="saveSettingsButton"
+          class="primary-button full-width"
+          type="button"
+        >
+          Сохранить настройки
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<!-- =====================================================
+     PRODUCT MODAL
+====================================================== -->
+
+<div
+  id="productModal"
+  class="modal hidden"
+  aria-hidden="true"
+>
+
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-card">
+
+    <div class="modal-header">
+
+      <div>
+        <div class="eyebrow">CATALOG</div>
+
+        <h2 id="productModalTitle">
+          Новый товар
+        </h2>
+      </div>
+
+      <button
+        class="modal-close"
+        data-close-modal="productModal"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <form id="productForm">
+
+      <input
+        id="productId"
+        type="hidden"
+      >
+
+
+      <div class="form-section">
+
+        <div class="form-section-header">
+          Основная информация
+        </div>
+
+        <div class="form-section-description">
+          Название, цена, категория и описание.
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="productName">
+            Название
+          </label>
+
+          <input
+            id="productName"
+            class="form-input"
+            type="text"
+            required
+            placeholder="iPhone 17 Pro Max"
+          >
+
+        </div>
+
+
+        <div class="form-row">
+
+          <div class="form-group">
+
+            <label for="productPrice">
+              Цена, ₽
+            </label>
+
+            <input
+              id="productPrice"
+              class="form-input"
+              type="number"
+              min="0"
+              step="1"
+              required
+              placeholder="100000"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="productOldPrice">
+              Старая цена
+            </label>
+
+            <input
+              id="productOldPrice"
+              class="form-input"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="110000"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="productCategory">
+            Категория
+          </label>
+
+          <select
+            id="productCategory"
+            class="form-select"
+          >
+            <option value="">
+              Без категории
+            </option>
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Изображение
+          </label>
+
+          <div class="upload-box">
+
+            <input
+              id="productImageFile"
+              type="file"
+              accept="image/*"
+              hidden
+            >
+
+            <button
+              id="productImageUploadButton"
+              class="upload-button"
+              type="button"
+            >
+              Выбрать фото
+            </button>
+
+            <div
+              id="productImagePreview"
+              class="upload-preview"
+            ></div>
+
+            <input
+              id="productImage"
+              class="form-input"
+              type="text"
+              placeholder="/uploads/..."
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="productDescription">
+            Описание
+          </label>
+
+          <textarea
+            id="productDescription"
+            class="form-textarea"
+            rows="5"
+            placeholder="Описание товара..."
+          ></textarea>
+
+        </div>
+
+
+        <label class="switch-row">
+
+          <span>
+            Новинка
+          </span>
+
+          <input
+            id="productIsNew"
+            type="checkbox"
+          >
+
+          <span class="switch"></span>
+
+        </label>
+
+      </div>
+
+
+      <!-- OPTIONS -->
+
+      <div class="form-section">
+
+        <div class="form-section-header">
+          Характеристики
+        </div>
+
+        <div class="form-section-description">
+          Варианты товара и возможные доплаты.
+        </div>
+
+
+        <!-- COLORS -->
+
+        <div class="option-group">
+
+          <div class="option-group-header">
+
+            <div>
+              <strong>Цвет</strong>
+              <span>colors</span>
+            </div>
+
+            <button
+              class="small-add-button"
+              data-add-option="colors"
+              type="button"
+            >
+              + Добавить
+            </button>
+
+          </div>
+
+          <div
+            id="productColors"
+            class="options-list"
+          ></div>
+
+        </div>
+
+
+        <!-- MEMORY -->
+
+        <div class="option-group">
+
+          <div class="option-group-header">
+
+            <div>
+              <strong>Память</strong>
+              <span>memories</span>
+            </div>
+
+            <button
+              class="small-add-button"
+              data-add-option="memories"
+              type="button"
+            >
+              + Добавить
+            </button>
+
+          </div>
+
+          <div
+            id="productMemories"
+            class="options-list"
+          ></div>
+
+        </div>
+
+
+        <!-- SIM -->
+
+        <div class="option-group">
+
+          <div class="option-group-header">
+
+            <div>
+              <strong>SIM</strong>
+              <span>sims</span>
+            </div>
+
+            <button
+              class="small-add-button"
+              data-add-option="sims"
+              type="button"
+            >
+              + Добавить
+            </button>
+
+          </div>
+
+          <div
+            id="productSims"
+            class="options-list"
+          ></div>
+
+        </div>
+
+
+        <!-- REGION -->
+
+        <div class="option-group">
+
+          <div class="option-group-header">
+
+            <div>
+              <strong>Регион</strong>
+              <span>regions</span>
+            </div>
+
+            <button
+              class="small-add-button"
+              data-add-option="regions"
+              type="button"
+            >
+              + Добавить
+            </button>
+
+          </div>
+
+          <div
+            id="productRegions"
+            class="options-list"
+          ></div>
+
+        </div>
+
+
+        <div
+          id="productPricePreview"
+          class="price-preview"
+        >
+
+          <div class="price-preview-title">
+            Предпросмотр цены
+          </div>
+
+          <div class="price-preview-row">
+
+            <span>
+              Базовая цена
+            </span>
+
+            <strong id="previewBasePrice">
+              0 ₽
+            </strong>
+
+          </div>
+
+          <div class="price-preview-row">
+
+            <span>
+              Максимальная цена
+            </span>
+
+            <strong id="previewMaxPrice">
+              0 ₽
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          class="secondary-button"
+          data-close-modal="productModal"
+          type="button"
+        >
+          Отмена
+        </button>
+
+        <button
+          id="saveProductButton"
+          class="primary-button"
+          type="submit"
+        >
+          Сохранить
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     CATEGORY MODAL
+====================================================== -->
+
+<div
+  id="categoryModal"
+  class="modal hidden"
+  aria-hidden="true"
+>
+
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-card">
+
+    <div class="modal-header">
+
+      <div>
+        <div class="eyebrow">CATALOG</div>
+
+        <h2 id="categoryModalTitle">
+          Новая категория
+        </h2>
+      </div>
+
+      <button
+        class="modal-close"
+        data-close-modal="categoryModal"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <form id="categoryForm">
+
+      <input
+        id="categoryId"
+        type="hidden"
+      >
+
+
+      <div class="form-group">
+
+        <label for="categoryName">
+          Название
+        </label>
+
+        <input
+          id="categoryName"
+          class="form-input"
+          type="text"
+          required
+          placeholder="Apple"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Изображение
+        </label>
+
+        <div class="upload-box">
+
+          <input
+            id="categoryImageFile"
+            type="file"
+            accept="image/*"
+            hidden
+          >
+
+          <button
+            id="categoryImageUploadButton"
+            class="upload-button"
+            type="button"
+          >
+            Выбрать фото
+          </button>
+
+          <div
+            id="categoryImagePreview"
+            class="upload-preview"
+          ></div>
+
+          <input
+            id="categoryImage"
+            class="form-input"
+            type="text"
+            placeholder="/uploads/..."
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="categoryDescription">
+          Описание
+        </label>
+
+        <textarea
+          id="categoryDescription"
+          class="form-textarea"
+          rows="4"
+          placeholder="Описание категории..."
+        ></textarea>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="categorySortOrder">
+          Порядок
+        </label>
+
+        <input
+          id="categorySortOrder"
+          class="form-input"
+          type="number"
+          step="1"
+          value="0"
+        >
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          class="secondary-button"
+          data-close-modal="categoryModal"
+          type="button"
+        >
+          Отмена
+        </button>
+
+        <button
+          id="saveCategoryButton"
+          class="primary-button"
+          type="submit"
+        >
+          Сохранить
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     BANNER MODAL
+====================================================== -->
+
+<div
+  id="bannerModal"
+  class="modal hidden"
+  aria-hidden="true"
+>
+
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-card">
+
+    <div class="modal-header">
+
+      <div>
+        <div class="eyebrow">HOME</div>
+
+        <h2 id="bannerModalTitle">
+          Новый баннер
+        </h2>
+      </div>
+
+      <button
+        class="modal-close"
+        data-close-modal="bannerModal"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <form id="bannerForm">
+
+      <input
+        id="bannerId"
+        type="hidden"
+      >
+
+
+      <div class="form-group">
+
+        <label for="bannerTitle">
+          Заголовок
+        </label>
+
+        <input
+          id="bannerTitle"
+          class="form-input"
+          type="text"
+          placeholder="Новый iPhone"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="bannerSubtitle">
+          Подзаголовок
+        </label>
+
+        <input
+          id="bannerSubtitle"
+          class="form-input"
+          type="text"
+          placeholder="Новая коллекция уже в продаже"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="bannerText">
+          Текст
+        </label>
+
+        <textarea
+          id="bannerText"
+          class="form-textarea"
+          rows="4"
+          placeholder="Описание предложения..."
+        ></textarea>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Изображение баннера
+        </label>
+
+        <div class="upload-box">
+
+          <input
+            id="bannerImageFile"
+            type="file"
+            accept="image/*"
+            hidden
+          >
+
+          <button
+            id="bannerImageUploadButton"
+            class="upload-button"
+            type="button"
+          >
+            Выбрать изображение
+          </button>
+
+          <div
+            id="bannerImagePreview"
+            class="upload-preview banner-preview"
+          ></div>
+
+          <input
+            id="bannerImage"
+            class="form-input"
+            type="text"
+            placeholder="/uploads/..."
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="bannerButtonText">
+          Текст кнопки
+        </label>
+
+        <input
+          id="bannerButtonText"
+          class="form-input"
+          type="text"
+          placeholder="Подробнее"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="bannerButtonUrl">
+          Ссылка кнопки
+        </label>
+
+        <input
+          id="bannerButtonUrl"
+          class="form-input"
+          type="text"
+          placeholder="https://..."
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="bannerProduct">
+          Товар
+        </label>
+
+        <select
+          id="bannerProduct"
+          class="form-select"
+        >
+
+          <option value="">
+            Без товара
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label for="bannerSortOrder">
+            Порядок
+          </label>
+
+          <input
+            id="bannerSortOrder"
+            class="form-input"
+            type="number"
+            step="1"
+            value="0"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="bannerActive">
+            Статус
+          </label>
+
+          <select
+            id="bannerActive"
+            class="form-select"
+          >
+
+            <option value="1">
+              Активен
+            </option>
+
+            <option value="0">
+              Скрыт
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          class="secondary-button"
+          data-close-modal="bannerModal"
+          type="button"
+        >
+          Отмена
+        </button>
+
+        <button
+          id="saveBannerButton"
+          class="primary-button"
+          type="submit"
+        >
+          Сохранить
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     RESERVATION CARD MODAL
+====================================================== -->
+
+<div
+  id="reservationCardModal"
+  class="modal hidden"
+  aria-hidden="true"
+>
+
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-card">
+
+    <div class="modal-header">
+
+      <div>
+        <div class="eyebrow">CHECKOUT</div>
+
+        <h2 id="reservationCardModalTitle">
+          Новые реквизиты
+        </h2>
+      </div>
+
+      <button
+        class="modal-close"
+        data-close-modal="reservationCardModal"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <form id="reservationCardForm">
+
+      <input
+        id="reservationCardId"
+        type="hidden"
+      >
+
+
+      <div class="form-group">
+
+        <label for="reservationCardTitle">
+          Название
+        </label>
+
+        <input
+          id="reservationCardTitle"
+          class="form-input"
+          type="text"
+          placeholder="Основная карта"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="reservationCardNumber">
+          Номер карты
+        </label>
+
+        <input
+          id="reservationCardNumber"
+          class="form-input"
+          type="text"
+          inputmode="numeric"
+          placeholder="0000 0000 0000 0000"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="reservationCardRecipient">
+          Получатель
+        </label>
+
+        <input
+          id="reservationCardRecipient"
+          class="form-input"
+          type="text"
+          placeholder="Иван Иванов"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="reservationCardRequisites">
+          Дополнительные реквизиты
+        </label>
+
+        <textarea
+          id="reservationCardRequisites"
+          class="form-textarea"
+          rows="4"
+          placeholder="Банк, комментарий, СБП и т.д."
+        ></textarea>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="reservationCardAmount">
+          Сумма для этой карты, ₽
+        </label>
+
+        <input
+          id="reservationCardAmount"
+          class="form-input"
+          type="number"
+          min="0"
+          step="1"
+          placeholder="1000"
+        >
+
+      </div>
+
+
+      <label class="switch-row">
+
+        <span>Активна</span>
+
+        <input
+          id="reservationCardActive"
+          type="checkbox"
+          checked
+        >
+
+        <span class="switch"></span>
+
+      </label>
+
+
+      <label class="switch-row">
+
+        <span>
+          Использовать по умолчанию
+        </span>
+
+        <input
+          id="reservationCardDefault"
+          type="checkbox"
+        >
+
+        <span class="switch"></span>
+
+      </label>
+
+
+      <div class="modal-actions">
+
+        <button
+          class="secondary-button"
+          data-close-modal="reservationCardModal"
+          type="button"
+        >
+          Отмена
+        </button>
+
+        <button
+          id="saveReservationCardButton"
+          class="primary-button"
+          type="submit"
+        >
+          Сохранить
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     PICKUP MODAL
+====================================================== -->
+
+<div
+  id="pickupModal"
+  class="modal hidden"
+  aria-hidden="true"
+>
+
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-card">
+
+    <div class="modal-header">
+
+      <div>
+        <div class="eyebrow">DELIVERY</div>
+
+        <h2 id="pickupModalTitle">
+          Новый пункт
+        </h2>
+      </div>
+
+      <button
+        class="modal-close"
+        data-close-modal="pickupModal"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <form id="pickupForm">
+
+      <input
+        id="pickupId"
+        type="hidden"
+      >
+
+
+      <div class="form-group">
+
+        <label for="pickupTitle">
+          Название
+        </label>
+
+        <input
+          id="pickupTitle"
+          class="form-input"
+          type="text"
+          placeholder="Пункт выдачи"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="pickupAddress">
+          Адрес
+        </label>
+
+        <input
+          id="pickupAddress"
+          class="form-input"
+          type="text"
+          placeholder="Москва, ул. Тверская, 10"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="pickupDirections">
+          Как добраться?
+        </label>
+
+        <textarea
+          id="pickupDirections"
+          class="form-textarea"
+          rows="4"
+          placeholder="Описание маршрута..."
+        ></textarea>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="pickupVideo">
+          Видео
+        </label>
+
+        <input
+          id="pickupVideo"
+          class="form-input"
+          type="text"
+          placeholder="/uploads/pickup.mp4"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Загрузить видео
+        </label>
+
+        <div class="upload-box">
+
+          <input
+            id="pickupVideoFile"
+            type="file"
+            accept="video/mp4,video/webm,video/quicktime"
+            hidden
+          >
+
+          <button
+            id="pickupVideoUploadButton"
+            class="upload-button"
+            type="button"
+          >
+            Выбрать видео
+          </button>
+
+          <div
+            id="pickupVideoPreview"
+            class="upload-preview"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+      <label class="switch-row">
+
+        <span>Активен</span>
+
+        <input
+          id="pickupActive"
+          type="checkbox"
+          checked
+        >
+
+        <span class="switch"></span>
+
+      </label>
+
+
+      <div class="modal-actions">
+
+        <button
+          class="secondary-button"
+          data-close-modal="pickupModal"
+          type="button"
+        >
+          Отмена
+        </button>
+
+        <button
+          id="savePickupButton"
+          class="primary-button"
+          type="submit"
+        >
+          Сохранить
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     ORDER MODAL
+====================================================== -->
+
+<div
+  id="orderModal"
+  class="modal hidden"
+  aria-hidden="true"
+>
+
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-card order-modal-card">
+
+    <div class="modal-header">
+
+      <div>
+        <div class="eyebrow">ORDER</div>
+
+        <h2 id="orderModalTitle">
+          Заказ
+        </h2>
+      </div>
+
+      <button
+        class="modal-close"
+        data-close-modal="orderModal"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div
+      id="orderModalContent"
+      class="order-details"
+    ></div>
+
+
+    <div class="order-management">
+
+
+      <!-- ORDER STATUS -->
+
+      <div class="management-block">
+
+        <div class="management-title">
+          Статус заказа
+        </div>
+
+        <select
+          id="orderStatusSelect"
+          class="form-select"
+        >
+
+          <option value="new">
+            🆕 Новый
+          </option>
+
+          <option value="confirmed">
+            🔵 Подтверждён
+          </option>
+
+          <option value="processing">
+            ⚙️ В обработке
+          </option>
+
+          <option value="ready">
+            📦 Готов к выдаче
+          </option>
+
+          <option value="completed">
+            🏁 Завершён
+          </option>
+
+          <option value="cancelled">
+            ❌ Отменён
+          </option>
+
+          <option value="rejected">
+            ❌ Отклонён
+          </option>
+
+        </select>
+
+
+        <button
+          id="saveOrderStatusButton"
+          class="primary-button full-width"
+          type="button"
+        >
+          Сохранить статус
+        </button>
+
+      </div>
+
+
+      <!-- RESERVATION STATUS -->
+
+      <div class="management-block">
+
+        <div class="management-title">
+          Статус залога
+        </div>
+
+        <select
+          id="reservationStatusSelect"
+          class="form-select"
+        >
+
+          <option value="not_required">
+            Не требуется
+          </option>
+
+          <option value="pending_payment">
+            🟡 Ожидает оплаты
+          </option>
+
+          <option value="awaiting_confirmation">
+            🟠 Ожидает проверки
+          </option>
+
+          <option value="confirmed">
+            🟢 Залог подтверждён
+          </option>
+
+          <option value="rejected">
+            🔴 Залог отклонён
+          </option>
+
+        </select>
+
+
+        <button
+          id="saveReservationStatusButton"
+          class="primary-button full-width"
+          type="button"
+        >
+          Сохранить статус залога
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- LOADER -->
+
+<div
+  id="globalLoader"
+  class="global-loader hidden"
+>
+
+  <div class="loader-spinner"></div>
+
+  <span>
+    Загрузка…
+  </span>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div
+  id="toast"
+  class="toast"
+></div>
+
+
+<script src="/admin.js"></script>
+
+</body>
+</html>
