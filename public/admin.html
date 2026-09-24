@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+
+  <title>IRoom Admin</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="stylesheet" href="/admin.css" />
+</head>
+
+<body>
+
+  <div class="admin-app">
+
+    <!-- HEADER -->
+
+    <header class="admin-header">
+
+      <div>
+        <div class="admin-brand">
+          <span class="brand-pink">IR</span><span>oom</span>
+        </div>
+
+        <div class="admin-subtitle">
+          Панель управления
+        </div>
+      </div>
+
+      <button
+        id="backToStore"
+        class="header-button"
+        type="button"
+      >
+        Магазин
+      </button>
+
+    </header>
+
+
+    <!-- ACCESS -->
+
+    <main>
+
+      <section
+        id="accessScreen"
+        class="screen center-screen"
+      >
+
+        <div class="access-card">
+
+          <div class="loader"></div>
+
+          <div id="accessText">
+            Проверяем доступ...
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ADMIN -->
+
+      <section
+        id="adminScreen"
+        class="screen hidden"
+      >
+
+        <!-- TABS -->
+
+        <div class="tabs">
+
+          <button
+            class="tab active"
+            data-tab="products"
+            type="button"
+          >
+            Товары
+          </button>
+
+          <button
+            class="tab"
+            data-tab="categories"
+            type="button"
+          >
+            Категории
+          </button>
+
+          <button
+            class="tab"
+            data-tab="orders"
+            type="button"
+          >
+            Заказы
+          </button>
+
+        </div>
+
+
+        <!-- =========================
+             PRODUCTS
+        ========================== -->
+
+        <section
+          id="productsTab"
+          class="tab-content"
+        >
+
+          <div class="section-header">
+
+            <div>
+
+              <h1>Товары</h1>
+
+              <p>
+                Управление каталогом IRoom
+              </p>
+
+            </div>
+
+            <button
+              id="addProductButton"
+              class="primary-button"
+              type="button"
+            >
+              + Добавить
+            </button>
+
+          </div>
+
+
+          <div
+            id="productsList"
+            class="items-list"
+          ></div>
+
+        </section>
+
+
+        <!-- =========================
+             CATEGORIES
+        ========================== -->
+
+        <section
+          id="categoriesTab"
+          class="tab-content hidden"
+        >
+
+          <div class="section-header">
+
+            <div>
+
+              <h1>Категории</h1>
+
+              <p>
+                Разделы магазина
+              </p>
+
+            </div>
+
+            <button
+              id="addCategoryButton"
+              class="primary-button"
+              type="button"
+            >
+              + Добавить
+            </button>
+
+          </div>
+
+
+          <div
+            id="categoriesList"
+            class="items-list"
+          ></div>
+
+        </section>
+
+
+        <!-- =========================
+             ORDERS
+        ========================== -->
+
+        <section
+          id="ordersTab"
+          class="tab-content hidden"
+        >
+
+          <div class="section-header">
+
+            <div>
+
+              <h1>Заказы</h1>
+
+              <p>
+                Заявки на бронирование
+              </p>
+
+            </div>
+
+            <button
+              id="refreshOrders"
+              class="secondary-button"
+              type="button"
+            >
+              Обновить
+            </button>
+
+          </div>
+
+
+          <div
+            id="ordersList"
+            class="items-list"
+          ></div>
+
+        </section>
+
+      </section>
+
+    </main>
+
+
+    <!-- =========================
+         PRODUCT MODAL
+    ========================== -->
+
+    <div
+      id="productModal"
+      class="modal hidden"
+    >
+
+      <div
+        class="modal-overlay"
+        data-close-modal="product"
+      ></div>
+
+
+      <div class="modal-card">
+
+        <div class="modal-header">
+
+          <div>
+
+            <h2 id="productModalTitle">
+              Новый товар
+            </h2>
+
+            <p>
+              Информация о товаре
+            </p>
+
+          </div>
+
+          <button
+            class="close-button"
+            type="button"
+            data-close-modal="product"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <form id="productForm">
+
+          <input
+            type="hidden"
+            id="productId"
+          />
+
+
+          <!-- NAME -->
+
+          <label>
+
+            <span>Название</span>
+
+            <input
+              id="productName"
+              type="text"
+              placeholder="iPhone 18 Pro"
+              required
+            />
+
+          </label>
+
+
+          <!-- CATEGORY -->
+
+          <label>
+
+            <span>Категория</span>
+
+            <select id="productCategory">
+
+              <option value="">
+                Без категории
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <!-- DESCRIPTION -->
+
+          <label>
+
+            <span>Описание</span>
+
+            <textarea
+              id="productDescription"
+              placeholder="Описание товара"
+              rows="4"
+            ></textarea>
+
+          </label>
+
+
+          <!-- BASE PRICE -->
+
+          <div class="price-main-block">
+
+            <div class="form-section-title">
+              Базовая цена
+            </div>
+
+            <div class="price-main-description">
+              От этой цены рассчитываются выбранные варианты.
+            </div>
+
+            <label>
+
+              <span>Цена товара</span>
+
+              <div class="price-input-wrap">
+
+                <input
+                  id="productPrice"
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder="125000"
+                  required
+                />
+
+                <span>₽</span>
+
+              </div>
+
+            </label>
+
+          </div>
+
+
+          <!-- IMAGE -->
+
+          <label>
+
+            <span>Изображение</span>
+
+            <input
+              id="productImage"
+              type="file"
+              accept="image/*"
+            />
+
+          </label>
+
+
+          <div
+            id="currentProductImage"
+            class="current-image hidden"
+          ></div>
+
+
+          <!-- =========================
+               COLOR
+          ========================== -->
+
+          <div class="form-section">
+
+            <div class="form-section-header">
+
+              <div>
+
+                <div class="form-section-title">
+                  Цвет
+                </div>
+
+                <div class="form-section-description">
+                  Добавьте доступные цвета товара.
+                </div>
+
+              </div>
+
+              <button
+                type="button"
+                id="addColorButton"
+                class="small-add-button"
+              >
+                + Добавить
+              </button>
+
+            </div>
+
+
+            <div
+              id="colorsContainer"
+              class="option-list"
+            ></div>
+
+          </div>
+
+
+          <!-- =========================
+               MEMORY
+          ========================== -->
+
+          <div class="form-section">
+
+            <div class="form-section-header">
+
+              <div>
+
+                <div class="form-section-title">
+                  Память
+                </div>
+
+                <div class="form-section-description">
+                  Например: 128 ГБ, 256 ГБ, 512 ГБ, 1 ТБ.
+                </div>
+
+              </div>
+
+              <button
+                type="button"
+                id="addMemoryButton"
+                class="small-add-button"
+              >
+                + Добавить
+              </button>
+
+            </div>
+
+
+            <div
+              id="memoryContainer"
+              class="option-list"
+            ></div>
+
+          </div>
+
+
+          <!-- =========================
+               SIM
+          ========================== -->
+
+          <div class="form-section">
+
+            <div class="form-section-header">
+
+              <div>
+
+                <div class="form-section-title">
+                  SIM
+                </div>
+
+                <div class="form-section-description">
+                  Например: eSIM или SIM + eSIM.
+                </div>
+
+              </div>
+
+              <button
+                type="button"
+                id="addSimButton"
+                class="small-add-button"
+              >
+                + Добавить
+              </button>
+
+            </div>
+
+
+            <div
+              id="simContainer"
+              class="option-list"
+            ></div>
+
+          </div>
+
+
+          <!-- =========================
+               REGION
+          ========================== -->
+
+          <div class="form-section">
+
+            <div class="form-section-header">
+
+              <div>
+
+                <div class="form-section-title">
+                  Регион
+                </div>
+
+                <div class="form-section-description">
+                  Необязательно. Например: США, Европа.
+                </div>
+
+              </div>
+
+              <button
+                type="button"
+                id="addRegionButton"
+                class="small-add-button"
+              >
+                + Добавить
+              </button>
+
+            </div>
+
+
+            <div
+              id="regionContainer"
+              class="option-list"
+            ></div>
+
+          </div>
+
+
+          <!-- PRICE PREVIEW -->
+
+          <div class="price-preview">
+
+            <div class="price-preview-title">
+              Пример расчёта
+            </div>
+
+            <div class="price-preview-row">
+
+              <span>
+                Базовая цена
+              </span>
+
+              <strong id="previewBasePrice">
+                0 ₽
+              </strong>
+
+            </div>
+
+            <div class="price-preview-row">
+
+              <span>
+                Максимальная цена
+              </span>
+
+              <strong id="previewMaxPrice">
+                0 ₽
+              </strong>
+
+            </div>
+
+            <div class="price-preview-note">
+              Покупатель видит только итоговую цену.
+              Наценки в магазине не отображаются.
+            </div>
+
+          </div>
+
+
+          <!-- ACTIONS -->
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="secondary-button"
+              data-close-modal="product"
+            >
+              Отмена
+            </button>
+
+            <button
+              type="submit"
+              class="primary-button"
+            >
+              Сохранить
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         CATEGORY MODAL
+    ========================== -->
+
+    <div
+      id="categoryModal"
+      class="modal hidden"
+    >
+
+      <div
+        class="modal-overlay"
+        data-close-modal="category"
+      ></div>
+
+
+      <div class="modal-card">
+
+        <div class="modal-header">
+
+          <div>
+
+            <h2 id="categoryModalTitle">
+              Новая категория
+            </h2>
+
+            <p>
+              Раздел магазина
+            </p>
+
+          </div>
+
+          <button
+            class="close-button"
+            type="button"
+            data-close-modal="category"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <form id="categoryForm">
+
+          <input
+            type="hidden"
+            id="categoryId"
+          />
+
+
+          <label>
+
+            <span>Название</span>
+
+            <input
+              id="categoryName"
+              type="text"
+              placeholder="Apple"
+              required
+            />
+
+          </label>
+
+
+          <label>
+
+            <span>Изображение</span>
+
+            <input
+              id="categoryImage"
+              type="file"
+              accept="image/*"
+            />
+
+          </label>
+
+
+          <label>
+
+            <span>Описание</span>
+
+            <textarea
+              id="categoryDescription"
+              placeholder="Описание категории"
+              rows="3"
+            ></textarea>
+
+          </label>
+
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="secondary-button"
+              data-close-modal="category"
+            >
+              Отмена
+            </button>
+
+            <button
+              type="submit"
+              class="primary-button"
+            >
+              Сохранить
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+
+    <!-- TOAST -->
+
+    <div
+      id="toast"
+      class="toast"
+    ></div>
+
+
+    <!-- LOADER -->
+
+    <div
+      id="pageLoader"
+      class="page-loader hidden"
+    >
+
+      <div class="loader"></div>
+
+    </div>
+
+  </div>
+
+
+  <script src="/admin.js"></script>
+
+</body>
+</html>
