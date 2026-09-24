@@ -2987,23 +2987,90 @@
                IMAGE
           ========================================== -->
 
-          <div class="field">
+          <div class="field full">
 
-            <label>
-              Изображение
-            </label>
+  <label>
+    Изображение товара
+  </label>
 
-            <input
-              id="productImage"
-              value="${esc(
-                currentProduct.image_url ||
-                currentProduct.image ||
-                ""
-              )}"
-              placeholder="https://..."
-            >
+  <input
+    id="productImageFile"
+    type="file"
+    accept="image/*"
+    style="display:none"
+  >
 
-          </div>
+  <input
+    id="productImage"
+    type="hidden"
+    value="${esc(
+      currentProduct.image_url ||
+      currentProduct.image ||
+      ""
+    )}"
+  >
+
+  <button
+    class="btn"
+    id="chooseProductImage"
+    type="button"
+    style="
+      width:100%;
+      min-height:48px;
+      border-color:rgba(255,45,141,.25);
+      background:rgba(255,45,141,.08);
+      color:#ff5ba8;
+    "
+  >
+    📷 Выбрать фото из галереи
+  </button>
+
+  <div
+    id="productImagePreview"
+    style="
+      margin-top:10px;
+      display:${(
+        currentProduct.image_url ||
+        currentProduct.image
+      ) ? "block" : "none"};
+    "
+  >
+
+    <img
+      id="productImagePreviewImg"
+      src="${esc(
+        currentProduct.image_url ||
+        currentProduct.image ||
+        ""
+      )}"
+      alt=""
+      style="
+        width:100%;
+        max-height:240px;
+        object-fit:cover;
+        border-radius:14px;
+        display:block;
+        background:#151518;
+      "
+    >
+
+    <button
+      id="removeProductImage"
+      class="btn"
+      type="button"
+      style="
+        width:100%;
+        margin-top:8px;
+        color:#ff6868;
+        border-color:rgba(255,104,104,.2);
+      "
+    >
+      Удалить фото
+    </button>
+
+  </div>
+
+</div>
 
 
           <!-- =========================================
