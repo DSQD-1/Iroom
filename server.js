@@ -5286,8 +5286,8 @@ app.get(
       res
         .status(500)
         .json({
-          error:
-            "Не удалось загрузить заказы"
+        error:
+  error.message
         });
     }
   }
