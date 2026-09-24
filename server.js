@@ -5042,84 +5042,144 @@ app.get(
 
 app.post(
   "/telegram/webhook",
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
+    // Telegram должен получить ответ сразу
     res.sendStatus(200);
 
     try {
-      const update =
-        req.body || {};
+      const update = req.body || {};
 
-      if (
-        update.callback_query
-      ) {
-        const callback =
-          update.callback_query;
+      /* =====================================================
+         CALLBACK QUERY
+      ====================================================== */
 
-        const data =
-          stringValue(
-            callback.data
-          );
+      if (update.callback_query) {
+        const callback = update.callback_query;
+
+        const data = stringValue(
+          callback.data
+        );
 
         if (
-          data.startsWith(
-            "order_status:"
-          )
+          data.startsWith("order_status:")
         ) {
+          await answerCallbackQuery(
+            callback.id
+          );
+        } else {
+          // Просто закрываем "часики" у callback-кнопки
           await answerCallbackQuery(
             callback.id
           );
         }
       }
 
-      if (
-        update.message
-      ) {
-        const message =
-          update.message;
 
-        const text =
-          stringValue(
-            message.text
-          );
+      /* =====================================================
+         MESSAGE
+      ====================================================== */
 
-        if (
-          text === "/start" ||
-          text === "/app"
-        ) {
-          await sendTelegramMessage(
-            message.chat.id,
-            " Добро пожаловать
-            Откройте магазин IRoom :",
-            {
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text:
-                        "Открыть IRoom",
-                      web_app: {
-                        url:
-                          `${MINIAPP_URL}/index.html`
-                      }
-                    }
-                  ]
-                ]
-              }
-            }
-          );
-        }
+      if (!update.message) {
+        return;
       }
+
+      const message =
+        update.message;
+
+      const text =
+        stringValue(
+          message.text
+        );
+
+
+      /* =====================================================
+         /START
+      ====================================================== */
+
+      if (
+        text === "/start" ||
+        text === "/app"
+      ) {
+        await sendTelegramMessage(
+          message.chat.id,
+
+          [
+            "👋 <b>Добро пожаловать в IRoom!</b>",
+            "",
+            "📱 Здесь вы можете посмотреть товары,",
+            "оформить заказ и связаться с менеджером.",
+            "",
+            "Нажмите кнопку ниже, чтобы открыть магазин."
+          ].join("\n"),
+
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text:
+                      "🛍 Открыть IRoom",
+
+                    web_app: {
+                      url:
+                        `${MINIAPP_URL}/index.html`
+                    }
+                  }
+                ]
+              ]
+            }
+          }
+        );
+
+        return;
+      }
+
+
+      /* =====================================================
+         /HELP
+      ====================================================== */
+
+      if (
+        text === "/help"
+      ) {
+        await sendTelegramMessage(
+          message.chat.id,
+
+          [
+            "🤖 <b>IRoom</b>",
+            "",
+            "Доступные команды:",
+            "",
+            "/start — открыть магазин",
+            "/app — открыть магазин",
+            "/help — помощь"
+          ].join("\n")
+        );
+
+        return;
+      }
+
+
+      /* =====================================================
+         ОСТАЛЬНЫЕ СООБЩЕНИЯ
+      ====================================================== */
+
+      // Пока обычные сообщения боту не обрабатываем.
+      // AI будет подключён отдельно через Mini App.
+
     } catch (error) {
       console.error(
-        "Webhook:",
+        "Telegram webhook error:",
         error
       );
     }
   }
 );
+
+
+/* =========================================================
+   TELEGRAM CALLBACK
+========================================================= */
 
 async function answerCallbackQuery(
   callbackQueryId
@@ -5132,10 +5192,48 @@ async function answerCallbackQuery(
           callbackQueryId
       }
     );
-  } catch {}
+  } catch (error) {
+    console.error(
+      "Callback answer error:",
+      error.message
+    );
+  }
 }
 
+
+/* =========================================================
+   TELEGRAM WEBHOOK SETUP
+========================================================= */
+
 async function setupWebhook() {
+  try {
+    const url =
+      `${MINIAPP_URL}/telegram/webhook`;
+
+    await telegramApi(
+      "setWebhook",
+      {
+        url,
+
+        allowed_updates: [
+          "message",
+          "callback_query"
+        ]
+      }
+    );
+
+    console.log(
+      "Telegram webhook:",
+      url
+    );
+
+  } catch (error) {
+    console.error(
+      "Webhook setup error:",
+      error.message
+    );
+  }
+}
   try {
     const url =
       `${MINIAPP_URL}/telegram/webhook`;
