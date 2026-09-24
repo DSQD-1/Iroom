@@ -5236,7 +5236,7 @@ app.get(
             u.username AS user_username
           FROM orders o
           LEFT JOIN users u
-            ON u.id = o.user_id
+            ON u.telegram_user_id = o.telegram_user_id
           ORDER BY o.id DESC
         `);
 
