@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
+  >
+
+  <meta
+    name="theme-color"
+    content="#050505"
+  >
+
+  <meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+  >
+
+  <title>IRoom</title>
+
+  <link
+    rel="stylesheet"
+    href="/style.css"
+  >
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+
+  <div id="app">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="header">
+
+      <button
+        class="header-button menu-button"
+        id="menuButton"
+        aria-label="Меню"
+        type="button"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+
+      <button
+        class="logo"
+        id="homeButton"
+        aria-label="IRoom"
+        type="button"
+      >
+        <span>IR</span><b>oom</b>
+      </button>
+
+
+      <div class="header-right">
+
+        <!-- SEARCH -->
+
+        <button
+          class="header-button"
+          id="searchButton"
+          aria-label="Поиск"
+          type="button"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="6.5"
+            ></circle>
+
+            <path
+              d="M16 16L21 21"
+            ></path>
+          </svg>
+        </button>
+
+
+        <!-- CART -->
+
+        <button
+          class="header-button cart-button"
+          id="cartButton"
+          aria-label="Корзина"
+          type="button"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          >
+            <path
+              d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 8H6"
+            ></path>
+
+            <circle
+              cx="10"
+              cy="20"
+              r="1"
+            ></circle>
+
+            <circle
+              cx="18"
+              cy="20"
+              r="1"
+            ></circle>
+          </svg>
+
+          <i id="cartBadge">0</i>
+        </button>
+
+
+        <!-- PROFILE / ORDERS -->
+
+        <button
+          class="header-button"
+          id="profileButton"
+          aria-label="Мои заказы"
+          type="button"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          >
+            <circle
+              cx="12"
+              cy="8"
+              r="3.5"
+            ></circle>
+
+            <path
+              d="M5 21c.7-4 3-6 7-6s6.3 2 7 6"
+            ></path>
+          </svg>
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         SEARCH
+    ====================================================== -->
+
+    <div
+      class="search-container"
+      id="searchContainer"
+    >
+
+      <div class="search-box">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
+          <circle
+            cx="11"
+            cy="11"
+            r="6.5"
+          ></circle>
+
+          <path
+            d="M16 16L21 21"
+          ></path>
+        </svg>
+
+
+        <input
+          id="globalSearch"
+          type="search"
+          inputmode="search"
+          placeholder="Поиск товаров"
+          autocomplete="off"
+        >
+
+
+        <button
+          id="clearSearch"
+          type="button"
+        >
+          ×
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MAIN SCREEN
+    ====================================================== -->
+
+    <main id="screen"></main>
+
+
+    <!-- =====================================================
+         DRAWER
+    ====================================================== -->
+
+    <div
+      class="drawer"
+      id="drawer"
+      aria-hidden="true"
+    >
+
+      <div
+        class="drawer-backdrop"
+        id="drawerBackdrop"
+      ></div>
+
+
+      <aside class="drawer-panel">
+
+        <!-- DRAWER HEADER -->
+
+        <div class="drawer-header">
+
+          <div class="logo drawer-logo">
+            <span>IR</span><b>oom</b>
+          </div>
+
+
+          <button
+            class="drawer-close"
+            id="closeDrawer"
+            type="button"
+            aria-label="Закрыть"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <!-- DRAWER MENU -->
+
+        <div class="drawer-menu">
+
+          <!-- HOME -->
+
+          <button
+            class="drawer-item"
+            data-route="home"
+            type="button"
+          >
+            <span class="drawer-icon">⌂</span>
+            <span>Главная</span>
+          </button>
+
+
+          <!-- CATALOG -->
+
+          <button
+            class="drawer-item"
+            data-route="catalog"
+            type="button"
+          >
+            <span class="drawer-icon">▦</span>
+            <span>Каталог</span>
+          </button>
+
+
+          <!-- ORDERS -->
+
+          <button
+            class="drawer-item"
+            data-route="orders"
+            type="button"
+          >
+            <span class="drawer-icon">▣</span>
+            <span>Мои заказы</span>
+          </button>
+
+
+          <!-- CART -->
+
+          <button
+            class="drawer-item"
+            data-route="cart"
+            type="button"
+          >
+            <span class="drawer-icon">🛒</span>
+            <span>Корзина</span>
+
+            <em id="drawerBadge">0</em>
+          </button>
+
+
+          <!-- DIVIDER -->
+
+          <div class="drawer-divider"></div>
+
+
+          <!-- CATEGORIES -->
+
+          <div class="drawer-label">
+            КАТЕГОРИИ
+          </div>
+
+          <div id="drawerCategories"></div>
+
+
+          <!-- DIVIDER -->
+
+          <div class="drawer-divider"></div>
+
+
+          <!-- MANAGER -->
+
+          <a
+            class="drawer-item"
+            id="managerLink"
+            href="https://t.me/iroom_24"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="drawer-icon">◉</span>
+            <span>Связаться с менеджером</span>
+          </a>
+
+
+          <!-- CHANNEL -->
+
+          <a
+            class="drawer-item"
+            id="channelLink"
+            href="https://t.me/iroom_market"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="drawer-icon">◎</span>
+            <span>Канал IRoom</span>
+          </a>
+
+
+          <!-- ADMIN -->
+
+          <button
+            class="drawer-item admin-drawer-item hidden"
+            id="adminLink"
+            type="button"
+          >
+            <span class="drawer-icon">⚙</span>
+            <span>Админ-панель</span>
+          </button>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+
+    <!-- =====================================================
+         TOAST
+    ====================================================== -->
+
+    <div
+      class="toast"
+      id="toast"
+    ></div>
+
+  </div>
+
+
+  <!-- =====================================================
+       APP
+  ====================================================== -->
+
+  <script src="/app.js?v=20260925-2"></script>
+
+</body>
+</html>
