@@ -2630,13 +2630,9 @@ async function reservationPaid(
 ) {
   try {
     const realOrderId =
-      resolveRealOrderId(
-        id
-      );
+      String(id || "").trim();
 
-    if (
-      !realOrderId
-    ) {
+    if (!realOrderId) {
       throw new Error(
         "Не удалось определить ID заказа"
       );
@@ -2661,18 +2657,12 @@ async function reservationPaid(
     );
 
     /*
-     * Сервер уже вернул
-     * полностью обновлённый заказ.
+     * Сервер уже возвращает
+     * обновлённый заказ.
      *
-     * НЕ делаем второй GET
-     * /api/orders/:id.
-     *
-     * Именно второй запрос
-     * раньше мог приводить
-     * к ошибке:
-     *
-     * Cannot read properties
-     * of null (reading 'id')
+     * Поэтому второй GET
+     * /api/orders/:id
+     * НЕ выполняем.
      */
     if (
       data?.order
@@ -2683,12 +2673,8 @@ async function reservationPaid(
       state.orders =
         state.orders.map(
           order =>
-            String(
-              order.id
-            ) ===
-            String(
-              data.order.id
-            )
+            String(order.id) ===
+            String(data.order.id)
               ? data.order
               : order
         );
@@ -2703,28 +2689,11 @@ async function reservationPaid(
 
     await loadOrders();
 
-    const updatedOrder =
-      state.orders.find(
-        order =>
-          String(
-            order.id
-          ) ===
-          String(
-            realOrderId
-          )
-      );
-
-    if (
-      updatedOrder
-    ) {
-      state.currentOrder =
-        updatedOrder;
-    }
-
     state.route =
-      "order";
+      "orders";
 
     render();
+
   } catch (
     error
   ) {
@@ -2735,11 +2704,10 @@ async function reservationPaid(
 
     toast(
       error.message ||
-        "Не удалось отправить заявку"
+      "Не удалось отправить заявку"
     );
   }
 }
-
 function resolveRealOrderId(
   id
 ) {
