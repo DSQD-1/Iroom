@@ -3829,3 +3829,327 @@ a {
     gap: 6px;
   }
 }
+/* =========================================================
+   IROOM ADMIN — DRAWER MENU
+   Sidebar скрыт всегда и открывается только через ☰
+========================================================= */
+
+/* Основной контент ВСЕГДА на всю ширину */
+.admin-main {
+  width: 100% !important;
+  margin-left: 0 !important;
+
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+/* Header тоже на всю ширину */
+.admin-header {
+  left: 0 !important;
+  right: 0 !important;
+
+  padding-left: 24px !important;
+}
+
+/* =========================================================
+   HAMBURGER
+========================================================= */
+
+.mobile-menu-button {
+  display: flex !important;
+
+  width: 42px;
+  height: 42px;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 13px;
+
+  background: rgba(255,255,255,.045);
+  color: #fff;
+
+  cursor: pointer;
+
+  transition:
+    transform .2s ease,
+    background .2s ease,
+    border-color .2s ease;
+}
+
+.mobile-menu-button:hover {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.14);
+}
+
+.mobile-menu-button:active {
+  transform: scale(.91);
+}
+
+/* =========================================================
+   SIDEBAR — HIDDEN BY DEFAULT
+========================================================= */
+
+.sidebar {
+  position: fixed !important;
+
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+
+  z-index: 1100 !important;
+
+  width: min(330px, 86vw) !important;
+
+  transform: translateX(-105%) !important;
+
+  transition:
+    transform .38s cubic-bezier(.22,1,.36,1) !important;
+
+  box-shadow:
+    25px 0 80px rgba(0,0,0,.55) !important;
+}
+
+/* =========================================================
+   SIDEBAR — OPEN
+========================================================= */
+
+.sidebar.open {
+  transform: translateX(0) !important;
+
+  box-shadow:
+    25px 0 90px rgba(0,0,0,.65) !important;
+}
+
+/* =========================================================
+   OVERLAY
+========================================================= */
+
+.sidebar-overlay {
+  position: fixed !important;
+
+  inset: 0 !important;
+
+  z-index: 1050 !important;
+
+  display: block !important;
+
+  background:
+    rgba(0,0,0,.68) !important;
+
+  backdrop-filter: blur(7px) !important;
+  -webkit-backdrop-filter: blur(7px) !important;
+
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+
+  transition:
+    opacity .3s ease,
+    visibility .3s ease !important;
+}
+
+.sidebar-overlay.open {
+  opacity: 1 !important;
+
+  visibility: visible !important;
+
+  pointer-events: auto !important;
+}
+
+/* =========================================================
+   SIDEBAR CONTENT
+========================================================= */
+
+.sidebar-inner {
+  height: 100% !important;
+
+  padding:
+    calc(18px + env(safe-area-inset-top))
+    13px
+    calc(18px + env(safe-area-inset-bottom)) !important;
+
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+}
+
+/* =========================================================
+   MOBILE / TELEGRAM
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .admin-header {
+    height: 64px !important;
+
+    padding:
+      0
+      13px
+      0
+      calc(13px + env(safe-area-inset-left)) !important;
+  }
+
+  .admin-main {
+    width: 100% !important;
+
+    margin-left: 0 !important;
+
+    padding:
+      calc(64px + 22px)
+      calc(13px + env(safe-area-inset-right))
+      calc(40px + env(safe-area-inset-bottom))
+      calc(13px + env(safe-area-inset-left)) !important;
+  }
+
+  .mobile-menu-button {
+    display: flex !important;
+  }
+
+  .admin-brand {
+    position: absolute !important;
+
+    left: 50% !important;
+
+    transform:
+      translateX(-50%) !important;
+
+    white-space: nowrap;
+  }
+
+}
+
+/* =========================================================
+   TABLET / DESKTOP
+   Drawer behaviour remains the same
+========================================================= */
+
+@media (min-width: 901px) {
+
+  .admin-header {
+    padding-left: 24px !important;
+  }
+
+  .admin-main {
+    margin-left: 0 !important;
+
+    width: 100% !important;
+  }
+
+  .mobile-menu-button {
+    display: flex !important;
+  }
+
+}
+
+/* =========================================================
+   PREVENT CONTENT FROM SHRINKING
+========================================================= */
+
+.admin-main,
+.admin-section {
+  min-width: 0;
+}
+
+.admin-section {
+  width: 100%;
+}
+
+/* =========================================================
+   CARDS — USE AVAILABLE WIDTH
+========================================================= */
+
+.products-grid-admin {
+  width: 100%;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(210px,1fr)
+    );
+}
+
+.category-admin-grid {
+  width: 100%;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(210px,1fr)
+    );
+}
+
+.promo-grid {
+  width: 100%;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(250px,1fr)
+    );
+}
+
+.banners-grid {
+  width: 100%;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(280px,1fr)
+    );
+}
+
+/* =========================================================
+   IPHONE
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .admin-header {
+    height: 60px !important;
+  }
+
+  .admin-main {
+    padding-top: 80px !important;
+  }
+
+  .admin-brand {
+    font-size: 18px !important;
+  }
+
+  .section-heading h1 {
+    font-size: 32px !important;
+
+    letter-spacing: -1.5px;
+  }
+
+  .products-grid-admin,
+  .category-admin-grid {
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+  }
+
+}
+
+/* =========================================================
+   VERY SMALL IPHONE
+========================================================= */
+
+@media (max-width: 390px) {
+
+  .products-grid-admin,
+  .category-admin-grid,
+  .promo-grid,
+  .banners-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-main {
+    padding-left: 11px !important;
+    padding-right: 11px !important;
+  }
+
+}
