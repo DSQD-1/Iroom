@@ -1,0 +1,7298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#050505">
+<title>IRoom — Admin</title>
+
+<style>
+:root{
+  --bg:#050505;
+  --panel:#101012;
+  --panel2:#151518;
+  --line:rgba(255,255,255,.08);
+  --text:#f7f7f8;
+  --muted:#8c8c95;
+  --pink:#ff2d8d;
+  --pink2:#ff4da5;
+  --green:#39d98a;
+  --red:#ff6868;
+  --ease:cubic-bezier(.22,.8,.25,1)
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent
+}
+
+html,body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif
+}
+
+button,input,textarea,select{
+  font:inherit
+}
+
+button{
+  border:0;
+  color:inherit;
+  cursor:pointer
+}
+
+body{
+  min-height:100vh
+}
+
+.app{
+  max-width:1180px;
+  margin:auto;
+  padding:
+    calc(16px + env(safe-area-inset-top))
+    16px
+    calc(30px + env(safe-area-inset-bottom))
+}
+
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px
+}
+
+.brand{
+  font-size:22px;
+  font-weight:850;
+  letter-spacing:-.7px
+}
+
+.brand span{
+  color:var(--pink)
+}
+
+.top-actions{
+  display:flex;
+  gap:8px
+}
+
+.btn{
+  min-height:42px;
+  padding:0 15px;
+  border-radius:14px;
+  background:#18181b;
+  color:#ddd;
+  border:1px solid var(--line);
+  font-weight:750
+}
+
+.btn.primary{
+  background:linear-gradient(135deg,#ff2d8d,#ff4da5);
+  color:#fff;
+  border:0
+}
+
+.btn.danger{
+  color:#ff8585
+}
+
+.btn:active{
+  transform:scale(.97)
+}
+
+.tabs{
+  display:flex;
+  gap:7px;
+  overflow:auto;
+  padding-bottom:5px;
+  margin-bottom:14px
+}
+
+.tab{
+  white-space:nowrap;
+  padding:10px 14px;
+  border-radius:13px;
+  background:#0e0e10;
+  color:#888;
+  border:1px solid var(--line);
+  font-size:12px;
+  font-weight:750
+}
+
+.tab.active{
+  background:rgba(255,45,141,.13);
+  border-color:rgba(255,45,141,.3);
+  color:#ff70ad
+}
+
+.panel{
+  background:linear-gradient(180deg,#111113,#0d0d0f);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:16px;
+  margin-bottom:14px;
+  box-shadow:0 18px 60px rgba(0,0,0,.2)
+}
+
+.panel h2{
+  margin:0 0 13px;
+  font-size:16px
+}
+
+.muted{
+  color:var(--muted);
+  font-size:12px
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px
+}
+
+.field.full{
+  grid-column:1/-1
+}
+
+.field label{
+  font-size:10px;
+  color:#777780;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.8px
+}
+
+.field input,
+.field textarea,
+.field select{
+  width:100%;
+  border:1px solid var(--line);
+  outline:0;
+  background:#09090b;
+  color:#fff;
+  border-radius:13px;
+  padding:12px;
+  font-size:13px
+}
+
+.field textarea{
+  min-height:90px;
+  resize:vertical
+}
+
+.check{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:#bbb
+}
+
+.check input{
+  accent-color:var(--pink)
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:12px
+}
+
+.media-pick{
+  position:relative;
+  border:1px dashed rgba(255,255,255,.14);
+  background:#09090b;
+  border-radius:17px;
+  padding:16px;
+  text-align:center;
+  color:#aaa
+}
+
+.media-pick input{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  opacity:0
+}
+
+.media-list{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:10px
+}
+
+.media-item{
+  position:relative;
+  aspect-ratio:1;
+  background:#08080a;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid var(--line)
+}
+
+.media-item img,
+.media-item video{
+  width:100%;
+  height:100%;
+  object-fit:contain
+}
+
+.media-item .x{
+  position:absolute;
+  right:5px;
+  top:5px;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:rgba(0,0,0,.75);
+  color:#fff
+}
+
+.cards{
+  display:grid;
+  gap:9px
+}
+
+.item{
+  padding:13px;
+  border:1px solid var(--line);
+  background:#0a0a0c;
+  border-radius:16px
+}
+
+.item-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px
+}
+
+.item-title{
+  font-weight:800
+}
+
+.pill{
+  font-size:10px;
+  border-radius:99px;
+  padding:5px 8px;
+  background:#19191c;
+  color:#aaa
+}
+
+.pill.pending{
+  color:#ffc06b
+}
+
+.pill.wait{
+  color:#ffad52
+}
+
+.pill.ok{
+  color:#56df9c
+}
+
+.pill.bad{
+  color:#ff7777
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:6px 0;
+  color:#aaa;
+  font-size:12px
+}
+
+.row strong{
+  color:#eee;
+  text-align:right
+}
+
+.empty{
+  padding:28px;
+  text-align:center;
+  color:#777
+}
+
+.login{
+  min-height:80vh;
+  display:flex;
+  align-items:center;
+  justify-content:center
+}
+
+.login .panel{
+  width:min(440px,100%);
+  text-align:center
+}
+
+.hidden{
+  display:none!important
+}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:calc(18px + env(safe-area-inset-bottom));
+  transform:translate(-50%,20px);
+  opacity:0;
+  pointer-events:none;
+  background:#19191d;
+  border:1px solid var(--line);
+  padding:12px 16px;
+  border-radius:14px;
+  font-size:12px;
+  z-index:99;
+  transition:.3s var(--ease)
+}
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0)
+}
+
+.order-media{
+  width:56px;
+  height:56px;
+  object-fit:contain;
+  background:transparent;
+  border-radius:10px
+}
+
+.order{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:12px
+}
+
+.order-main{
+  min-width:0
+}
+
+@media(max-width:650px){
+
+  .grid{
+    grid-template-columns:1fr
+  }
+
+  .field.full{
+    grid-column:auto
+  }
+
+  .app{
+    padding-left:12px;
+    padding-right:12px
+  }
+
+  .top{
+    align-items:flex-start
+  }
+
+  .brand{
+    font-size:19px
+  }
+
+  .top-actions .btn{
+    padding:0 11px
+  }
+
+  .media-list{
+    grid-template-columns:repeat(3,1fr)
+  }
+}
+
+.option-groups{
+  display:grid;
+  gap:12px;
+  margin-top:2px
+}
+
+.option-group{
+  padding:13px;
+  border:1px solid var(--line);
+  background:#09090b;
+  border-radius:16px
+}
+
+.option-group-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:9px
+}
+
+.option-group-title{
+  font-size:12px;
+  font-weight:800
+}
+
+.option-group-sub{
+  font-size:10px;
+  color:#666
+}
+
+.option-add{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 105px 42px;
+  gap:7px
+}
+
+.option-add input{
+  width:100%;
+  border:1px solid var(--line);
+  outline:0;
+  background:#101012;
+  color:#fff;
+  border-radius:11px;
+  padding:10px;
+  font-size:13px
+}
+
+.option-add input[type=number]{
+  text-align:right
+}
+
+.option-add button{
+  border:0;
+  border-radius:11px;
+  background:var(--pink);
+  color:#fff;
+  font-weight:800
+}
+
+.option-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-bottom:9px
+}
+
+.option-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:32px;
+  padding:0 8px 0 11px;
+  border:1px solid rgba(255,45,141,.24);
+  border-radius:10px;
+  background:rgba(255,45,141,.08);
+  color:#eee;
+  font-size:11px
+}
+
+.option-chip small{
+  color:#ff77b1
+}
+
+.option-chip button{
+  width:20px;
+  height:20px;
+  border-radius:7px;
+  background:rgba(255,255,255,.07);
+  color:#aaa;
+  padding:0
+}
+
+@media(max-width:650px){
+
+  .option-add{
+    grid-template-columns:minmax(0,1fr) 85px 42px
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<div
+  id="login"
+  class="login hidden">
+
+  <div class="panel">
+
+    <div class="brand">
+
+      IR<span style="color:#ff2d8d">
+        oom
+      </span>
+
+      <small style="color:#777">
+        ADMIN
+      </small>
+
+    </div>
+
+    <p class="muted">
+      Откройте админ-панель из Telegram.
+    </p>
+
+  </div>
+
+</div>
+
+
+<div
+  id="app"
+  class="app hidden">
+
+  <header class="top">
+
+    <div class="brand">
+
+      IR<span>oom</span>
+
+      <small
+        style="
+          color:#666;
+          font-size:10px
+        ">
+
+        ADMIN
+
+      </small>
+
+    </div>
+
+    <div class="top-actions">
+
+      <button
+        class="btn"
+        id="closeBtn">
+
+        Закрыть
+
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <nav
+    class="tabs"
+    id="tabs">
+
+    <button
+      class="tab active"
+      data-tab="orders">
+
+      Заказы
+
+    </button>
+
+    <button
+      class="tab"
+      data-tab="products">
+
+      Товары
+
+    </button>
+
+    <button
+      class="tab"
+      data-tab="deposit">
+
+      Залог
+
+    </button>
+
+    <button
+      class="tab"
+      data-tab="settings">
+
+      Настройки
+
+    </button>
+
+  </nav>
+
+
+  <main id="content"></main>
+
+</div>
+
+
+<div
+  id="toast"
+  class="toast">
+</div>
+
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<script>
+
+(() => {
+
+  const tg =
+    window.Telegram?.WebApp || null;
+
+  tg?.ready();
+  tg?.expand();
+
+
+  const ADMIN_IDS =
+    new Set([
+      "5082864281",
+      "5975037118"
+    ]);
+
+
+  const state = {
+
+    tab:"orders",
+
+    orders:[],
+
+    products:[],
+
+    categories:[],
+
+    cards:[],
+
+    settings:{},
+
+    media:[]
+
+  };
+
+
+  const $ =
+    s =>
+      document.querySelector(s);
+
+
+  const esc =
+    v =>
+      String(v ?? "")
+        .replace(
+          /[&<>"']/g,
+          c =>
+            ({
+              "&":"&amp;",
+              "<":"&lt;",
+              ">":"&gt;",
+              "\"":"&quot;",
+              "'":"&#039;"
+            }[c])
+        );
+
+
+  const init =
+    () =>
+      String(
+        tg?.initData || ""
+      );
+
+
+  const headers =
+    () => ({
+      "Content-Type":
+        "application/json",
+
+      "x-telegram-init-data":
+        init()
+    });
+
+
+  function toast(text){
+
+    const e =
+      $("#toast");
+
+    e.textContent =
+      text;
+
+    e.classList.add(
+      "show"
+    );
+
+    clearTimeout(
+      window.__toast
+    );
+
+    window.__toast =
+      setTimeout(
+        () =>
+          e.classList.remove(
+            "show"
+          ),
+        2600
+      );
+
+  }
+
+
+  async function api(
+    url,
+    opt={}
+  ){
+
+    const r =
+      await fetch(
+        url,
+        {
+          ...opt,
+
+          headers:{
+            ...headers(),
+
+            ...(opt.headers || {})
+          }
+        }
+      );
+
+
+    let d={};
+
+    try{
+
+      d =
+        await r.json();
+
+    }catch{}
+
+
+    if(!r.ok){
+
+      throw new Error(
+        d.error ||
+        "Ошибка запроса"
+      );
+
+    }
+
+
+    return d;
+
+  }
+
+
+  function closeAdmin(){
+
+    try{
+
+      tg?.HapticFeedback
+        ?.impactOccurred(
+          "light"
+        );
+
+    }catch{}
+
+
+    window.location.href = "/";
+
+  }
+
+
+  $("#closeBtn").onclick =
+    closeAdmin;
+
+
+  async function uploadFiles(
+    files
+  ){
+
+    for(
+      const file of files
+    ){
+
+      const fd =
+        new FormData();
+
+      fd.append(
+        "file",
+        file
+      );
+
+
+      const r =
+        await fetch(
+          "/api/admin/upload",
+          {
+            method:"POST",
+
+            headers:{
+              "x-telegram-init-data":
+                init()
+            },
+
+            body:fd
+          }
+        );
+
+
+      let d={};
+
+      try{
+
+        d =
+          await r.json();
+
+      }catch{}
+
+
+      if(!r.ok){
+
+        throw new Error(
+          d.error ||
+          "Не удалось загрузить файл"
+        );
+
+      }
+
+
+      state.media.push({
+
+        url:d.url,
+
+        type:
+          file.type.startsWith(
+            "video/"
+          )
+          ? "video"
+          : "image"
+
+      });
+
+    }
+
+
+    renderProductMedia();
+
+  }
+
+
+  function renderProductMedia(){
+
+    const box =
+      $("#mediaList");
+
+    if(!box) return;
+
+
+    box.innerHTML =
+      state.media
+        .map(
+          (m,i) =>
+            `
+            <div
+              class="media-item">
+
+              ${
+                m.type === "video"
+                ?
+                `
+                <video
+                  src="${esc(m.url)}"
+                  controls>
+                </video>
+                `
+                :
+                `
+                <img
+                  src="${esc(m.url)}"
+                  alt="">
+                `
+              }
+
+              <button
+                type="button"
+                class="x"
+                data-remove-media="${i}">
+
+                ×
+
+              </button>
+
+            </div>
+            `
+        )
+        .join("");
+
+
+    box
+      .querySelectorAll(
+        "[data-remove-media]"
+      )
+      .forEach(
+        btn => {
+
+          btn.onclick =
+            () => {
+
+              state.media.splice(
+                Number(
+                  btn.dataset.removeMedia
+                ),
+                1
+              );
+
+              renderProductMedia();
+
+            };
+
+        }
+      );
+
+  }
+
+
+  function statusText(
+    status
+  ){
+
+    const found = {
+
+      new:
+        "Новый",
+
+      confirmed:
+        "Подтверждён",
+
+      processing:
+        "В обработке",
+
+      ready:
+        "Готов",
+
+      completed:
+        "Завершён",
+
+      cancelled:
+        "Отменён",
+
+      rejected:
+        "Отклонён"
+
+    }[status];
+
+
+    return found ||
+      status ||
+      "—";
+
+  }
+
+
+  function reservationText(
+    status
+  ){
+
+    const found = {
+
+      not_required:
+        "Не требуется",
+
+      pending_payment:
+        "Ожидается оплата",
+
+      pending:
+        "Ожидается",
+
+      awaiting_confirmation:
+        "Проверка залога",
+
+      confirmed:
+        "Залог подтверждён",
+
+      rejected:
+        "Залог отклонён"
+
+    }[status];
+
+
+    return found ||
+      status ||
+      "—";
+
+  }
+
+
+  function formatPrice(
+    value
+  ){
+
+    return Number(
+      value || 0
+    ).toLocaleString(
+      "ru-RU"
+    ) + " ₽";
+
+  }
+
+
+  async function loadOrders(){
+
+    const data =
+      await api(
+        "/api/admin/orders"
+      );
+
+
+    state.orders =
+      Array.isArray(
+        data.orders
+      )
+      ?
+      data.orders
+      :
+      [];
+
+  }
+
+
+  async function loadProducts(){
+
+    const data =
+      await api(
+        "/api/admin/products"
+      );
+
+
+    state.products =
+      Array.isArray(
+        data.products
+      )
+      ?
+      data.products
+      :
+      [];
+
+  }
+
+
+  async function loadCategories(){
+
+    const data =
+      await api(
+        "/api/admin/categories"
+      );
+
+
+    state.categories =
+      Array.isArray(
+        data.categories
+      )
+      ?
+      data.categories
+      :
+      [];
+
+  }
+
+
+  async function loadBanners(){
+
+    const data =
+      await api(
+        "/api/admin/banners"
+      );
+
+
+    state.banners =
+      Array.isArray(
+        data.banners
+      )
+      ?
+      data.banners
+      :
+      [];
+
+  }
+
+
+  async function renderOrders(){
+
+    await loadOrders();
+
+
+    $("#content").innerHTML = `
+
+      <section class="panel">
+
+        <div class="item-head">
+
+          <div>
+
+            <h2>
+              Заказы
+            </h2>
+
+            <div class="muted">
+
+              Всего:
+              ${state.orders.length}
+
+            </div>
+
+          </div>
+
+
+          <button
+            class="btn danger"
+            id="clearOrdersBtn">
+
+            Очистить все заказы
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="panel">
+
+        <div
+          id="ordersList"
+          class="cards">
+
+        </div>
+
+      </section>
+
+    `;
+
+
+    $("#clearOrdersBtn").onclick =
+      clearAllOrders;
+
+
+    renderOrderList();
+
+  }
+
+
+  function renderOrderList(){
+
+    const box =
+      $("#ordersList");
+
+    if(!box) return;
+
+
+    if(
+      !state.orders.length
+    ){
+
+      box.innerHTML = `
+
+        <div class="empty">
+
+          Заказов пока нет.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    box.innerHTML =
+      state.orders
+        .map(
+          order =>
+            `
+
+            <article
+              class="item">
+
+              <div
+                class="item-head">
+
+                <div>
+
+                  <div
+                    class="item-title">
+
+                    ${esc(
+                      order.order_number ||
+                      order.public_number ||
+                      `#${order.id}`
+                    )}
+
+                  </div>
+
+                  <div
+                    class="muted">
+
+                    ${esc(
+                      order.product_name ||
+                      order.title ||
+                      "Товар"
+                    )}
+
+                  </div>
+
+                </div>
+
+
+                <span
+                  class="pill">
+
+                  ${esc(
+                    statusText(
+                      order.status
+                    )
+                  )}
+
+                </span>
+
+              </div>
+
+
+              <div class="row">
+
+                <span>
+                  Клиент
+                </span>
+
+                <strong>
+
+                  ${esc(
+                    order.customer_name ||
+                    order.name ||
+                    "—"
+                  )}
+
+                </strong>
+
+              </div>
+
+
+              <div class="row">
+
+                <span>
+                  Телефон / @username
+                </span>
+
+                <strong>
+
+                  ${esc(
+                    order.contact ||
+                    order.phone ||
+                    order.username ||
+                    "—"
+                  )}
+
+                </strong>
+
+              </div>
+
+
+              <div class="row">
+
+                <span>
+                  Сумма
+                </span>
+
+                <strong>
+
+                  ${formatPrice(
+                    order.total_price ||
+                    order.price
+                  )}
+
+                </strong>
+
+              </div>
+
+
+              <div class="row">
+
+                <span>
+                  Залог
+                </span>
+
+                <strong>
+
+                  ${esc(
+                    reservationText(
+                      order.reservation_status
+                    )
+                  )}
+
+                </strong>
+
+              </div>
+
+
+              <div class="actions">
+
+                <select
+                  class="btn"
+                  data-status-id="${order.id}">
+
+                  <option
+                    value="new"
+                    ${
+                      order.status === "new"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Новый
+
+                  </option>
+
+                  <option
+                    value="confirmed"
+                    ${
+                      order.status === "confirmed"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Подтверждён
+
+                  </option>
+
+                  <option
+                    value="processing"
+                    ${
+                      order.status === "processing"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    В обработке
+
+                  </option>
+
+                  <option
+                    value="ready"
+                    ${
+                      order.status === "ready"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Готов
+
+                  </option>
+
+                  <option
+                    value="completed"
+                    ${
+                      order.status === "completed"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Завершён
+
+                  </option>
+
+                  <option
+                    value="cancelled"
+                    ${
+                      order.status === "cancelled"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Отменён
+
+                  </option>
+
+                  <option
+                    value="rejected"
+                    ${
+                      order.status === "rejected"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Отклонён
+
+                  </option>
+
+                </select>
+
+
+                <button
+                  class="btn"
+                  data-save-status="${order.id}">
+
+                  Сохранить статус
+
+                </button>
+
+
+                <select
+                  class="btn"
+                  data-reservation-id="${order.id}">
+
+                  <option
+                    value="not_required"
+                    ${
+                      order.reservation_status === "not_required"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Не требуется
+
+                  </option>
+
+                  <option
+                    value="pending_payment"
+                    ${
+                      order.reservation_status === "pending_payment"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Ожидается оплата
+
+                  </option>
+
+                  <option
+                    value="pending"
+                    ${
+                      order.reservation_status === "pending"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Ожидается
+
+                  </option>
+
+                  <option
+                    value="awaiting_confirmation"
+                    ${
+                      order.reservation_status === "awaiting_confirmation"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Проверка залога
+
+                  </option>
+
+                  <option
+                    value="confirmed"
+                    ${
+                      order.reservation_status === "confirmed"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Залог подтверждён
+
+                  </option>
+
+                  <option
+                    value="rejected"
+                    ${
+                      order.reservation_status === "rejected"
+                      ? "selected"
+                      : ""
+                    }>
+
+                    Залог отклонён
+
+                  </option>
+
+                </select>
+
+
+                <button
+                  class="btn"
+                  data-save-reservation="${order.id}">
+
+                  Сохранить залог
+
+                </button>
+
+              </div>
+
+            </article>
+
+            `
+        )
+        .join("");
+
+
+    box
+      .querySelectorAll(
+        "[data-save-status]"
+      )
+      .forEach(
+        btn => {
+
+          btn.onclick =
+            () =>
+              updateOrderStatus(
+                btn.dataset.saveStatus
+              );
+
+        }
+      );
+
+
+    box
+      .querySelectorAll(
+        "[data-save-reservation]"
+      )
+      .forEach(
+        btn => {
+
+          btn.onclick =
+            () =>
+              updateReservation(
+                btn.dataset.saveReservation
+              );
+
+        }
+      );
+
+  }
+
+
+  async function updateOrderStatus(
+    id
+  ){
+
+    const select =
+      document.querySelector(
+        `[data-status-id="${CSS.escape(String(id))}"]`
+      );
+
+
+    if(!select){
+
+      return;
+
+    }
+
+
+    try{
+
+      await api(
+        `/api/admin/orders/${encodeURIComponent(id)}/status`,
+        {
+          method:"PUT",
+
+          body:
+            JSON.stringify({
+              status:
+                select.value
+            })
+        }
+      );
+
+
+      toast(
+        "Статус заказа сохранён"
+      );
+
+
+      await renderOrders();
+
+    }catch(error){
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+
+  async function updateReservation(
+    id
+  ){
+
+    const select =
+      document.querySelector(
+        `[data-reservation-id="${CSS.escape(String(id))}"]`
+      );
+
+
+    if(!select){
+
+      return;
+
+    }
+
+
+    try{
+
+      await api(
+        `/api/admin/orders/${encodeURIComponent(id)}/reservation`,
+        {
+          method:"PUT",
+
+          body:
+            JSON.stringify({
+              reservation_status:
+                select.value
+            })
+        }
+      );
+
+
+      toast(
+        "Статус залога сохранён"
+      );
+
+
+      await renderOrders();
+
+    }catch(error){
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+
+  async function clearAllOrders(){
+
+    if(
+      !confirm(
+        "Удалить все заказы?\n\n" +
+        "Это действие нельзя отменить."
+      )
+    ){
+
+      return;
+
+    }
+
+
+    if(
+      !confirm(
+        "Точно удалить ВСЕ заказы?"
+      )
+    ){
+
+      return;
+
+    }
+
+
+    try{
+
+      await api(
+        "/api/admin/orders",
+        {
+          method:"DELETE"
+        }
+      );
+
+
+      toast(
+        "Все заказы удалены"
+      );
+
+
+      await renderOrders();
+
+    }catch(error){
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+</script>
+</body>
+</html>
+<script>
+
+  async function renderProducts(){
+
+    await loadProducts();
+    await loadCategories();
+
+    $("#content").innerHTML = `
+
+      <section class="panel">
+
+        <div class="item-head">
+
+          <div>
+
+            <h2>
+              Товары
+            </h2>
+
+            <div class="muted">
+              Управление каталогом
+            </div>
+
+          </div>
+
+
+          <button
+            class="btn primary"
+            id="addProductBtn">
+
+            Добавить товар
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="panel">
+
+        <div
+          class="toolbar"
+          style="
+            display:flex;
+            gap:8px;
+            margin-bottom:12px;
+          ">
+
+          <input
+            id="productSearch"
+            class="field-input"
+            placeholder="Поиск товара..."
+            style="
+              flex:1;
+              background:#09090b;
+              border:1px solid var(--line);
+              color:#fff;
+              border-radius:13px;
+              padding:12px;
+              outline:none;
+            ">
+
+
+          <select
+            id="productCategoryFilter"
+            class="btn">
+
+            <option value="">
+              Все категории
+            </option>
+
+            ${
+              state.categories
+                .map(
+                  c =>
+                    `
+                    <option
+                      value="${c.id}">
+
+                      ${esc(c.name)}
+
+                    </option>
+                    `
+                )
+                .join("")
+            }
+
+          </select>
+
+        </div>
+
+
+        <div
+          id="productsList"
+          class="cards">
+
+        </div>
+
+      </section>
+
+    `;
+
+
+    $("#addProductBtn").onclick =
+      () =>
+        openProductModal();
+
+
+    $("#productSearch").oninput =
+      renderProductList;
+
+
+    $("#productCategoryFilter").onchange =
+      renderProductList;
+
+
+    renderProductList();
+
+  }
+
+
+  function renderProductList(){
+
+    const box =
+      $("#productsList");
+
+
+    if(!box){
+
+      return;
+
+    }
+
+
+    const query =
+      String(
+        $("#productSearch")
+          ?.value ||
+        ""
+      )
+      .trim()
+      .toLowerCase();
+
+
+    const category =
+      String(
+        $("#productCategoryFilter")
+          ?.value ||
+        ""
+      );
+
+
+    const list =
+      state.products.filter(
+        product => {
+
+          const name =
+            String(
+              product.name ||
+              product.title ||
+              ""
+            )
+            .toLowerCase();
+
+
+          const matchesQuery =
+            !query ||
+            name.includes(
+              query
+            );
+
+
+          const matchesCategory =
+            !category ||
+            String(
+              product.category_id ||
+              ""
+            ) ===
+            category;
+
+
+          return (
+            matchesQuery &&
+            matchesCategory
+          );
+
+        }
+      );
+
+
+    if(!list.length){
+
+      box.innerHTML = `
+
+        <div class="empty">
+
+          Товары не найдены.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    box.innerHTML =
+      list
+        .map(
+          product => {
+
+            const image =
+              product.image_url ||
+              product.image ||
+              "";
+
+
+            return `
+
+              <article
+                class="item">
+
+                <div
+                  class="item-head">
+
+                  <div
+                    style="
+                      display:flex;
+                      gap:10px;
+                      align-items:center;
+                    ">
+
+                    ${
+                      image
+                      ?
+                      `
+                      <img
+                        src="${esc(image)}"
+                        style="
+                          width:58px;
+                          height:58px;
+                          border-radius:13px;
+                          object-fit:contain;
+                          background:#070709;
+                        ">
+                      `
+                      :
+                      ""
+                    }
+
+
+                    <div>
+
+                      <div
+                        class="item-title">
+
+                        ${esc(
+                          product.name ||
+                          product.title ||
+                          "Без названия"
+                        )}
+
+                      </div>
+
+
+                      <div
+                        class="muted">
+
+                        ${esc(
+                          product.category_name ||
+                          "Без категории"
+                        )}
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+
+                  <span
+                    class="pill">
+
+                    ${formatPrice(
+                      product.price
+                    )}
+
+                  </span>
+
+                </div>
+
+
+                <div class="row">
+
+                  <span>
+                    Артикул
+                  </span>
+
+                  <strong>
+
+                    ${esc(
+                      product.sku ||
+                      "—"
+                    )}
+
+                  </strong>
+
+                </div>
+
+
+                <div class="row">
+
+                  <span>
+                    ID
+                  </span>
+
+                  <strong>
+
+                    ${esc(
+                      product.id
+                    )}
+
+                  </strong>
+
+                </div>
+
+
+                <div class="actions">
+
+                  <button
+                    class="btn"
+                    data-edit-product="${product.id}">
+
+                    Изменить
+
+                  </button>
+
+
+                  <button
+                    class="btn danger"
+                    data-delete-product="${product.id}">
+
+                    Удалить
+
+                  </button>
+
+                </div>
+
+              </article>
+
+            `;
+
+          }
+        )
+        .join("");
+
+
+    box
+      .querySelectorAll(
+        "[data-edit-product]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () => {
+
+              const product =
+                state.products.find(
+                  item =>
+                    String(
+                      item.id
+                    ) ===
+                    String(
+                      button.dataset.editProduct
+                    )
+                );
+
+
+              if(product){
+
+                openProductModal(
+                  product
+                );
+
+              }
+
+            };
+
+        }
+      );
+
+
+    box
+      .querySelectorAll(
+        "[data-delete-product]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () =>
+              deleteProduct(
+                button.dataset.deleteProduct
+              );
+
+        }
+      );
+
+  }
+
+
+  async function deleteProduct(
+    id
+  ){
+
+    if(
+      !confirm(
+        "Удалить этот товар?"
+      )
+    ){
+
+      return;
+
+    }
+
+
+    try{
+
+      await api(
+        `/api/admin/products/${encodeURIComponent(id)}`,
+        {
+          method:"DELETE"
+        }
+      );
+
+
+      toast(
+        "Товар удалён"
+      );
+
+
+      await renderProducts();
+
+    }catch(error){
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+
+  function openProductModal(
+    product=null
+  ){
+
+    const old =
+      document.getElementById(
+        "productModal"
+      );
+
+
+    if(old){
+
+      old.remove();
+
+    }
+
+
+    const modal =
+      document.createElement(
+        "div"
+      );
+
+
+    modal.id =
+      "productModal";
+
+
+    modal.className =
+      "modal";
+
+
+    modal.innerHTML = `
+
+      <div
+        class="modal-overlay"
+        data-close-product-modal>
+      </div>
+
+
+      <div
+        class="modal-dialog"
+        style="
+          max-height:92vh;
+          overflow:auto;
+        ">
+
+        <div
+          class="modal-header">
+
+          <div
+            class="modal-title">
+
+            ${
+              product
+              ?
+              "Изменить товар"
+              :
+              "Добавить товар"
+            }
+
+          </div>
+
+
+          <button
+            class="modal-close"
+            data-close-product-modal>
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="grid">
+
+            <div class="field">
+
+              <label>
+                Название
+              </label>
+
+              <input
+                id="pmName"
+                value="${esc(
+                  product?.name ||
+                  product?.title ||
+                  ""
+                )}">
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Категория
+              </label>
+
+              <select
+                id="pmCategory">
+
+                <option value="">
+                  Без категории
+                </option>
+
+                ${
+                  state.categories
+                    .map(
+                      category =>
+                        `
+                        <option
+                          value="${category.id}"
+                          ${
+                            String(
+                              product?.category_id ||
+                              ""
+                            ) ===
+                            String(
+                              category.id
+                            )
+                            ?
+                            "selected"
+                            :
+                            ""
+                          }>
+
+                          ${esc(
+                            category.name
+                          )}
+
+                        </option>
+                        `
+                    )
+                    .join("")
+                }
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Цена
+              </label>
+
+              <input
+                id="pmPrice"
+                type="number"
+                min="0"
+                value="${
+                  Number(
+                    product?.price ||
+                    0
+                  )
+                }">
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Старая цена
+              </label>
+
+              <input
+                id="pmOldPrice"
+                type="number"
+                min="0"
+                value="${
+                  Number(
+                    product?.old_price ||
+                    0
+                  )
+                }">
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Описание
+              </label>
+
+              <textarea
+                id="pmDescription">${esc(
+                  product?.description ||
+                  ""
+                )}</textarea>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Артикул
+              </label>
+
+              <input
+                id="pmSku"
+                value="${esc(
+                  product?.sku ||
+                  ""
+                )}">
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Сортировка
+              </label>
+
+              <input
+                id="pmSort"
+                type="number"
+                min="0"
+                value="${
+                  Number(
+                    product?.sort_order ||
+                    0
+                  )
+                }">
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Основное изображение
+              </label>
+
+              <input
+                id="pmImage"
+                value="${esc(
+                  product?.image_url ||
+                  product?.image ||
+                  ""
+                )}">
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="
+              margin-top:14px;
+            ">
+
+            <div
+              style="
+                font-size:12px;
+                font-weight:800;
+                margin-bottom:8px;
+              ">
+
+              Фото и видео
+
+            </div>
+
+
+            <label
+              class="media-pick">
+
+              <input
+                id="pmMedia"
+                type="file"
+                accept="image/*,video/*"
+                multiple>
+
+              Нажмите, чтобы выбрать
+              фото или видео из галереи
+
+            </label>
+
+
+            <div
+              id="mediaList"
+              class="media-list">
+            </div>
+
+          </div>
+
+
+          <div
+            class="option-groups"
+            style="
+              margin-top:15px;
+            ">
+
+
+            <div
+              class="option-group">
+
+              <div
+                class="option-group-head">
+
+                <div>
+
+                  <div
+                    class="option-group-title">
+
+                    Память
+
+                  </div>
+
+                  <div
+                    class="option-group-sub">
+
+                    Например 256GB / 512GB / 1TB
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div
+                id="memoryOptions"
+                class="option-chips">
+              </div>
+
+
+              <div
+                class="option-add">
+
+                <input
+                  id="newMemory"
+                  placeholder="256GB">
+
+
+                <input
+                  id="newMemoryPrice"
+                  type="number"
+                  placeholder="+ ₽">
+
+
+                <button
+                  type="button"
+                  id="addMemory">
+
+                  +
+
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="option-group">
+
+              <div
+                class="option-group-head">
+
+                <div>
+
+                  <div
+                    class="option-group-title">
+
+                    Цвет
+
+                  </div>
+
+                  <div
+                    class="option-group-sub">
+
+                    Например Orange / Black
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div
+                id="colorOptions"
+                class="option-chips">
+              </div>
+
+
+              <div
+                class="option-add">
+
+                <input
+                  id="newColor"
+                  placeholder="Orange">
+
+
+                <input
+                  id="newColorPrice"
+                  type="number"
+                  placeholder="+ ₽">
+
+
+                <button
+                  type="button"
+                  id="addColor">
+
+                  +
+
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="option-group">
+
+              <div
+                class="option-group-head">
+
+                <div>
+
+                  <div
+                    class="option-group-title">
+
+                    SIM
+
+                  </div>
+
+                  <div
+                    class="option-group-sub">
+
+                    eSIM + eSIM / SIM + eSIM / SIM + SIM
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div
+                id="simOptions"
+                class="option-chips">
+              </div>
+
+
+              <div
+                class="option-add">
+
+                <input
+                  id="newSim"
+                  placeholder="eSIM + eSIM">
+
+
+                <input
+                  id="newSimPrice"
+                  type="number"
+                  placeholder="+ ₽">
+
+
+                <button
+                  type="button"
+                  id="addSim">
+
+                  +
+
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="option-group">
+
+              <div
+                class="option-group-head">
+
+                <div>
+
+                  <div
+                    class="option-group-title">
+
+                    Регион
+
+                  </div>
+
+                  <div
+                    class="option-group-sub">
+
+                    США / Индия / Гонконг / Китай / Япония
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div
+                id="regionOptions"
+                class="option-chips">
+              </div>
+
+
+              <div
+                class="option-add">
+
+                <input
+                  id="newRegion"
+                  placeholder="США">
+
+
+                <input
+                  id="newRegionPrice"
+                  type="number"
+                  placeholder="+ ₽">
+
+
+                <button
+                  type="button"
+                  id="addRegion">
+
+                  +
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="
+              margin-top:14px;
+            ">
+
+            <div
+              style="
+                font-size:12px;
+                font-weight:800;
+                margin-bottom:8px;
+              ">
+
+              Матрица цен
+
+            </div>
+
+
+            <div
+              id="priceMatrix"
+              class="cards">
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="modal-footer">
+
+          <button
+            class="btn"
+            data-close-product-modal>
+
+            Отмена
+
+          </button>
+
+
+          <button
+            class="btn primary"
+            id="saveProduct">
+
+            Сохранить товар
+
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.body.appendChild(
+      modal
+    );
+
+
+    state.media =
+      [];
+
+
+    const existingMedia =
+      Array.isArray(
+        product?.media
+      )
+      ?
+      product.media
+      :
+      [];
+
+
+    existingMedia.forEach(
+      item => {
+
+        if(
+          typeof item ===
+          "string"
+        ){
+
+          state.media.push({
+            url:item,
+            type:"image"
+          });
+
+        }else if(
+          item &&
+          item.url
+        ){
+
+          state.media.push({
+            url:item.url,
+            type:
+              item.type ||
+              "image"
+          });
+
+        }
+
+      }
+    );
+
+
+    renderProductMedia();
+
+
+    document
+      .querySelectorAll(
+        "[data-close-product-modal]"
+      )
+      .forEach(
+        element => {
+
+          element.onclick =
+            () =>
+              modal.remove();
+
+        }
+      );
+
+
+    $("#pmMedia").onchange =
+      async event => {
+
+        const files =
+          Array.from(
+            event.target.files ||
+            []
+          );
+
+
+        if(!files.length){
+
+          return;
+
+        }
+
+
+        try{
+
+          await uploadFiles(
+            files
+          );
+
+          toast(
+            "Файлы загружены"
+          );
+
+        }catch(error){
+
+          toast(
+            error.message
+          );
+
+        }
+
+
+        event.target.value =
+          "";
+
+      };
+
+
+    const optionState = {
+
+      memory:
+        Array.isArray(
+          product?.memories
+        )
+        ?
+        product.memories
+        :
+        [],
+
+      color:
+        Array.isArray(
+          product?.colors
+        )
+        ?
+        product.colors
+        :
+        [],
+
+      sim:
+        Array.isArray(
+          product?.sim_types
+        )
+        ?
+        product.sim_types
+        :
+        [],
+
+      region:
+        Array.isArray(
+          product?.regions
+        )
+        ?
+        product.regions
+        :
+        []
+
+    };
+
+
+    function renderOptions(){
+
+      const configs = [
+
+        [
+          "memory",
+          "#memoryOptions"
+        ],
+
+        [
+          "color",
+          "#colorOptions"
+        ],
+
+        [
+          "sim",
+          "#simOptions"
+        ],
+
+        [
+          "region",
+          "#regionOptions"
+        ]
+
+      ];
+
+
+      configs.forEach(
+        ([type,selector]) => {
+
+          const box =
+            $(selector);
+
+          if(!box){
+
+            return;
+
+          }
+
+
+          box.innerHTML =
+            optionState[type]
+              .map(
+                (item,index) => {
+
+                  const value =
+                    typeof item ===
+                    "string"
+                    ?
+                    item
+                    :
+                    item.name ||
+                    item.value ||
+                    "";
+
+
+                  const price =
+                    typeof item ===
+                    "object"
+                    ?
+                    Number(
+                      item.price ||
+                      item.price_delta ||
+                      0
+                    )
+                    :
+                    0;
+
+
+                  return `
+
+                    <span
+                      class="option-chip">
+
+                      ${esc(value)}
+
+                      ${
+                        price
+                        ?
+                        `
+                        <small>
+                          ${
+                            price > 0
+                            ? "+"
+                            : ""
+                          }${formatPrice(
+                            price
+                          )}
+                        </small>
+                        `
+                        :
+                        ""
+                      }
+
+
+                      <button
+                        type="button"
+                        data-remove-option="${type}:${index}">
+
+                        ×
+
+                      </button>
+
+                    </span>
+
+                  `;
+
+                }
+              )
+              .join("");
+
+
+          box
+            .querySelectorAll(
+              "[data-remove-option]"
+            )
+            .forEach(
+              button => {
+
+                button.onclick =
+                  () => {
+
+                    const [
+                      type,
+                      index
+                    ] =
+                      button
+                        .dataset
+                        .removeOption
+                        .split(":");
+
+
+                    optionState[type]
+                      .splice(
+                        Number(index),
+                        1
+                      );
+
+
+                    renderOptions();
+                    renderMatrix();
+
+                  };
+
+              }
+            );
+
+        }
+      );
+
+    }
+
+
+    function addOption(
+      type,
+      value,
+      price
+    ){
+
+      const clean =
+        String(
+          value ||
+          ""
+        ).trim();
+
+
+      if(!clean){
+
+        return;
+
+      }
+
+
+      optionState[type]
+        .push({
+          name:clean,
+          price:
+            Number(
+              price ||
+              0
+            )
+        });
+
+
+      renderOptions();
+      renderMatrix();
+
+    }
+
+
+    $("#addMemory").onclick =
+      () => {
+
+        addOption(
+          "memory",
+          $("#newMemory").value,
+          $("#newMemoryPrice").value
+        );
+
+
+        $("#newMemory").value="";
+        $("#newMemoryPrice").value="";
+
+      };
+
+
+    $("#addColor").onclick =
+      () => {
+
+        addOption(
+          "color",
+          $("#newColor").value,
+          $("#newColorPrice").value
+        );
+
+
+        $("#newColor").value="";
+        $("#newColorPrice").value="";
+
+      };
+
+
+    $("#addSim").onclick =
+      () => {
+
+        addOption(
+          "sim",
+          $("#newSim").value,
+          $("#newSimPrice").value
+        );
+
+
+        $("#newSim").value="";
+        $("#newSimPrice").value="";
+
+      };
+
+
+    $("#addRegion").onclick =
+      () => {
+
+        addOption(
+          "region",
+          $("#newRegion").value,
+          $("#newRegionPrice").value
+        );
+
+
+        $("#newRegion").value="";
+        $("#newRegionPrice").value="";
+
+      };
+
+
+    function renderMatrix(){
+
+      const box =
+        $("#priceMatrix");
+
+
+      if(!box){
+
+        return;
+
+      }
+
+
+      const memories =
+        optionState.memory;
+
+
+      const colors =
+        optionState.color;
+
+
+      const sims =
+        optionState.sim;
+
+
+      const regions =
+        optionState.region;
+
+
+      if(
+        !memories.length &&
+        !colors.length &&
+        !sims.length &&
+        !regions.length
+      ){
+
+        box.innerHTML = `
+
+          <div class="empty">
+
+            Добавьте варианты товара.
+
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+
+      const values = {
+
+
+        memory:
+          memories.length
+          ?
+          memories
+          :
+          [{name:"—",price:0}],
+
+
+        color:
+          colors.length
+          ?
+          colors
+          :
+          [{name:"—",price:0}],
+
+
+        sim:
+          sims.length
+          ?
+          sims
+          :
+          [{name:"—",price:0}],
+
+
+        region:
+          regions.length
+          ?
+          regions
+          :
+          [{name:"—",price:0}]
+
+      };
+
+
+      const rows=[];
+
+
+      values.region.forEach(
+        region => {
+
+          values.memory.forEach(
+            memory => {
+
+              values.color.forEach(
+                color => {
+
+                  values.sim.forEach(
+                    sim => {
+
+                      const key =
+                        [
+                          region.name,
+                          memory.name,
+                          color.name,
+                          sim.name
+                        ]
+                        .join("|");
+
+
+                      const base =
+                        Number(
+                          product?.price ||
+                          0
+                        );
+
+
+                      const delta =
+                        Number(
+                          region.price ||
+                          0
+                        ) +
+                        Number(
+                          memory.price ||
+                          0
+                        ) +
+                        Number(
+                          color.price ||
+                          0
+                        ) +
+                        Number(
+                          sim.price ||
+                          0
+                        );
+
+
+                      rows.push({
+
+                        key,
+
+                        region:
+                          region.name,
+
+                        memory:
+                          memory.name,
+
+                        color:
+                          color.name,
+
+                        sim:
+                          sim.name,
+
+                        price:
+                          base + delta
+
+                      });
+
+                    }
+                  );
+
+                }
+              );
+
+            }
+          );
+
+        }
+      );
+
+
+      box.innerHTML =
+        rows
+          .map(
+            row =>
+              `
+
+              <div
+                class="item">
+
+                <div
+                  class="row">
+
+                  <span>
+                    Регион
+                  </span>
+
+                  <strong>
+                    ${esc(row.region)}
+                  </strong>
+
+                </div>
+
+
+                <div
+                  class="row">
+
+                  <span>
+                    Память
+                  </span>
+
+                  <strong>
+                    ${esc(row.memory)}
+                  </strong>
+
+                </div>
+
+
+                <div
+                  class="row">
+
+                  <span>
+                    Цвет
+                  </span>
+
+                  <strong>
+                    ${esc(row.color)}
+                  </strong>
+
+                </div>
+
+
+                <div
+                  class="row">
+
+                  <span>
+                    SIM
+                  </span>
+
+                  <strong>
+                    ${esc(row.sim)}
+                  </strong>
+
+                </div>
+
+
+                <div
+                  class="field"
+                  style="
+                    margin-top:8px;
+                  ">
+
+                  <label>
+                    Цена
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value="${row.price}"
+                    data-matrix-price="${esc(row.key)}">
+
+                </div>
+
+              </div>
+
+              `
+          )
+          .join("");
+
+    }
+
+
+    renderOptions();
+    renderMatrix();
+
+
+    $("#saveProduct").onclick =
+      async () => {
+
+        const payload = {
+
+          name:
+            $("#pmName").value.trim(),
+
+          category_id:
+            $("#pmCategory").value
+              ?
+              Number(
+                $("#pmCategory").value
+              )
+              :
+              null,
+
+          price:
+            Number(
+              $("#pmPrice").value
+            ) || 0,
+
+          old_price:
+            Number(
+              $("#pmOldPrice").value
+            ) || 0,
+
+          description:
+            $("#pmDescription").value,
+
+          sku:
+            $("#pmSku").value.trim(),
+
+          sort_order:
+            Number(
+              $("#pmSort").value
+            ) || 0,
+
+          image_url:
+            $("#pmImage").value.trim(),
+
+          media:
+            state.media,
+
+          memories:
+            optionState.memory,
+
+          colors:
+            optionState.color,
+
+          sim_types:
+            optionState.sim,
+
+          regions:
+            optionState.region,
+
+          price_matrix:
+            Array.from(
+              document.querySelectorAll(
+                "[data-matrix-price]"
+              )
+            )
+            .map(
+              input => ({
+
+                key:
+                  input.dataset.matrixPrice,
+
+                price:
+                  Number(
+                    input.value
+                  ) || 0
+
+              })
+            )
+
+        };
+
+
+        if(!payload.name){
+
+          toast(
+            "Введите название товара"
+          );
+
+          return;
+
+        }
+
+
+        try{
+
+          const url =
+            product
+            ?
+            `/api/admin/products/${encodeURIComponent(product.id)}`
+            :
+            "/api/admin/products";
+
+
+          await api(
+            url,
+            {
+              method:
+                product
+                ?
+                "PUT"
+                :
+                "POST",
+
+              body:
+                JSON.stringify(
+                  payload
+                )
+            }
+          );
+
+
+          toast(
+            "Товар сохранён"
+          );
+
+
+          modal.remove();
+
+
+          await renderProducts();
+
+        }catch(error){
+
+          toast(
+            error.message
+          );
+
+        }
+
+      };
+
+  }
+
+</script>
+<script>
+
+  async function renderCategories(){
+
+    await loadCategories();
+
+
+    $("#content").innerHTML = `
+
+      <section class="panel">
+
+        <div class="item-head">
+
+          <div>
+
+            <h2>
+              Категории
+            </h2>
+
+            <div class="muted">
+              Управление категориями
+            </div>
+
+          </div>
+
+
+          <button
+            class="btn primary"
+            id="addCategoryBtn">
+
+            Добавить категорию
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="panel">
+
+        <div
+          id="categoriesList"
+          class="cards">
+        </div>
+
+      </section>
+
+    `;
+
+
+    $("#addCategoryBtn").onclick =
+      () =>
+        openCategoryModal();
+
+
+    renderCategoryList();
+
+  }
+
+
+  function renderCategoryList(){
+
+    const box =
+      $("#categoriesList");
+
+
+    if(!box){
+
+      return;
+
+    }
+
+
+    if(
+      !state.categories.length
+    ){
+
+      box.innerHTML = `
+
+        <div class="empty">
+
+          Категорий пока нет.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    box.innerHTML =
+      state.categories
+        .map(
+          category =>
+            `
+
+            <article
+              class="item">
+
+              <div
+                class="item-head">
+
+                <div>
+
+                  <div
+                    class="item-title">
+
+                    ${esc(
+                      category.name
+                    )}
+
+                  </div>
+
+
+                  <div
+                    class="muted">
+
+                    ${esc(
+                      category.description ||
+                      ""
+                    )}
+
+                  </div>
+
+                </div>
+
+
+                <span
+                  class="pill">
+
+                  ID ${esc(
+                    category.id
+                  )}
+
+                </span>
+
+              </div>
+
+
+              <div class="actions">
+
+                <button
+                  class="btn"
+                  data-edit-category="${category.id}">
+
+                  Изменить
+
+                </button>
+
+
+                <button
+                  class="btn danger"
+                  data-delete-category="${category.id}">
+
+                  Удалить
+
+                </button>
+
+              </div>
+
+            </article>
+
+            `
+        )
+        .join("");
+
+
+    box
+      .querySelectorAll(
+        "[data-edit-category]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () => {
+
+              const category =
+                state.categories.find(
+                  item =>
+                    String(item.id) ===
+                    String(
+                      button.dataset.editCategory
+                    )
+                );
+
+
+              if(category){
+
+                openCategoryModal(
+                  category
+                );
+
+              }
+
+            };
+
+        }
+      );
+
+
+    box
+      .querySelectorAll(
+        "[data-delete-category]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () =>
+              deleteCategory(
+                button.dataset.deleteCategory
+              );
+
+        }
+      );
+
+  }
+
+
+  function openCategoryModal(
+    category=null
+  ){
+
+    const modal =
+      document.createElement(
+        "div"
+      );
+
+
+    modal.className =
+      "modal";
+
+
+    modal.innerHTML = `
+
+      <div
+        class="modal-overlay"
+        data-close-category>
+      </div>
+
+
+      <div class="modal-dialog">
+
+        <div class="modal-header">
+
+          <div
+            class="modal-title">
+
+            ${
+              category
+              ?
+              "Изменить категорию"
+              :
+              "Добавить категорию"
+            }
+
+          </div>
+
+
+          <button
+            class="modal-close"
+            data-close-category>
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="grid">
+
+            <div class="field full">
+
+              <label>
+                Название
+              </label>
+
+              <input
+                id="cmName"
+                value="${esc(
+                  category?.name ||
+                  ""
+                )}">
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Описание
+              </label>
+
+              <textarea
+                id="cmDescription">${esc(
+                  category?.description ||
+                  ""
+                )}</textarea>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Сортировка
+              </label>
+
+              <input
+                id="cmSort"
+                type="number"
+                value="${
+                  Number(
+                    category?.sort_order ||
+                    0
+                  )
+                }">
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button
+            class="btn"
+            data-close-category>
+
+            Отмена
+
+          </button>
+
+
+          <button
+            class="btn primary"
+            id="saveCategory">
+
+            Сохранить
+
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.body.appendChild(
+      modal
+    );
+
+
+    modal
+      .querySelectorAll(
+        "[data-close-category]"
+      )
+      .forEach(
+        element => {
+
+          element.onclick =
+            () =>
+              modal.remove();
+
+        }
+      );
+
+
+    $("#saveCategory").onclick =
+      async () => {
+
+        const payload = {
+
+          name:
+            $("#cmName")
+              .value
+              .trim(),
+
+          description:
+            $("#cmDescription")
+              .value,
+
+          sort_order:
+            Number(
+              $("#cmSort")
+                .value
+            ) || 0
+
+        };
+
+
+        if(!payload.name){
+
+          toast(
+            "Введите название"
+          );
+
+          return;
+
+        }
+
+
+        try{
+
+          await api(
+            category
+            ?
+            `/api/admin/categories/${encodeURIComponent(category.id)}`
+            :
+            "/api/admin/categories",
+            {
+              method:
+                category
+                ?
+                "PUT"
+                :
+                "POST",
+
+              body:
+                JSON.stringify(
+                  payload
+                )
+            }
+          );
+
+
+          toast(
+            "Категория сохранена"
+          );
+
+
+          modal.remove();
+
+
+          await renderCategories();
+
+        }catch(error){
+
+          toast(
+            error.message
+          );
+
+        }
+
+      };
+
+  }
+
+
+  async function deleteCategory(
+    id
+  ){
+
+    if(
+      !confirm(
+        "Удалить категорию?"
+      )
+    ){
+
+      return;
+
+    }
+
+
+    try{
+
+      await api(
+        `/api/admin/categories/${encodeURIComponent(id)}`,
+        {
+          method:"DELETE"
+        }
+      );
+
+
+      toast(
+        "Категория удалена"
+      );
+
+
+      await renderCategories();
+
+    }catch(error){
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+
+  async function renderBanners(){
+
+    await loadBanners();
+
+
+    $("#content").innerHTML = `
+
+      <section class="panel">
+
+        <div class="item-head">
+
+          <div>
+
+            <h2>
+              Баннеры
+            </h2>
+
+            <div class="muted">
+              Управление баннерами
+            </div>
+
+          </div>
+
+
+          <button
+            class="btn primary"
+            id="addBannerBtn">
+
+            Добавить баннер
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="panel">
+
+        <div
+          id="bannersList"
+          class="cards">
+        </div>
+
+      </section>
+
+    `;
+
+
+    $("#addBannerBtn").onclick =
+      () =>
+        openBannerModal();
+
+
+    renderBannerList();
+
+  }
+
+
+  function renderBannerList(){
+
+    const box =
+      $("#bannersList");
+
+
+    if(!box){
+
+      return;
+
+    }
+
+
+    if(
+      !state.banners.length
+    ){
+
+      box.innerHTML = `
+
+        <div class="empty">
+
+          Баннеров пока нет.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    box.innerHTML =
+      state.banners
+        .map(
+          banner =>
+            `
+
+            <article
+              class="item">
+
+              <div
+                style="
+                  display:flex;
+                  gap:12px;
+                  align-items:center;
+                ">
+
+                ${
+                  banner.image_url
+                  ?
+                  `
+                  <img
+                    src="${esc(
+                      banner.image_url
+                    )}"
+                    style="
+                      width:90px;
+                      height:60px;
+                      object-fit:cover;
+                      border-radius:12px;
+                      background:#08080a;
+                    ">
+                  `
+                  :
+                  ""
+                }
+
+
+                <div
+                  style="
+                    flex:1;
+                  ">
+
+                  <div
+                    class="item-title">
+
+                    ${esc(
+                      banner.title ||
+                      "Без заголовка"
+                    )}
+
+                  </div>
+
+
+                  <div
+                    class="muted">
+
+                    ${esc(
+                      banner.text ||
+                      ""
+                    )}
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="actions">
+
+                <button
+                  class="btn"
+                  data-edit-banner="${banner.id}">
+
+                  Изменить
+
+                </button>
+
+
+                <button
+                  class="btn danger"
+                  data-delete-banner="${banner.id}">
+
+                  Удалить
+
+                </button>
+
+              </div>
+
+            </article>
+
+            `
+        )
+        .join("");
+
+
+    box
+      .querySelectorAll(
+        "[data-edit-banner]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () => {
+
+              const banner =
+                state.banners.find(
+                  item =>
+                    String(item.id) ===
+                    String(
+                      button.dataset.editBanner
+                    )
+                );
+
+
+              if(banner){
+
+                openBannerModal(
+                  banner
+                );
+
+              }
+
+            };
+
+        }
+      );
+
+
+    box
+      .querySelectorAll(
+        "[data-delete-banner]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () =>
+              deleteBanner(
+                button.dataset.deleteBanner
+              );
+
+        }
+      );
+
+  }
+
+
+  function openBannerModal(
+    banner=null
+  ){
+
+    const modal =
+      document.createElement(
+        "div"
+      );
+
+
+    modal.className =
+      "modal";
+
+
+    modal.innerHTML = `
+
+      <div
+        class="modal-overlay"
+        data-close-banner>
+      </div>
+
+
+      <div class="modal-dialog">
+
+        <div class="modal-header">
+
+          <div
+            class="modal-title">
+
+            ${
+              banner
+              ?
+              "Изменить баннер"
+              :
+              "Добавить баннер"
+            }
+
+          </div>
+
+
+          <button
+            class="modal-close"
+            data-close-banner>
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="grid">
+
+            <div class="field full">
+
+              <label>
+                Заголовок
+              </label>
+
+              <input
+                id="bmTitle"
+                value="${esc(
+                  banner?.title ||
+                  ""
+                )}">
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Текст
+              </label>
+
+              <textarea
+                id="bmText">${esc(
+                  banner?.text ||
+                  ""
+                )}</textarea>
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Ссылка
+              </label>
+
+              <input
+                id="bmUrl"
+                value="${esc(
+                  banner?.url ||
+                  banner?.link ||
+                  ""
+                )}">
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Сортировка
+              </label>
+
+              <input
+                id="bmSort"
+                type="number"
+                value="${
+                  Number(
+                    banner?.sort_order ||
+                    0
+                  )
+                }">
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="
+              margin-top:12px;
+            ">
+
+            <label
+              class="media-pick">
+
+              <input
+                id="bmFile"
+                type="file"
+                accept="image/*">
+
+              Выбрать изображение
+
+            </label>
+
+
+            <div
+              id="bmPreview"
+              class="media-list">
+
+              ${
+                banner?.image_url
+                ?
+                `
+                <div
+                  class="media-item">
+
+                  <img
+                    src="${esc(
+                      banner.image_url
+                    )}">
+
+                </div>
+                `
+                :
+                ""
+              }
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button
+            class="btn"
+            data-close-banner>
+
+            Отмена
+
+          </button>
+
+
+          <button
+            class="btn primary"
+            id="saveBanner">
+
+            Сохранить
+
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.body.appendChild(
+      modal
+    );
+
+
+    let imageUrl =
+      banner?.image_url ||
+      "";
+
+
+    modal
+      .querySelectorAll(
+        "[data-close-banner]"
+      )
+      .forEach(
+        element => {
+
+          element.onclick =
+            () =>
+              modal.remove();
+
+        }
+      );
+
+
+    $("#bmFile").onchange =
+      async event => {
+
+        const file =
+          event.target.files?.[0];
+
+
+        if(!file){
+
+          return;
+
+        }
+
+
+        try{
+
+          const fd =
+            new FormData();
+
+          fd.append(
+            "file",
+            file
+          );
+
+
+          const response =
+            await fetch(
+              "/api/admin/upload",
+              {
+                method:"POST",
+
+                headers:{
+                  "x-telegram-init-data":
+                    init()
+                },
+
+                body:fd
+              }
+            );
+
+
+          const data =
+            await response.json();
+
+
+          if(!response.ok){
+
+            throw new Error(
+              data.error ||
+              "Ошибка загрузки"
+            );
+
+          }
+
+
+          imageUrl =
+            data.url;
+
+
+          $("#bmPreview")
+            .innerHTML = `
+
+              <div
+                class="media-item">
+
+                <img
+                  src="${esc(
+                    imageUrl
+                  )}">
+
+              </div>
+
+            `;
+
+
+          toast(
+            "Изображение загружено"
+          );
+
+        }catch(error){
+
+          toast(
+            error.message
+          );
+
+        }
+
+
+        event.target.value =
+          "";
+
+      };
+
+
+    $("#saveBanner").onclick =
+      async () => {
+
+        const payload = {
+
+          title:
+            $("#bmTitle")
+              .value
+              .trim(),
+
+          text:
+            $("#bmText")
+              .value,
+
+          url:
+            $("#bmUrl")
+              .value
+              .trim(),
+
+          image_url:
+            imageUrl,
+
+          sort_order:
+            Number(
+              $("#bmSort")
+                .value
+            ) || 0
+
+        };
+
+
+        try{
+
+          await api(
+            banner
+            ?
+            `/api/admin/banners/${encodeURIComponent(banner.id)}`
+            :
+            "/api/admin/banners",
+            {
+              method:
+                banner
+                ?
+                "PUT"
+                :
+                "POST",
+
+              body:
+                JSON.stringify(
+                  payload
+                )
+            }
+          );
+
+
+          toast(
+            "Баннер сохранён"
+          );
+
+
+          modal.remove();
+
+
+          await renderBanners();
+
+        }catch(error){
+
+          toast(
+            error.message
+          );
+
+        }
+
+      };
+
+  }
+
+
+  async function deleteBanner(
+    id
+  ){
+
+    if(
+      !confirm(
+        "Удалить баннер?"
+      )
+    ){
+
+      return;
+
+    }
+
+
+    try{
+
+      await api(
+        `/api/admin/banners/${encodeURIComponent(id)}`,
+        {
+          method:"DELETE"
+        }
+      );
+
+
+      toast(
+        "Баннер удалён"
+      );
+
+
+      await renderBanners();
+
+    }catch(error){
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+
+  async function renderReservation(){
+
+    let data;
+
+
+    try{
+
+      data =
+        await api(
+          "/api/admin/reservation-cards"
+        );
+
+    }catch{
+
+      data = {
+        cards:[]
+      };
+
+    }
+
+
+    state.cards =
+      Array.isArray(
+        data.cards
+      )
+      ?
+      data.cards
+      :
+      [];
+
+
+    $("#content").innerHTML = `
+
+      <section class="panel">
+
+        <div class="item-head">
+
+          <div>
+
+            <h2>
+              Залог
+            </h2>
+
+            <div class="muted">
+              Реквизиты для оплаты залога
+            </div>
+
+          </div>
+
+
+          <button
+            class="btn primary"
+            id="addReservation">
+
+            Добавить реквизиты
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="panel">
+
+        <div
+          id="reservationList"
+          class="cards">
+        </div>
+
+      </section>
+
+    `;
+
+
+    $("#addReservation").onclick =
+      () =>
+        openReservationModal();
+
+
+    renderReservationList();
+
+  }
+
+
+  function renderReservationList(){
+
+    const box =
+      $("#reservationList");
+
+
+    if(!box){
+
+      return;
+
+    }
+
+
+    if(
+      !state.cards.length
+    ){
+
+      box.innerHTML = `
+
+        <div class="empty">
+
+          Реквизитов пока нет.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    box.innerHTML =
+      state.cards
+        .map(
+          card =>
+            `
+
+            <article
+              class="item">
+
+              <div
+                class="item-head">
+
+                <div>
+
+                  <div
+                    class="item-title">
+
+                    ${esc(
+                      card.title ||
+                      "Реквизиты"
+                    )}
+
+                  </div>
+
+                  <div
+                    class="muted">
+
+                    ${esc(
+                      card.card_number ||
+                      card.requisites ||
+                      "—"
+                    )}
+
+                  </div>
+
+                </div>
+
+
+                <span
+                  class="pill ${
+                    card.active
+                    ? "ok"
+                    : "bad"
+                  }">
+
+                  ${
+                    card.active
+                    ?
+                    "Активно"
+                    :
+                    "Выключено"
+                  }
+
+                </span>
+
+              </div>
+
+
+              <div class="row">
+
+                <span>
+                  Получатель
+                </span>
+
+                <strong>
+
+                  ${esc(
+                    card.recipient ||
+                    "—"
+                  )}
+
+                </strong>
+
+              </div>
+
+
+              <div class="row">
+
+                <span>
+                  Сумма
+                </span>
+
+                <strong>
+
+                  ${formatPrice(
+                    card.amount
+                  )}
+
+                </strong>
+
+              </div>
+
+
+              <div class="actions">
+
+                <button
+                  class="btn"
+                  data-edit-reservation="${card.id}">
+
+                  Изменить
+
+                </button>
+
+
+                <button
+                  class="btn danger"
+                  data-delete-reservation="${card.id}">
+
+                  Удалить
+
+                </button>
+
+              </div>
+
+            </article>
+
+            `
+        )
+        .join("");
+
+
+    box
+      .querySelectorAll(
+        "[data-edit-reservation]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () => {
+
+              const card =
+                state.cards.find(
+                  item =>
+                    String(item.id) ===
+                    String(
+                      button.dataset.editReservation
+                    )
+                );
+
+
+              if(card){
+
+                openReservationModal(
+                  card
+                );
+
+              }
+
+            };
+
+        }
+      );
+
+
+    box
+      .querySelectorAll(
+        "[data-delete-reservation]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () =>
+              deleteReservation(
+                button.dataset.deleteReservation
+              );
+
+        }
+      );
+
+  }
+
+
+  function openReservationModal(
+    card=null
+  ){
+
+    const modal =
+      document.createElement(
+        "div"
+      );
+
+
+    modal.className =
+      "modal";
+
+
+    modal.innerHTML = `
+
+      <div
+        class="modal-overlay"
+        data-close-reservation>
+      </div>
+
+
+      <div class="modal-dialog">
+
+        <div class="modal-header">
+
+          <div
+            class="modal-title">
+
+            ${
+              card
+              ?
+              "Изменить реквизиты"
+              :
+              "Добавить реквизиты"
+            }
+
+          </div>
+
+
+          <button
+            class="modal-close"
+            data-close-reservation>
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="grid">
+
+            <div class="field">
+
+              <label>
+                Название
+              </label>
+
+              <input
+                id="rmTitle"
+                value="${esc(
+                  card?.title ||
+                  ""
+                )}">
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Сумма
+              </label>
+
+              <input
+                id="rmAmount"
+                type="number"
+                min="0"
+                value="${
+                  Number(
+                    card?.amount ||
+                    0
+                  )
+                }">
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Номер карты
+              </label>
+
+              <input
+                id="rmCard"
+                value="${esc(
+                  card?.card_number ||
+                  ""
+                )}">
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Получатель
+              </label>
+
+              <input
+                id="rmRecipient"
+                value="${esc(
+                  card?.recipient ||
+                  ""
+                )}">
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Дополнительная информация
+              </label>
+
+              <textarea
+                id="rmDescription">${esc(
+                  card?.description ||
+                  card?.requisites ||
+                  ""
+                )}</textarea>
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="
+              margin-top:12px;
+              display:grid;
+              gap:8px;
+            ">
+
+            <label class="check">
+
+              <input
+                id="rmActive"
+                type="checkbox"
+                ${
+                  card?.active !== 0
+                  ?
+                  "checked"
+                  :
+                  ""
+                }>
+
+              Активные реквизиты
+
+            </label>
+
+
+            <label class="check">
+
+              <input
+                id="rmDefault"
+                type="checkbox"
+                ${
+                  card?.is_default
+                  ?
+                  "checked"
+                  :
+                  ""
+                }>
+
+              По умолчанию
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button
+            class="btn"
+            data-close-reservation>
+
+            Отмена
+
+          </button>
+
+
+          <button
+            class="btn primary"
+            id="saveReservation">
+
+            Сохранить
+
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.body.appendChild(
+      modal
+    );
+
+
+    modal
+      .querySelectorAll(
+        "[data-close-reservation]"
+      )
+      .forEach(
+        element => {
+
+          element.onclick =
+            () =>
+              modal.remove();
+
+        }
+      );
+
+
+    $("#saveReservation").onclick =
+      async () => {
+
+        const payload = {
+
+          title:
+            $("#rmTitle")
+              .value
+              .trim(),
+
+          amount:
+            Number(
+              $("#rmAmount")
+                .value
+            ) || 0,
+
+          card_number:
+            $("#rmCard")
+              .value
+              .trim(),
+
+          recipient:
+            $("#rmRecipient")
+              .value
+              .trim(),
+
+          description:
+            $("#rmDescription")
+              .value,
+
+          active:
+            $("#rmActive")
+              .checked
+              ?
+              1
+              :
+              0,
+
+          is_default:
+            $("#rmDefault")
+              .checked
+              ?
+              1
+              :
+              0
+
+        };
+
+
+        try{
+
+          await api(
+            card
+            ?
+            `/api/admin/reservation-cards/${encodeURIComponent(card.id)}`
+            :
+            "/api/admin/reservation-cards",
+            {
+              method:
+                card
+                ?
+                "PUT"
+                :
+                "POST",
+
+              body:
+                JSON.stringify(
+                  payload
+                )
+            }
+          );
+
+
+          toast(
+            "Реквизиты сохранены"
+          );
+
+
+          modal.remove();
+
+
+          await renderReservation();
+
+        }catch(error){
+
+          toast(
+            error.message
+          );
+
+        }
+
+      };
+
+  }
+
+
+  async function deleteReservation(
+    id
+  ){
+
+    if(
+      !confirm(
+        "Удалить эти реквизиты?"
+      )
+    ){
+
+      return;
+
+    }
+
+
+    try{
+
+      await api(
+        `/api/admin/reservation-cards/${encodeURIComponent(id)}`,
+        {
+          method:"DELETE"
+        }
+      );
+
+
+      toast(
+        "Реквизиты удалены"
+      );
+
+
+      await renderReservation();
+
+    }catch(error){
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+</script>
+<script>
+
+  async function renderPickup(){
+
+    let data;
+
+
+    try{
+
+      data =
+        await api(
+          "/api/admin/pickup"
+        );
+
+    }catch{
+
+      data = {
+        pickup_points:[]
+      };
+
+    }
+
+
+    state.pickup =
+      Array.isArray(
+        data.pickup_points
+      )
+      ?
+      data.pickup_points
+      :
+      [];
+
+
+    $("#content").innerHTML = `
+
+      <section class="panel">
+
+        <div class="item-head">
+
+          <div>
+
+            <h2>
+              Получение
+            </h2>
+
+            <div class="muted">
+              Самовывоз и доставка
+            </div>
+
+          </div>
+
+
+          <button
+            class="btn primary"
+            id="addPickup">
+
+            Добавить пункт
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="panel">
+
+        <div
+          id="pickupList"
+          class="cards">
+        </div>
+
+      </section>
+
+    `;
+
+
+    $("#addPickup").onclick =
+      () =>
+        openPickupModal();
+
+
+    renderPickupList();
+
+  }
+
+
+  function renderPickupList(){
+
+    const box =
+      $("#pickupList");
+
+
+    if(!box){
+
+      return;
+
+    }
+
+
+    if(
+      !state.pickup.length
+    ){
+
+      box.innerHTML = `
+
+        <div class="empty">
+
+          Пунктов получения пока нет.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    box.innerHTML =
+      state.pickup
+        .map(
+          point =>
+            `
+
+            <article
+              class="item">
+
+              <div
+                class="item-head">
+
+                <div>
+
+                  <div
+                    class="item-title">
+
+                    ${esc(
+                      point.name ||
+                      "Пункт получения"
+                    )}
+
+                  </div>
+
+                  <div
+                    class="muted">
+
+                    ${esc(
+                      point.address ||
+                      ""
+                    )}
+
+                  </div>
+
+                </div>
+
+
+                <span
+                  class="pill ${
+                    point.active
+                    ? "ok"
+                    : "bad"
+                  }">
+
+                  ${
+                    point.active
+                    ?
+                    "Активен"
+                    :
+                    "Выключен"
+                  }
+
+                </span>
+
+              </div>
+
+
+              <div class="row">
+
+                <span>
+                  Описание
+                </span>
+
+                <strong>
+
+                  ${esc(
+                    point.description ||
+                    "—"
+                  )}
+
+                </strong>
+
+              </div>
+
+
+              <div class="row">
+
+                <span>
+                  Видео
+                </span>
+
+                <strong>
+
+                  ${point.video_url
+                    ?
+                    "Есть"
+                    :
+                    "Нет"}
+
+                </strong>
+
+              </div>
+
+
+              <div class="actions">
+
+                <button
+                  class="btn"
+                  data-edit-pickup="${point.id}">
+
+                  Изменить
+
+                </button>
+
+
+                <button
+                  class="btn danger"
+                  data-delete-pickup="${point.id}">
+
+                  Удалить
+
+                </button>
+
+              </div>
+
+            </article>
+
+            `
+        )
+        .join("");
+
+
+    box
+      .querySelectorAll(
+        "[data-edit-pickup]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () => {
+
+              const point =
+                state.pickup.find(
+                  item =>
+                    String(item.id) ===
+                    String(
+                      button.dataset.editPickup
+                    )
+                );
+
+
+              if(point){
+
+                openPickupModal(
+                  point
+                );
+
+              }
+
+            };
+
+        }
+      );
+
+
+    box
+      .querySelectorAll(
+        "[data-delete-pickup]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () =>
+              deletePickup(
+                button.dataset.deletePickup
+              );
+
+        }
+      );
+
+  }
+
+
+  function openPickupModal(
+    point=null
+  ){
+
+    const modal =
+      document.createElement(
+        "div"
+      );
+
+
+    modal.className =
+      "modal";
+
+
+    modal.innerHTML = `
+
+      <div
+        class="modal-overlay"
+        data-close-pickup>
+      </div>
+
+
+      <div class="modal-dialog">
+
+        <div class="modal-header">
+
+          <div
+            class="modal-title">
+
+            ${
+              point
+              ?
+              "Изменить пункт"
+              :
+              "Добавить пункт"
+            }
+
+          </div>
+
+
+          <button
+            class="modal-close"
+            data-close-pickup>
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="grid">
+
+            <div class="field full">
+
+              <label>
+                Название
+              </label>
+
+              <input
+                id="pmPickupName"
+                value="${esc(
+                  point?.name ||
+                  ""
+                )}">
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Адрес
+              </label>
+
+              <input
+                id="pmPickupAddress"
+                value="${esc(
+                  point?.address ||
+                  ""
+                )}">
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Описание
+              </label>
+
+              <textarea
+                id="pmPickupDescription">${esc(
+                  point?.description ||
+                  ""
+                )}</textarea>
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Видео / ссылка
+              </label>
+
+              <input
+                id="pmPickupVideo"
+                value="${esc(
+                  point?.video_url ||
+                  ""
+                )}">
+
+            </div>
+
+          </div>
+
+
+          <label
+            class="check"
+            style="
+              margin-top:12px;
+            ">
+
+            <input
+              id="pmPickupActive"
+              type="checkbox"
+              ${
+                point?.active !== 0
+                ?
+                "checked"
+                :
+                ""
+              }>
+
+            Активный пункт
+
+          </label>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button
+            class="btn"
+            data-close-pickup>
+
+            Отмена
+
+          </button>
+
+
+          <button
+            class="btn primary"
+            id="savePickup">
+
+            Сохранить
+
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.body.appendChild(
+      modal
+    );
+
+
+    modal
+      .querySelectorAll(
+        "[data-close-pickup]"
+      )
+      .forEach(
+        element => {
+
+          element.onclick =
+            () =>
+              modal.remove();
+
+        }
+      );
+
+
+    $("#savePickup").onclick =
+      async () => {
+
+        const payload = {
+
+          name:
+            $("#pmPickupName")
+              .value
+              .trim(),
+
+          address:
+            $("#pmPickupAddress")
+              .value
+              .trim(),
+
+          description:
+            $("#pmPickupDescription")
+              .value,
+
+          video_url:
+            $("#pmPickupVideo")
+              .value
+              .trim(),
+
+          active:
+            $("#pmPickupActive")
+              .checked
+            ?
+            1
+            :
+            0
+
+        };
+
+
+        if(!payload.name){
+
+          toast(
+            "Введите название пункта"
+          );
+
+          return;
+
+        }
+
+
+        try{
+
+          await api(
+            point
+            ?
+            `/api/admin/pickup/${encodeURIComponent(point.id)}`
+            :
+            "/api/admin/pickup",
+            {
+              method:
+                point
+                ?
+                "PUT"
+                :
+                "POST",
+
+              body:
+                JSON.stringify(
+                  payload
+                )
+            }
+          );
+
+
+          toast(
+            "Пункт сохранён"
+          );
+
+
+          modal.remove();
+
+
+          await renderPickup();
+
+        }catch(error){
+
+          toast(
+            error.message
+          );
+
+        }
+
+      };
+
+  }
+
+
+  async function deletePickup(
+    id
+  ){
+
+    if(
+      !confirm(
+        "Удалить пункт получения?"
+      )
+    ){
+
+      return;
+
+    }
+
+
+    try{
+
+      await api(
+        `/api/admin/pickup/${encodeURIComponent(id)}`,
+        {
+          method:"DELETE"
+        }
+      );
+
+
+      toast(
+        "Пункт удалён"
+      );
+
+
+      await renderPickup();
+
+    }catch(error){
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+
+  async function renderPromocodes(){
+
+    let data;
+
+
+    try{
+
+      data =
+        await api(
+          "/api/admin/promocodes"
+        );
+
+    }catch{
+
+      data = {
+        promos:[]
+      };
+
+    }
+
+
+    state.promocodes =
+      Array.isArray(
+        data.promos
+      )
+      ?
+      data.promos
+      :
+      Array.isArray(
+        data.promocodes
+      )
+      ?
+      data.promocodes
+      :
+      [];
+
+
+    $("#content").innerHTML = `
+
+      <section class="panel">
+
+        <div class="item-head">
+
+          <div>
+
+            <h2>
+              Промокоды
+            </h2>
+
+            <div class="muted">
+              Создание и управление промокодами
+            </div>
+
+          </div>
+
+
+          <button
+            class="btn primary"
+            id="addPromo">
+
+            Создать промокод
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="panel">
+
+        <div
+          id="promocodesList"
+          class="cards">
+        </div>
+
+      </section>
+
+    `;
+
+
+    $("#addPromo").onclick =
+      () =>
+        openPromoModal();
+
+
+    renderPromoList();
+
+  }
+
+
+  function renderPromoList(){
+
+    const box =
+      $("#promocodesList");
+
+
+    if(!box){
+
+      return;
+
+    }
+
+
+    if(
+      !state.promocodes.length
+    ){
+
+      box.innerHTML = `
+
+        <div class="empty">
+
+          Промокодов пока нет.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    box.innerHTML =
+      state.promocodes
+        .map(
+          promo =>
+            `
+
+            <article
+              class="item">
+
+              <div
+                class="item-head">
+
+                <div>
+
+                  <div
+                    class="item-title">
+
+                    ${esc(
+                      promo.code
+                    )}
+
+                  </div>
+
+                  <div
+                    class="muted">
+
+                    ${
+                      promo.type === "percent"
+                      ?
+                      `${promo.discount}%`
+                      :
+                      formatPrice(
+                        promo.discount
+                      )
+                    }
+
+                  </div>
+
+                </div>
+
+
+                <span
+                  class="pill ${
+                    promo.active
+                    ? "ok"
+                    : "bad"
+                  }">
+
+                  ${
+                    promo.active
+                    ?
+                    "Активен"
+                    :
+                    "Выключен"
+                  }
+
+                </span>
+
+              </div>
+
+
+              <div class="row">
+
+                <span>
+                  Использований
+                </span>
+
+                <strong>
+
+                  ${
+                    Number(
+                      promo.used_count ||
+                      0
+                    )
+                  }
+
+                  ${
+                    promo.usage_limit
+                    ?
+                    ` / ${promo.usage_limit}`
+                    :
+                    ""
+                  }
+
+                </strong>
+
+              </div>
+
+
+              <div class="row">
+
+                <span>
+                  Минимальная сумма
+                </span>
+
+                <strong>
+
+                  ${
+                    Number(
+                      promo.min_order_amount ||
+                      0
+                    )
+                    ?
+                    formatPrice(
+                      promo.min_order_amount
+                    )
+                    :
+                    "Нет"
+                  }
+
+                </strong>
+
+              </div>
+
+
+              <div class="actions">
+
+                <button
+                  class="btn"
+                  data-edit-promo="${promo.id}">
+
+                  Изменить
+
+                </button>
+
+
+                <button
+                  class="btn"
+                  data-toggle-promo="${promo.id}">
+
+                  ${
+                    promo.active
+                    ?
+                    "Выключить"
+                    :
+                    "Включить"
+                  }
+
+                </button>
+
+
+                <button
+                  class="btn danger"
+                  data-delete-promo="${promo.id}">
+
+                  Удалить
+
+                </button>
+
+              </div>
+
+            </article>
+
+            `
+        )
+        .join("");
+
+
+    box
+      .querySelectorAll(
+        "[data-edit-promo]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () => {
+
+              const promo =
+                state.promocodes.find(
+                  item =>
+                    String(item.id) ===
+                    String(
+                      button.dataset.editPromo
+                    )
+                );
+
+
+              if(promo){
+
+                openPromoModal(
+                  promo
+                );
+
+              }
+
+            };
+
+        }
+      );
+
+
+    box
+      .querySelectorAll(
+        "[data-toggle-promo]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () =>
+              togglePromo(
+                button.dataset.togglePromo
+              );
+
+        }
+      );
+
+
+    box
+      .querySelectorAll(
+        "[data-delete-promo]"
+      )
+      .forEach(
+        button => {
+
+          button.onclick =
+            () =>
+              deletePromo(
+                button.dataset.deletePromo
+              );
+
+        }
+      );
+
+  }
+
+
+  function openPromoModal(
+    promo=null
+  ){
+
+    const modal =
+      document.createElement(
+        "div"
+      );
+
+
+    modal.className =
+      "modal";
+
+
+    modal.innerHTML = `
+
+      <div
+        class="modal-overlay"
+        data-close-promo>
+      </div>
+
+
+      <div class="modal-dialog">
+
+        <div class="modal-header">
+
+          <div
+            class="modal-title">
+
+            ${
+              promo
+              ?
+              "Изменить промокод"
+              :
+              "Создать промокод"
+            }
+
+          </div>
+
+
+          <button
+            class="modal-close"
+            data-close-promo>
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="grid">
+
+            <div class="field full">
+
+              <label>
+                Код
+              </label>
+
+              <input
+                id="promoCode"
+                value="${esc(
+                  promo?.code ||
+                  ""
+                )}"
+                placeholder="IRROOM10">
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Тип скидки
+              </label>
+
+              <select
+                id="promoType">
+
+                <option
+                  value="percent"
+                  ${
+                    promo?.type !== "fixed"
+                    ?
+                    "selected"
+                    :
+                    ""
+                  }>
+
+                  Процент
+
+                </option>
+
+                <option
+                  value="fixed"
+                  ${
+                    promo?.type === "fixed"
+                    ?
+                    "selected"
+                    :
+                    ""
+                  }>
+
+                  Фиксированная сумма
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Скидка
+              </label>
+
+              <input
+                id="promoDiscount"
+                type="number"
+                min="0"
+                value="${
+                  Number(
+                    promo?.discount ||
+                    0
+                  )
+                }">
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Лимит использований
+              </label>
+
+              <input
+                id="promoLimit"
+                type="number"
+                min="0"
+                value="${
+                  Number(
+                    promo?.usage_limit ||
+                    0
+                  )
+                }">
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Минимальная сумма заказа
+              </label>
+
+              <input
+                id="promoMinOrder"
+                type="number"
+                min="0"
+                value="${
+                  Number(
+                    promo?.min_order_amount ||
+                    0
+                  )
+                }">
+
+            </div>
+
+          </div>
+
+
+          <label
+            class="check"
+            style="
+              margin-top:12px;
+            ">
+
+            <input
+              id="promoActive"
+              type="checkbox"
+              ${
+                promo?.active !== 0
+                ?
+                "checked"
+                :
+                ""
+              }>
+
+            Активный промокод
+
+          </label>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button
+            class="btn"
+            data-close-promo>
+
+            Отмена
+
+          </button>
+
+
+          <button
+            class="btn primary"
+            id="savePromo">
+
+            Сохранить
+
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.body.appendChild(
+      modal
+    );
+
+
+    modal
+      .querySelectorAll(
+        "[data-close-promo]"
+      )
+      .forEach(
+        element => {
+
+          element.onclick =
+            () =>
+              modal.remove();
+
+        }
+      );
+
+
+    $("#savePromo").onclick =
+      async () => {
+
+        const code =
+          $("#promoCode")
+            .value
+            .trim()
+            .toUpperCase();
+
+
+        if(!code){
+
+          toast(
+            "Введите промокод"
+          );
+
+          return;
+
+        }
+
+
+        const payload = {
+
+          code,
+
+          type:
+            $("#promoType")
+              .value,
+
+          discount:
+            Number(
+              $("#promoDiscount")
+                .value
+            ) || 0,
+
+          usage_limit:
+            Number(
+              $("#promoLimit")
+                .value
+            ) || 0,
+
+          min_order_amount:
+            Number(
+              $("#promoMinOrder")
+                .value
+            ) || 0,
+
+          active:
+            $("#promoActive")
+              .checked
+            ?
+            1
+            :
+            0
+
+        };
+
+
+        try{
+
+          await api(
+            promo
+            ?
+            `/api/admin/promocodes/${encodeURIComponent(promo.id)}`
+            :
+            "/api/admin/promocodes",
+            {
+              method:
+                promo
+                ?
+                "PUT"
+                :
+                "POST",
+
+              body:
+                JSON.stringify(
+                  payload
+                )
+            }
+          );
+
+
+          toast(
+            "Промокод сохранён"
+          );
+
+
+          modal.remove();
+
+
+          await renderPromocodes();
+
+        }catch(error){
+
+          toast(
+            error.message
+          );
+
+        }
+
+      };
+
+  }
+
+
+  async function togglePromo(
+    id
+  ){
+
+    try{
+
+      await api(
+        `/api/admin/promocodes/${encodeURIComponent(id)}/toggle`,
+        {
+          method:"PUT"
+        }
+      );
+
+
+      toast(
+        "Статус промокода изменён"
+      );
+
+
+      await renderPromocodes();
+
+    }catch(error){
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+
+  async function deletePromo(
+    id
+  ){
+
+    if(
+      !confirm(
+        "Удалить промокод?"
+      )
+    ){
+
+      return;
+
+    }
+
+
+    try{
+
+      await api(
+        `/api/admin/promocodes/${encodeURIComponent(id)}`,
+        {
+          method:"DELETE"
+        }
+      );
+
+
+      toast(
+        "Промокод удалён"
+      );
+
+
+      await renderPromocodes();
+
+    }catch(error){
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+
+  async function renderSettings(){
+
+    let data;
+
+
+    try{
+
+      data =
+        await api(
+          "/api/admin/settings"
+        );
+
+    }catch{
+
+      data = {
+        settings:{}
+      };
+
+    }
+
+
+    state.settings =
+      data.settings ||
+      {};
+
+
+    $("#content").innerHTML = `
+
+      <section class="panel">
+
+        <div class="item-head">
+
+          <div>
+
+            <h2>
+              Настройки
+            </h2>
+
+            <div class="muted">
+              Основные настройки магазина
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="grid">
+
+          <div class="field">
+
+            <label>
+              Название магазина
+            </label>
+
+            <input
+              id="settingStoreName"
+              value="${esc(
+                state.settings.store_name ||
+                "iroom"
+              )}">
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Менеджер
+            </label>
+
+            <input
+              id="settingManager"
+              value="${esc(
+                state.settings.manager_username ||
+                ""
+              )}">
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Канал
+            </label>
+
+            <input
+              id="settingChannel"
+              value="${esc(
+                state.settings.channel_username ||
+                ""
+              )}">
+
+          </div>
+
+
+          <div class="field full">
+
+            <label>
+              Текст доставки
+            </label>
+
+            <textarea
+              id="settingDelivery">${esc(
+                state.settings.delivery_text ||
+                ""
+              )}</textarea>
+
+          </div>
+
+
+          <div class="field full">
+
+            <label>
+              Текст самовывоза
+            </label>
+
+            <textarea
+              id="settingPickup">${esc(
+                state.settings.pickup_text ||
+                ""
+              )}</textarea>
+
+          </div>
+
+
+          <div class="field full">
+
+            <label>
+              Текст залога
+            </label>
+
+            <textarea
+              id="settingReservation">${esc(
+                state.settings.reservation_text ||
+                ""
+              )}</textarea>
+
+          </div>
+
+        </div>
+
+
+        <div class="actions">
+
+          <button
+            class="btn primary"
+            id="saveSettings">
+
+            Сохранить настройки
+
+          </button>
+
+        </div>
+
+      </section>
+
+    `;
+
+
+    $("#saveSettings").onclick =
+      async () => {
+
+        const settings = {
+
+          ...state.settings,
+
+          store_name:
+            $("#settingStoreName")
+              .value,
+
+          manager_username:
+            $("#settingManager")
+              .value,
+
+          channel_username:
+            $("#settingChannel")
+              .value,
+
+          delivery_text:
+            $("#settingDelivery")
+              .value,
+
+          pickup_text:
+            $("#settingPickup")
+              .value,
+
+          reservation_text:
+            $("#settingReservation")
+              .value
+
+        };
+
+
+        try{
+
+          await api(
+            "/api/admin/settings",
+            {
+              method:"PUT",
+
+              body:
+                JSON.stringify({
+                  settings
+                })
+            }
+          );
+
+
+          toast(
+            "Настройки сохранены"
+          );
+
+        }catch(error){
+
+          toast(
+            error.message
+          );
+
+        }
+
+      };
+
+  }
+
+
+  async function render(){
+
+    const tab =
+      state.tab;
+
+
+    document
+      .querySelectorAll(
+        ".tab"
+      )
+      .forEach(
+        element => {
+
+          element.classList.toggle(
+            "active",
+            element.dataset.tab ===
+            tab
+          );
+
+        }
+      );
+
+
+    try{
+
+      if(
+        tab === "orders"
+      ){
+
+        await renderOrders();
+
+      }else if(
+        tab === "products"
+      ){
+
+        await renderProducts();
+
+      }else if(
+        tab === "deposit"
+      ){
+
+        await renderReservation();
+
+      }else if(
+        tab === "categories"
+      ){
+
+        await renderCategories();
+
+      }else if(
+        tab === "banners"
+      ){
+
+        await renderBanners();
+
+      }else if(
+        tab === "pickup"
+      ){
+
+        await renderPickup();
+
+      }else if(
+        tab === "promocodes"
+      ){
+
+        await renderPromocodes();
+
+      }else{
+
+        await renderSettings();
+
+      }
+
+    }catch(error){
+
+      $("#content").innerHTML = `
+
+        <section class="panel">
+
+          <div class="empty">
+
+            ${esc(
+              error.message ||
+              "Не удалось загрузить раздел"
+            )}
+
+          </div>
+
+        </section>
+
+      `;
+
+    }
+
+  }
+
+
+  document
+    .querySelectorAll(
+      ".tab"
+    )
+    .forEach(
+      tab => {
+
+        tab.onclick =
+          () => {
+
+            state.tab =
+              tab.dataset.tab;
+
+            render();
+
+          };
+
+      }
+    );
+
+
+  async function boot(){
+
+    $("#app")
+      .classList
+      .remove(
+        "hidden"
+      );
+
+
+    if(
+      !tg ||
+      !tg.initData
+    ){
+
+      $("#content").innerHTML = `
+
+        <section class="panel">
+
+          <div class="empty">
+
+            Откройте админ-панель
+            через Telegram.
+
+          </div>
+
+        </section>
+
+      `;
+
+      return;
+
+    }
+
+
+    try{
+
+      const me =
+        await api(
+          "/api/admin/me"
+        );
+
+
+      const adminId =
+        String(
+          me.admin_id ||
+          me.user_id ||
+          ""
+        );
+
+
+      if(
+        !ADMIN_IDS.has(
+          adminId
+        )
+      ){
+
+        throw new Error(
+          "Доступ запрещён"
+        );
+
+      }
+
+
+      await render();
+
+    }catch(error){
+
+      $("#content").innerHTML = `
+
+        <section class="panel">
+
+          <h2>
+            Ошибка
+          </h2>
+
+          <div class="muted">
+
+            ${esc(
+              error.message ||
+              "Ошибка авторизации"
+            )}
+
+          </div>
+
+          <div class="actions">
+
+            <button
+              class="btn primary"
+              id="retry">
+
+              Повторить
+
+            </button>
+
+          </div>
+
+        </section>
+
+      `;
+
+
+      $("#retry").onclick =
+        boot;
+
+    }
+
+  }
+
+
+  boot();
+
+})();
+
+</script>
+
+</body>
+</html>
