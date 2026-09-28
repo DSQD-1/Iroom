@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
+  >
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
+  <title>IRoom — Admin</title>
+
+  <link rel="stylesheet" href="/admin.css">
+</head>
+
+<body>
+
+  <header class="admin-header">
+
+    <div class="admin-brand">
+      IR<span class="brand-pink">oom</span>
+      <small>ADMIN</small>
+    </div>
+
+    <div class="header-right">
+
+      <button
+        type="button"
+        class="icon-button mobile-menu-button"
+        id="mobileMenuButton"
+        aria-label="Открыть меню"
+      >☰</button>
+
+      <button
+        type="button"
+        class="icon-button"
+        id="refreshButton"
+        aria-label="Обновить"
+      >↻</button>
+
+      <button
+        type="button"
+        class="profile-button"
+        id="profileButton"
+      >
+        <span
+          class="profile-avatar"
+          id="profileAvatar"
+        >A</span>
+
+        <span
+          class="profile-name"
+          id="profileName"
+        >Администратор</span>
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <aside
+    class="sidebar"
+    id="sidebar"
+  >
+
+    <div class="sidebar-inner">
+
+      <div class="sidebar-title">
+        Управление
+      </div>
+
+
+      <button
+        class="nav-item active"
+        data-section="dashboard"
+        type="button"
+      >
+        <span class="nav-icon">⌂</span>
+        <span>Обзор</span>
+      </button>
+
+
+      <button
+        class="nav-item"
+        data-section="orders"
+        type="button"
+      >
+        <span class="nav-icon">▤</span>
+        <span>Заказы</span>
+
+        <span
+          class="nav-badge hidden"
+          id="ordersBadge"
+        >0</span>
+      </button>
+
+
+      <button
+        class="nav-item"
+        data-section="products"
+        type="button"
+      >
+        <span class="nav-icon">▦</span>
+        <span>Товары</span>
+      </button>
+
+
+      <button
+        class="nav-item"
+        data-section="categories"
+        type="button"
+      >
+        <span class="nav-icon">◫</span>
+        <span>Категории</span>
+      </button>
+
+
+      <div class="sidebar-separator"></div>
+
+
+      <button
+        class="nav-item"
+        data-section="promocodes"
+        type="button"
+      >
+        <span class="nav-icon">%</span>
+        <span>Промокоды</span>
+      </button>
+
+
+      <button
+        class="nav-item"
+        data-section="banners"
+        type="button"
+      >
+        <span class="nav-icon">▧</span>
+        <span>Баннеры</span>
+      </button>
+
+
+      <button
+        class="nav-item"
+        data-section="reservation"
+        type="button"
+      >
+        <span class="nav-icon">₽</span>
+        <span>Залог</span>
+      </button>
+
+
+      <button
+        class="nav-item"
+        data-section="pickup"
+        type="button"
+      >
+        <span class="nav-icon">⌖</span>
+        <span>Получение</span>
+      </button>
+
+
+      <button
+        class="nav-item"
+        data-section="users"
+        type="button"
+      >
+        <span class="nav-icon">●</span>
+        <span>Пользователи</span>
+      </button>
+
+
+      <div class="sidebar-separator"></div>
+
+
+      <button
+        class="nav-item"
+        data-section="settings"
+        type="button"
+      >
+        <span class="nav-icon">⚙</span>
+        <span>Настройки</span>
+      </button>
+
+
+      <div class="sidebar-bottom">
+
+        <button
+          class="open-store secondary-button"
+          type="button"
+          onclick="location.href='/'"
+        >
+          Открыть магазин
+        </button>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <div
+    class="sidebar-overlay"
+    id="sidebarOverlay"
+  ></div>
+
+
+  <main class="admin-main">
+
+
+    <!-- ===================================================
+         DASHBOARD
+    ==================================================== -->
+
+    <section
+      class="admin-section active"
+      id="section-dashboard"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            IROOM
+          </div>
+
+          <h1>
+            Обзор
+          </h1>
+
+          <p>
+            Основные показатели магазина и последние заказы.
+          </p>
+
+        </div>
+
+
+        <button
+          class="secondary-button"
+          id="dashboardRefresh"
+          type="button"
+        >
+          Обновить
+        </button>
+
+      </div>
+
+
+      <div class="stats-grid">
+
+        <article class="stat-card">
+
+          <div class="stat-icon">
+            ▤
+          </div>
+
+          <div class="stat-content">
+
+            <span>
+              Всего заказов
+            </span>
+
+            <strong id="statOrders">
+              0
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon">
+            !
+          </div>
+
+          <div class="stat-content">
+
+            <span>
+              Новые
+            </span>
+
+            <strong id="statNewOrders">
+              0
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon">
+            ₽
+          </div>
+
+          <div class="stat-content">
+
+            <span>
+              Залог на проверке
+            </span>
+
+            <strong id="statReservation">
+              0
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon">
+            ▦
+          </div>
+
+          <div class="stat-content">
+
+            <span>
+              Товаров
+            </span>
+
+            <strong id="statProducts">
+              0
+            </strong>
+
+          </div>
+
+        </article>
+
+      </div>
+
+
+      <div class="panel">
+
+        <div class="panel-header">
+
+          <div>
+
+            <div class="eyebrow">
+              ORDERS
+            </div>
+
+            <h2>
+              Последние заказы
+            </h2>
+
+          </div>
+
+
+          <button
+            class="text-button"
+            data-section-link="orders"
+            type="button"
+          >
+            Все заказы
+          </button>
+
+        </div>
+
+
+        <div
+          class="admin-list"
+          id="dashboardOrders"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         ORDERS
+    ==================================================== -->
+
+    <section
+      class="admin-section"
+      id="section-orders"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            ORDERS
+          </div>
+
+          <h1>
+            Заказы
+          </h1>
+
+          <p>
+            Просмотр заказов, статусов и залогов.
+          </p>
+
+        </div>
+
+
+        <div class="section-actions">
+
+          <button
+            class="danger-button"
+            id="clearOrdersButton"
+            type="button"
+          >
+            Очистить все заказы
+          </button>
+
+
+          <button
+            class="secondary-button"
+            id="ordersRefresh"
+            type="button"
+          >
+            Обновить
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-panel">
+
+        <div class="table-top">
+
+          <div class="search-box">
+
+            <input
+              id="ordersSearch"
+              type="search"
+              placeholder="Поиск заказа, клиента или товара"
+              autocomplete="off"
+            >
+
+          </div>
+
+
+          <div class="actions-row">
+
+            <button
+              class="filter-button active"
+              data-order-filter="all"
+              type="button"
+            >
+              Все
+            </button>
+
+            <button
+              class="filter-button"
+              data-order-filter="new"
+              type="button"
+            >
+              Новые
+            </button>
+
+            <button
+              class="filter-button"
+              data-order-filter="processing"
+              type="button"
+            >
+              В работе
+            </button>
+
+            <button
+              class="filter-button"
+              data-order-filter="ready"
+              type="button"
+            >
+              Готовы
+            </button>
+
+            <button
+              class="filter-button"
+              data-order-filter="completed"
+              type="button"
+            >
+              Завершены
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="orders-table"
+          id="ordersTable"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         PRODUCTS
+    ==================================================== -->
+
+    <section
+      class="admin-section"
+      id="section-products"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            CATALOG
+          </div>
+
+          <h1>
+            Товары
+          </h1>
+
+          <p>
+            Каталог, цены, изображения и варианты.
+          </p>
+
+        </div>
+
+
+        <div class="section-actions">
+
+          <div class="search-box compact">
+
+            <input
+              id="productsSearch"
+              type="search"
+              placeholder="Поиск товара"
+              autocomplete="off"
+            >
+
+          </div>
+
+
+          <button
+            class="primary-button"
+            id="addProductButton"
+            type="button"
+          >
+            Добавить товар
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           PRICE IMPORT
+      ================================================== -->
+
+      <div
+        class="admin-card"
+        style="
+          margin:0 0 22px;
+          padding:18px;
+          border:1px solid rgba(255,255,255,.08);
+          border-radius:20px;
+          background:rgba(255,255,255,.025);
+        "
+      >
+
+        <div
+          style="
+            display:flex;
+            justify-content:space-between;
+            gap:16px;
+            align-items:flex-start;
+            flex-wrap:wrap;
+          "
+        >
+
+          <div>
+
+            <div
+              class="eyebrow"
+              style="margin-bottom:6px;"
+            >
+              PRICE IMPORT
+            </div>
+
+            <h2
+              style="
+                margin:0 0 6px;
+                font-size:20px;
+              "
+            >
+              Импорт прайса
+            </h2>
+
+            <p
+              style="
+                margin:0;
+                color:rgba(255,255,255,.58);
+                line-height:1.5;
+                max-width:720px;
+              "
+            >
+              Вставьте прайс обычным текстом.
+              Импорт добавляет новые позиции и обновляет только
+              соответствующие товары/варианты. Товары, которых нет
+              в прайсе, не удаляются.
+            </p>
+
+          </div>
+
+
+          <div
+            style="
+              padding:8px 12px;
+              border-radius:999px;
+              background:rgba(255,255,255,.05);
+              color:rgba(255,255,255,.55);
+              font-size:12px;
+              white-space:nowrap;
+            "
+          >
+            Без удаления каталога
+          </div>
+
+        </div>
+
+
+        <div
+          style="
+            margin-top:16px;
+          "
+        >
+
+          <textarea
+            id="priceImportText"
+            rows="14"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="Например:
+
+18 Pro 256GB Black eSim - 122.000
+18 Pro 256GB Glacier eSim - 122.000
+iPhone 18 Pro Max 256GB Black eSim - 145.000
+
+Dyson ...
+По запросу
+От 19.000
+..."
+            style="
+              width:100%;
+              min-height:280px;
+              resize:vertical;
+              box-sizing:border-box;
+              padding:15px;
+              border-radius:15px;
+              border:1px solid rgba(255,255,255,.09);
+              outline:none;
+              background:#090909;
+              color:#fff;
+              font:inherit;
+              line-height:1.5;
+            "
+          ></textarea>
+
+        </div>
+
+
+        <div
+          style="
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            align-items:center;
+            flex-wrap:wrap;
+            margin-top:12px;
+          "
+        >
+
+          <div
+            id="priceImportStatus"
+            style="
+              color:rgba(255,255,255,.55);
+              font-size:13px;
+              line-height:1.4;
+            "
+          >
+            Повторный импорт одинаковых позиций не создаёт дубли.
+          </div>
+
+
+          <button
+            class="primary-button"
+            id="importPriceButton"
+            type="button"
+          >
+            Импортировать прайс
+          </button>
+
+        </div>
+
+
+        <div
+          id="priceImportReport"
+          style="
+            display:none;
+            margin-top:16px;
+            padding:14px;
+            border-radius:15px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.07);
+          "
+        ></div>
+
+      </div>
+
+
+      <div
+        class="products-grid"
+        id="productsGrid"
+      ></div>
+
+    </section>
+
+
+    <!-- ===================================================
+         CATEGORIES
+    ==================================================== -->
+
+    <section
+      class="admin-section"
+      id="section-categories"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            CATEGORIES
+          </div>
+
+          <h1>
+            Категории
+          </h1>
+
+          <p>
+            Категории товаров и порядок отображения.
+          </p>
+
+        </div>
+
+
+        <button
+          class="primary-button"
+          id="addCategoryButton"
+          type="button"
+        >
+          Добавить категорию
+        </button>
+
+      </div>
+
+
+      <div
+        class="category-admin-grid"
+        id="categoriesGrid"
+      ></div>
+
+    </section>
+
+
+    <!-- ===================================================
+         PROMOCODES
+    ==================================================== -->
+
+    <section
+      class="admin-section"
+      id="section-promocodes"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            PROMOCODES
+          </div>
+
+          <h1>
+            Промокоды
+          </h1>
+
+          <p>
+            Создание, редактирование и отключение промокодов.
+          </p>
+
+        </div>
+
+
+        <button
+          class="primary-button"
+          id="addPromoButton"
+          type="button"
+        >
+          Создать промокод
+        </button>
+
+      </div>
+
+
+      <div
+        class="promo-grid"
+        id="promoGrid"
+      ></div>
+
+    </section>
+
+
+    <!-- ===================================================
+         BANNERS
+    ==================================================== -->
+
+    <section
+      class="admin-section"
+      id="section-banners"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            HOME
+          </div>
+
+          <h1>
+            Баннеры
+          </h1>
+
+          <p>
+            Баннеры и промо-блоки главной страницы.
+          </p>
+
+        </div>
+
+
+        <button
+          class="primary-button"
+          id="addBannerButton"
+          type="button"
+        >
+          Добавить баннер
+        </button>
+
+      </div>
+
+
+      <div
+        class="banners-grid"
+        id="bannersGrid"
+      ></div>
+
+    </section>
+
+
+    <!-- ===================================================
+         RESERVATION
+    ==================================================== -->
+
+    <section
+      class="admin-section"
+      id="section-reservation"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            DEPOSIT
+          </div>
+
+          <h1>
+            Залог
+          </h1>
+
+          <p>
+            Настройка реквизитов и проверка переводов.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="reservation-layout">
+
+
+        <form
+          class="panel settings-form"
+          id="reservationForm"
+        >
+
+          <div class="panel-header">
+
+            <div>
+
+              <h2>
+                Настройки залога
+              </h2>
+
+              <p>
+                Эти данные показываются клиенту перед оплатой.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel-body">
+
+            <div class="form-grid">
+
+              <div class="form-group">
+
+                <label for="reservationAmount">
+                  Сумма залога
+                </label>
+
+                <input
+                  id="reservationAmount"
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder="10000"
+                >
+
+              </div>
+
+
+              <div class="form-group">
+
+                <label for="reservationRecipient">
+                  Получатель
+                </label>
+
+                <input
+                  id="reservationRecipient"
+                  type="text"
+                  placeholder="Иван Иванов"
+                >
+
+              </div>
+
+
+              <div class="form-group full">
+
+                <label for="reservationCard">
+                  Номер карты
+                </label>
+
+                <input
+                  id="reservationCard"
+                  type="text"
+                  placeholder="0000 0000 0000 0000"
+                  inputmode="numeric"
+                >
+
+              </div>
+
+
+              <div class="form-group full">
+
+                <label for="reservationInstruction">
+                  Инструкция
+                </label>
+
+                <textarea
+                  id="reservationInstruction"
+                  rows="5"
+                  placeholder="Переведите залог и нажмите кнопку «Я оплатил(а) залог»."
+                ></textarea>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+              <button
+                class="primary-button"
+                type="submit"
+              >
+                Сохранить настройки
+              </button>
+
+            </div>
+
+          </div>
+
+        </form>
+
+
+        <div class="panel">
+
+          <div class="panel-header">
+
+            <div>
+
+              <h2>
+                Залоги на проверке
+              </h2>
+
+              <p>
+                Заказы, где клиент сообщил об оплате.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="admin-list"
+            id="reservationOrders"
+          ></div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         PICKUP
+    ==================================================== -->
+
+    <section
+      class="admin-section"
+      id="section-pickup"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            DELIVERY
+          </div>
+
+          <h1>
+            Получение
+          </h1>
+
+          <p>
+            Точки самовывоза и информация для клиента.
+          </p>
+
+        </div>
+
+
+        <button
+          class="primary-button"
+          id="addPickupButton"
+          type="button"
+        >
+          Добавить точку
+        </button>
+
+      </div>
+
+
+      <div
+        class="pickup-grid"
+        id="pickupGrid"
+      ></div>
+
+    </section>
+
+
+    <!-- ===================================================
+         USERS
+    ==================================================== -->
+
+    <section
+      class="admin-section"
+      id="section-users"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            USERS
+          </div>
+
+          <h1>
+            Пользователи
+          </h1>
+
+          <p>
+            Пользователи, которые взаимодействовали с магазином.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-panel">
+
+        <div class="table-top">
+
+          <div class="search-box">
+
+            <input
+              id="usersSearch"
+              type="search"
+              placeholder="Поиск пользователя"
+              autocomplete="off"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="users-table"
+          id="usersTable"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         SETTINGS
+    ==================================================== -->
+
+    <section
+      class="admin-section"
+      id="section-settings"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            SETTINGS
+          </div>
+
+          <h1>
+            Настройки
+          </h1>
+
+          <p>
+            Основные параметры магазина.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <form
+        class="panel settings-form"
+        id="storeSettingsForm"
+      >
+
+        <div class="panel-header">
+
+          <div>
+
+            <h2>
+              Магазин
+            </h2>
+
+            <p>
+              Общие настройки IRoom.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="panel-body">
+
+          <div class="form-grid">
+
+            <div class="form-group">
+
+              <label for="storeName">
+                Название магазина
+              </label>
+
+              <input
+                id="storeName"
+                type="text"
+                placeholder="iroom"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="managerUsername">
+                Username менеджера
+              </label>
+
+              <input
+                id="managerUsername"
+                type="text"
+                placeholder="@manager"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="channelUsername">
+                Username канала
+              </label>
+
+              <input
+                id="channelUsername"
+                type="text"
+                placeholder="@iroom"
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="form-actions">
+
+            <button
+              class="primary-button"
+              type="submit"
+            >
+              Сохранить настройки
+            </button>
+
+          </div>
+
+        </div>
+
+      </form>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       MODAL
+  ====================================================== -->
+
+  <div
+    class="modal-backdrop"
+    id="modalBackdrop"
+  >
+
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
+
+      <button
+        class="modal-close"
+        id="modalClose"
+        type="button"
+        aria-label="Закрыть"
+      >
+        ×
+      </button>
+
+
+      <div
+        class="modal-content"
+        id="modalContent"
+      ></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       TOAST
+  ====================================================== -->
+
+  <div
+    class="admin-toast"
+    id="adminToast"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- =====================================================
+       TELEGRAM
+  ====================================================== -->
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- =====================================================
+       ADMIN JS
+  ====================================================== -->
+
+  <script src="/admin.js"></script>
+
+</body>
+</html>
