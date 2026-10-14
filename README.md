@@ -17,3 +17,9 @@ No sample product images are included in this ZIP to make GitHub upload easier. 
 Extract the ZIP in Files, open the repository on GitHub, choose Add file → Upload files, select the contents of `iroom-market-project`, then commit. Deploy latest commit in Render.
 
 Important: configure environment variables in Render and test the live database and Telegram bot before taking real orders.
+
+## Управление категориями (обновление)
+
+В админ-панели категории поддерживают название, описание, изображение, родительскую категорию (подкатегории) и порядок отображения. Изображение можно выбрать через файловый выбор iPhone (галерея, если браузер её предлагает) до 8 МБ; оно хранится как data URL в базе и сохраняется после перезапуска Render. Удаление категории требует подтверждения. Перед массовым использованием проверьте удаление на тестовой категории.
+
+После загрузки обновлённых файлов в GitHub Render должен развернуть проект на Node.js 24 с командами `npm install` и `npm start`. Не удаляйте базу Turso.

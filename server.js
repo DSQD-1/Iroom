@@ -1242,6 +1242,10 @@ async function migrate() {
     )
   `);
 
+  await ensureColumn("categories", "description", "TEXT DEFAULT ''");
+  await ensureColumn("categories", "parent_id", "INTEGER");
+  await ensureColumn("categories", "sort_order", "INTEGER DEFAULT 0");
+
   await db.execute(`
     CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -4006,7 +4010,7 @@ app.get(
       await db.execute(`
         SELECT *
         FROM categories
-        ORDER BY id ASC
+        ORDER BY sort_order ASC, id ASC
       `);
 
     res.json({
@@ -4028,17 +4032,15 @@ app.post(
         await db.execute({
           sql: `
             INSERT INTO categories
-            (name, image_url)
-            VALUES (?, ?)
+            (name, image_url, description, parent_id, sort_order)
+            VALUES (?, ?, ?, ?, ?)
           `,
           args: [
-            stringValue(
-              req.body.name
-            ),
-
-            stringValue(
-              req.body.image_url
-            )
+            stringValue(req.body.name),
+            stringValue(req.body.image_url),
+            stringValue(req.body.description),
+            req.body.parent_id ? integerId(req.body.parent_id) : null,
+            Number(req.body.sort_order || 0)
           ]
         });
 
@@ -4073,21 +4075,19 @@ app.put(
           UPDATE categories
           SET
             name = ?,
-            image_url = ?
+            image_url = ?,
+            description = ?,
+            parent_id = ?,
+            sort_order = ?
           WHERE id = ?
         `,
         args: [
-          stringValue(
-            req.body.name
-          ),
-
-          stringValue(
-            req.body.image_url
-          ),
-
-          integerId(
-            req.params.id
-          )
+          stringValue(req.body.name),
+          stringValue(req.body.image_url),
+          stringValue(req.body.description),
+          req.body.parent_id ? integerId(req.body.parent_id) : null,
+          Number(req.body.sort_order || 0),
+          integerId(req.params.id)
         ]
       });
 
