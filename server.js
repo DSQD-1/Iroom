@@ -1275,7 +1275,9 @@ async function migrate() {
     "Подписки",
     "Другое",
     "Apple / iTunes",
-    "Telegram Stars"
+    "Telegram Stars",
+    "Steam",
+    "OpenAI"
   ]) {
     const existing = await db.execute({
       sql: "SELECT id FROM categories WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) LIMIT 1",
@@ -1354,6 +1356,9 @@ async function migrate() {
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  await addColumnIfMissing("orders", "store_type", "TEXT DEFAULT 'tech'");
+  await db.execute("UPDATE orders SET store_type = 'tech' WHERE store_type IS NULL OR TRIM(store_type) = ''");
 
   // Global public order numbering.
   // If an old database contains id=0, shift the public numbering
@@ -2384,10 +2389,13 @@ app.get(
             SELECT *
             FROM orders
             WHERE telegram_user_id = ?
+              AND (? = '' OR store_type = ?)
             ORDER BY id DESC
           `,
           args: [
-            telegramId
+            telegramId,
+            ["tech", "digital"].includes(String(req.query.store_type || "")) ? String(req.query.store_type) : "",
+            ["tech", "digital"].includes(String(req.query.store_type || "")) ? String(req.query.store_type) : ""
           ]
         });
 
@@ -2836,6 +2844,7 @@ app.post(
               user_id,
               telegram_user_id,
               product_id,
+              store_type,
               variant_id,
               product_name,
               variant_text,
@@ -2868,7 +2877,7 @@ app.post(
             (
               ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
               ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-              ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP,
+              ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP,
               CURRENT_TIMESTAMP
             )
             RETURNING *
@@ -2882,6 +2891,8 @@ app.post(
             ),
 
             productId,
+
+            ["tech", "digital"].includes(String(req.body.store_type || "")) ? String(req.body.store_type) : "tech",
 
             variantId,
 
