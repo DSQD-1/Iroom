@@ -1242,9 +1242,9 @@ async function migrate() {
     )
   `);
 
-  await ensureColumn("categories", "description", "TEXT DEFAULT ''");
-  await ensureColumn("categories", "parent_id", "INTEGER");
-  await ensureColumn("categories", "sort_order", "INTEGER DEFAULT 0");
+  await addColumnIfMissing("categories", "description", "TEXT DEFAULT ''");
+  await addColumnIfMissing("categories", "parent_id", "INTEGER");
+  await addColumnIfMissing("categories", "sort_order", "INTEGER DEFAULT 0");
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS products (
