@@ -23,7 +23,8 @@
     me: null,
     viewedProducts: [],
 
-    route: "home",
+    route: "store-select",
+    activeStore: "tech",
     categoryId: null,
     search: "",
 
@@ -187,7 +188,7 @@
       const value =
         JSON.parse(
           localStorage.getItem(
-            "iroom_cart"
+            `iroom_cart_${state.activeStore || "tech"}`
           ) || "[]"
         );
 
@@ -201,7 +202,7 @@
 
   function saveCart() {
     localStorage.setItem(
-      "iroom_cart",
+      `iroom_cart_${state.activeStore || "tech"}`,
       JSON.stringify(state.cart)
     );
 
@@ -576,7 +577,7 @@
   async function loadOrders() {
     const data =
       await api(
-        "/api/orders"
+        `/api/orders?store_type=${encodeURIComponent(state.activeStore || "tech")}`
       );
 
     state.orders =
@@ -710,7 +711,9 @@
 
     if (!screen) return;
 
-    if (
+    if (state.route === "store-select") {
+      renderStoreSelect(screen);
+    } else if (
       state.route ===
       "home"
     ) {
@@ -720,6 +723,8 @@
       "catalog"
     ) {
       renderCatalog(screen);
+    } else if (state.route === "digital-loading") {
+      renderDigitalLoading(screen);
     } else if (
       state.route ===
       "digital-shop"
@@ -919,6 +924,75 @@
   }
 
   /* =========================================================
+     STORE SELECTOR + STORE ISOLATION
+  ========================================================= */
+
+  const DIGITAL_CATEGORY_NAMES = [
+    "PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes",
+    "Telegram Stars", "Steam", "OpenAI", "Быстрое пополнение"
+  ];
+
+  function isDigitalCategory(category) {
+    const name = String(category?.name || "").trim().toLowerCase();
+    return DIGITAL_CATEGORY_NAMES.some(item => item.toLowerCase() === name)
+      || name.includes("steam") || name.includes("openai")
+      || name.includes("цифров") || name.includes("пополнен");
+  }
+
+  function isDigitalProduct(product) {
+    const category = state.categories.find(c => String(c.id) === String(product.category_id));
+    return isDigitalCategory(category) || String(product.store_type || "").toLowerCase() === "digital";
+  }
+
+  function storeProducts(store = state.activeStore) {
+    return state.products.filter(product => store === "digital" ? isDigitalProduct(product) : !isDigitalProduct(product));
+  }
+
+  function switchStore(store) {
+    if (!['tech', 'digital'].includes(store)) return;
+    saveCart();
+    state.activeStore = store;
+    state.cart = loadCart();
+    state.categoryId = null;
+    state.search = "";
+    updateCartBadge();
+    if (store === "digital") {
+      navigate("digital-loading");
+      window.setTimeout(() => navigate("digital-shop"), 720);
+    } else {
+      navigate("home");
+    }
+  }
+
+  function renderDigitalLoading(screen) {
+    screen.innerHTML = `<div class="digital-loading-screen"><div class="digital-loading-orbit"><span>✦</span></div><div class="digital-loading-logo"><span>IR</span>oom</div><h1>Цифровой магазин</h1><p>Загружаем каталог и предложения…</p><div class="digital-loading-track"><i></i></div></div>`;
+  }
+
+  function renderStoreSelect(screen) {
+    screen.innerHTML = `
+      <div class="screen store-select-screen">
+        <section class="store-select-hero">
+          <div class="store-select-logo"><span>IR</span>oom <small>market</small></div>
+          <div class="eyebrow">ОДИН БРЕНД · ДВА МАГАЗИНА</div>
+          <h1>Выбери свой<br><span>магазин</span></h1>
+          <p>Техника и цифровые товары — отдельно, удобно и без смешивания корзин.</p>
+        </section>
+        <div class="store-choice-grid">
+          <button class="store-choice-card tech-choice" data-store-choice="tech" type="button">
+            <span class="store-choice-art"><span class="store-choice-glow"></span><span class="store-choice-symbol">⌁</span></span>
+            <span class="store-choice-copy"><strong>Магазин техники</strong><small>iPhone, iPad, MacBook, AirPods и аксессуары</small><b>Перейти в магазин <span>↗</span></b></span>
+          </button>
+          <button class="store-choice-card digital-choice" data-store-choice="digital" type="button">
+            <span class="store-choice-art"><span class="store-choice-glow"></span><span class="store-choice-symbol">✦</span></span>
+            <span class="store-choice-copy"><strong>Цифровой магазин</strong><small>Telegram, Apple, Steam, OpenAI, PlayStation</small><b>Открыть цифровой <span>↗</span></b></span>
+          </button>
+        </div>
+        <p class="store-select-foot">Чёрный интерфейс · фирменные розовые акценты</p>
+      </div>`;
+    $$('[data-store-choice]').forEach(button => button.addEventListener('click', () => switchStore(button.dataset.storeChoice)));
+  }
+
+  /* =========================================================
      HOME
   ========================================================= */
 
@@ -931,8 +1005,9 @@
     const banner =
       state.banners[0];
 
+    const storeItems = storeProducts("tech");
     const newest =
-      state.products
+      storeItems
         .filter(
           (item) =>
             Number(item.is_new) ===
@@ -943,7 +1018,7 @@
     const products =
       newest.length
         ? newest
-        : state.products.slice(
+        : storeItems.slice(
             0,
             6
           );
@@ -1162,7 +1237,7 @@
 
   function renderCatalog(screen) {
     let products =
-      [...state.products];
+      [...storeProducts("tech")];
 
     if (state.categoryId) {
       products =
@@ -1231,7 +1306,7 @@
             Все
           </button>
 
-          ${state.categories
+          ${state.categories.filter(category => !isDigitalCategory(category))
             .map(
               (category) => `
                 <button
@@ -1294,20 +1369,9 @@
   ========================================================= */
 
   function renderDigitalShop(screen) {
-    const digitalNames = [
-      "PlayStation / PS Plus",
-      "Подписки",
-      "Другое",
-      "Apple / iTunes",
-      "Telegram Stars"
-    ];
-    const categories = state.categories.filter(category =>
-      digitalNames.some(name => String(category.name || "").trim().toLowerCase() === name.toLowerCase())
-    );
+    const categories = state.categories.filter(isDigitalCategory);
     const selectedCategory = state.categoryId;
-    let products = [...state.products].filter(product =>
-      categories.some(category => String(category.id) === String(product.category_id))
-    );
+    let products = storeProducts("digital");
     if (selectedCategory) products = products.filter(product => String(product.category_id) === String(selectedCategory));
     const query = String(state.search || "").trim().toLowerCase();
     if (query) products = products.filter(product => [product.name, product.description].filter(Boolean).join(" ").toLowerCase().includes(query));
@@ -1323,7 +1387,7 @@
 
     screen.innerHTML = `
       <div class="screen digital-shop-page">
-        <button class="digital-back" data-action="catalog" type="button">‹ <span>Вернуться в iroom</span></button>
+        <button class="digital-back" data-action="store-select" type="button">‹ <span>Выбрать магазин</span></button>
         <section class="digital-hero">
           <div class="digital-hero-glow"></div>
           <div class="eyebrow">IROOM MARKET · DIGITAL</div>
@@ -2709,6 +2773,7 @@
         const item of state.cart
       ) {
         const payload = {
+          store_type: state.activeStore || "tech",
           product_id:
             item.product_id,
 
@@ -3775,7 +3840,7 @@
     if (!container) return;
 
     container.innerHTML =
-      state.categories
+      state.categories.filter(category => state.activeStore === "digital" ? isDigitalCategory(category) : !isDigitalCategory(category))
         .map(
           (category) => `
             <button
@@ -3804,14 +3869,7 @@
         button.addEventListener(
           "click",
           () => {
-            navigate(
-              "catalog",
-              {
-                categoryId:
-                  button.dataset
-                    .drawerCategory
-              }
-            );
+            navigate(state.activeStore === "digital" ? "digital-shop" : "catalog", { categoryId: button.dataset.drawerCategory });
           }
         );
       });
@@ -4409,12 +4467,10 @@
   function handleAction(
     action
   ) {
-    if (action === "digital-shop") {
-      state.categoryId = null;
-      state.search = "";
-      navigate("digital-shop");
-      return;
-    }
+    if (action === "digital-shop") { switchStore("digital"); return; }
+    if (action === "store-tech") { switchStore("tech"); return; }
+
+    if (action === "store-select") { navigate("store-select"); return; }
 
     if (
       action ===
