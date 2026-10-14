@@ -2557,3 +2557,24 @@ main {
 .digital-footer-mark { margin:25px 0 2px; text-align:center; color:#5e535d; font-size:9px; font-weight:900; letter-spacing:2px; }.digital-footer-mark span { color:#a14d79; }
 @media(min-width:620px) { .digital-quick-grid { grid-template-columns:repeat(5,minmax(0,1fr)); }.digital-category-grid-v2 { grid-template-columns:repeat(3,minmax(0,1fr)); }.digital-hero-v2 { padding:24px 26px 18px; }.digital-hero-decoration { right:35px; } }
 @media(max-width:360px) { .digital-quick-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.digital-category-grid-v2 .digital-category-card { min-height:116px; } }
+
+
+/* Minimal digital store: categories -> products -> product details */
+.digital-minimal { min-height: 100vh; padding: 18px 16px 40px; background: #050505; color: #f8f5f8; }
+.digital-minimal-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:30px; }
+.digital-minimal-back { border:0; background:transparent; color:#c6c0c7; padding:9px 0; font-size:14px; }
+.digital-minimal-brand { font-weight:850; letter-spacing:-.5px; font-size:18px; }
+.digital-minimal-brand > span { color:#ff4da6; }
+.digital-minimal-brand small { color:#8b828a; font-size:9px; letter-spacing:1.5px; margin-left:5px; }
+.digital-minimal-intro { margin:12px 0 25px; }
+.digital-minimal-intro h1,.digital-category-title h1 { font-size:27px; letter-spacing:-.8px; margin:0 0 7px; }
+.digital-minimal-intro p,.digital-category-title p { color:#8e8790; font-size:14px; margin:0; }
+.digital-minimal-category-list { display:flex; flex-direction:column; gap:10px; }
+.digital-minimal-category { width:100%; display:flex; align-items:center; gap:14px; min-height:76px; padding:14px; border:1px solid #292329; border-radius:17px; background:linear-gradient(110deg,#151015,#0b0b0b); color:#fff; text-align:left; }
+.digital-minimal-category-icon,.digital-category-title-icon { display:flex; align-items:center; justify-content:center; flex-shrink:0; width:44px; height:44px; border-radius:13px; background:rgba(255,65,157,.12); border:1px solid rgba(255,65,157,.24); color:#ff5eae; font-size:23px; }
+.digital-minimal-category-name { flex:1; font-size:16px; font-weight:700; }
+.digital-minimal-chevron { color:#ff5eae; font-size:28px; line-height:1; }
+.digital-category-title { display:flex; flex-direction:column; align-items:flex-start; gap:10px; margin:8px 0 22px; }
+.digital-category-title-icon { margin-bottom:2px; }
+.digital-minimal-empty { padding:30px 18px; border:1px solid #292329; border-radius:16px; text-align:center; color:#a49aa4; }
+.digital-minimal .product-grid { margin-top:0; }

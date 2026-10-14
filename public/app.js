@@ -1371,68 +1371,44 @@
   function renderDigitalShop(screen) {
     const categories = state.categories.filter(isDigitalCategory);
     const selectedCategory = state.categoryId;
+    const selected = selectedCategory
+      ? categories.find(category => String(category.id) === String(selectedCategory))
+      : null;
     let products = storeProducts("digital");
-    if (selectedCategory) products = products.filter(product => String(product.category_id) === String(selectedCategory));
+    if (selected) products = products.filter(product => String(product.category_id) === String(selected.id));
     const query = String(state.search || "").trim().toLowerCase();
     if (query) products = products.filter(product => [product.name, product.description].filter(Boolean).join(" ").toLowerCase().includes(query));
 
     const categoryVisual = name => {
       const n = String(name || "").toLowerCase();
-      if (n.includes("playstation") || n.includes("ps plus")) return ["◉", "PS Store · PS Plus", "digital-ps"];
-      if (n.includes("apple") || n.includes("itunes")) return ["⌘", "Apple ID · iTunes", "digital-apple"];
-      if (n.includes("telegram") || n.includes("звёзд")) return ["✦", "Telegram Stars", "digital-stars"];
-      if (n.includes("steam")) return ["◈", "Игры и баланс Steam", "digital-steam"];
-      if (n.includes("openai")) return ["◎", "AI-сервисы", "digital-ai"];
-      if (n.includes("подпис")) return ["♛", "Сервисы и подписки", "digital-subscriptions"];
-      return ["✧", "Цифровые товары", "digital-other"];
+      if (n.includes("playstation") || n.includes("ps plus")) return "◉";
+      if (n.includes("apple") || n.includes("itunes")) return "⌘";
+      if (n.includes("telegram") || n.includes("звёзд")) return "✦";
+      if (n.includes("steam")) return "◈";
+      if (n.includes("openai")) return "◎";
+      if (n.includes("подпис")) return "♛";
+      return "✧";
     };
 
-    const quickServices = [
-      { name: "Telegram", subtitle: "Звёзды", icon: "✦", match: /telegram|звёзд/i, cls: "quick-telegram" },
-      { name: "Apple", subtitle: "iTunes", icon: "⌘", match: /apple|itunes/i, cls: "quick-apple" },
-      { name: "Steam", subtitle: "Пополнение", icon: "◈", match: /steam/i, cls: "quick-steam" },
-      { name: "OpenAI", subtitle: "AI-сервисы", icon: "◎", match: /openai/i, cls: "quick-openai" },
-      { name: "PlayStation", subtitle: "PS Store", icon: "◉", match: /playstation|ps plus/i, cls: "quick-ps" }
-    ];
-
     screen.innerHTML = `
-      <div class="screen digital-shop-page digital-v2">
-        <button class="digital-back" data-action="store-select" type="button">‹ <span>Все магазины</span></button>
-        <section class="digital-hero-v2">
-          <div class="digital-hero-top"><span class="digital-brand-mark">IR<span>✦</span></span><span class="digital-status"><i></i> DIGITAL STORE</span></div>
-          <div class="digital-hero-copy"><div class="eyebrow">ЦИФРОВОЙ МАРКЕТПЛЕЙС</div><h1>Всё цифровое.<br><span>В одном месте.</span></h1><p>Пополнение баланса, игровые сервисы и подписки.</p></div>
-          <div class="digital-hero-decoration"><span>✦</span><i></i><b></b></div>
-          <div class="digital-hero-bottom"><span>Быстрое оформление</span><span>Поддержка менеджера</span></div>
-        </section>
-
-        <section class="digital-quick-section">
-          <div class="digital-section-head"><div><div class="eyebrow">БЫСТРЫЙ ДОСТУП</div><h2>Популярные сервисы</h2></div><span class="digital-count">01 — 05</span></div>
-          <div class="digital-quick-grid">
-            ${quickServices.map(service => {
-              const category = categories.find(c => service.match.test(String(c.name || "")));
-              return `<button class="digital-quick-card ${service.cls}" data-digital-category="${category ? escapeHtml(category.id) : ""}" type="button"><span class="quick-icon">${service.icon}</span><strong>${service.name}</strong><small>${service.subtitle}</small><span class="quick-arrow">↗</span></button>`;
-            }).join("")}
-          </div>
-        </section>
-
-        <section class="digital-categories-section">
-          <div class="digital-section-head"><div><div class="eyebrow">КАТАЛОГ IROOM</div><h2>Все категории</h2></div><span class="digital-count">${categories.length} разделов</span></div>
-          ${categories.length ? `<div class="digital-category-grid digital-category-grid-v2">${categories.map(category => { const [icon, desc, cls] = categoryVisual(category.name); return `<button class="digital-category-card ${cls} ${String(selectedCategory || "") === String(category.id) ? "selected" : ""}" data-digital-category="${escapeHtml(category.id)}" type="button"><span class="digital-category-icon">${icon}</span><span class="digital-category-text"><strong>${escapeHtml(category.name)}</strong><small>${desc}</small></span><span class="digital-category-arrow">↗</span></button>`; }).join("")}</div>` : `<div class="digital-empty"><span>✦</span><strong>Каталог скоро появится</strong><p>Разделы цифровых товаров можно добавить через админ-панель.</p></div>`}
-        </section>
-
-        <section class="digital-products-section">
-          <div class="digital-section-head digital-products-head"><div><div class="eyebrow">ВЫБОР IROOM</div><h2>${selectedCategory ? escapeHtml(categories.find(c => String(c.id) === String(selectedCategory))?.name || "Товары") : "Товары и предложения"}</h2></div>${selectedCategory ? '<button class="digital-reset" data-digital-category="" type="button">Сбросить ×</button>' : ""}</div>
-          ${query ? `<p class="digital-query">Результаты поиска: «${escapeHtml(state.search)}»</p>` : ""}
-          ${products.length ? `<div class="product-grid digital-product-grid">${products.map(productCard).join("")}</div>` : `<div class="digital-empty digital-products-empty"><span>✧</span><strong>Пока нет доступных товаров</strong><p>${selectedCategory ? "В этом разделе товары ещё не добавлены." : "Как только товары появятся в каталоге, они отобразятся здесь."}</p>${selectedCategory ? '<button class="secondary-button" data-digital-category="" type="button">Показать все товары</button>' : ""}</div>`}
-        </section>
-        <section class="digital-help-card"><div class="digital-help-icon">♡</div><div><strong>Нужна помощь?</strong><p>Напишите менеджеру — поможем с выбором и оформлением.</p></div><a href="https://t.me/iroom_24" target="_blank" rel="noopener">Связаться ↗</a></section>
-        <div class="digital-footer-mark">IROOM <span>MARKET</span> · DIGITAL</div>
+      <div class="screen digital-shop-page digital-minimal">
+        <header class="digital-minimal-header">
+          ${selected ? `<button class="digital-minimal-back" data-digital-category="" type="button">‹ Все категории</button>` : `<button class="digital-minimal-back" data-action="store-select" type="button">‹ Магазины</button>`}
+          <div class="digital-minimal-brand">IR<span>✦</span>oom <small>DIGITAL</small></div>
+        </header>
+        ${selected ? `
+          <section class="digital-category-title"><span class="digital-category-title-icon">${categoryVisual(selected.name)}</span><h1>${escapeHtml(selected.name)}</h1>${selected.description ? `<p>${escapeHtml(selected.description)}</p>` : ""}</section>
+          ${products.length ? `<div class="product-grid digital-product-grid">${products.map(productCard).join("")}</div>` : `<div class="digital-minimal-empty">В этой категории пока нет товаров.</div>`}
+        ` : `
+          <section class="digital-minimal-intro"><h1>Цифровой магазин</h1><p>Выберите категорию</p></section>
+          ${categories.length ? `<div class="digital-minimal-category-list">${categories.map(category => `<button class="digital-minimal-category" data-digital-category="${escapeHtml(category.id)}" type="button"><span class="digital-minimal-category-icon">${categoryVisual(category.name)}</span><span class="digital-minimal-category-name">${escapeHtml(category.name)}</span><span class="digital-minimal-chevron">›</span></button>`).join("")}</div>` : `<div class="digital-minimal-empty">Категории пока не добавлены.</div>`}
+        `}
       </div>`;
 
     $$('[data-digital-category]').forEach(button => button.addEventListener('click', () => {
       state.categoryId = button.dataset.digitalCategory || null;
       render();
-      requestAnimationFrame(() => { const el = document.querySelector('.digital-products-head'); if (el) el.scrollIntoView({behavior:'smooth', block:'start'}); });
+      requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
     }));
     bindDynamicEvents();
   }

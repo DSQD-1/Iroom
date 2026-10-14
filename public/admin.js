@@ -4717,6 +4717,11 @@
       return;
     }
 
+    // The legacy admin.html initially hides both containers. Reveal the app
+    // only after authorization succeeds so it never stays as a blank black page.
+    document.getElementById("login")?.classList.add("hidden");
+    document.getElementById("app")?.classList.remove("hidden");
+
     await Promise.all([
       loadCategories(),
       loadStoreSettings()
