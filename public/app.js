@@ -1378,36 +1378,55 @@
 
     const categoryVisual = name => {
       const n = String(name || "").toLowerCase();
-      if (n.includes("playstation")) return ["◉", "PS Store и PS Plus", "digital-ps"];
-      if (n.includes("apple")) return ["⌘", "Apple / iTunes", "digital-apple"];
-      if (n.includes("telegram")) return ["✦", "Звёзды Telegram", "digital-stars"];
+      if (n.includes("playstation") || n.includes("ps plus")) return ["◉", "PS Store · PS Plus", "digital-ps"];
+      if (n.includes("apple") || n.includes("itunes")) return ["⌘", "Apple ID · iTunes", "digital-apple"];
+      if (n.includes("telegram") || n.includes("звёзд")) return ["✦", "Telegram Stars", "digital-stars"];
+      if (n.includes("steam")) return ["◈", "Игры и баланс Steam", "digital-steam"];
+      if (n.includes("openai")) return ["◎", "AI-сервисы", "digital-ai"];
       if (n.includes("подпис")) return ["♛", "Сервисы и подписки", "digital-subscriptions"];
-      return ["✧", "Другие цифровые товары", "digital-other"];
+      return ["✧", "Цифровые товары", "digital-other"];
     };
 
+    const quickServices = [
+      { name: "Telegram", subtitle: "Звёзды", icon: "✦", match: /telegram|звёзд/i, cls: "quick-telegram" },
+      { name: "Apple", subtitle: "iTunes", icon: "⌘", match: /apple|itunes/i, cls: "quick-apple" },
+      { name: "Steam", subtitle: "Пополнение", icon: "◈", match: /steam/i, cls: "quick-steam" },
+      { name: "OpenAI", subtitle: "AI-сервисы", icon: "◎", match: /openai/i, cls: "quick-openai" },
+      { name: "PlayStation", subtitle: "PS Store", icon: "◉", match: /playstation|ps plus/i, cls: "quick-ps" }
+    ];
+
     screen.innerHTML = `
-      <div class="screen digital-shop-page">
-        <button class="digital-back" data-action="store-select" type="button">‹ <span>Выбрать магазин</span></button>
-        <section class="digital-hero">
-          <div class="digital-hero-glow"></div>
-          <div class="eyebrow">IROOM MARKET · DIGITAL</div>
-          <h1>Цифровые<br><span>товары</span></h1>
-          <p>Подписки, игровые сервисы и пополнения — в отдельном магазине внутри IRoom.</p>
-          <div class="digital-hero-tags"><span>✦ Быстрое оформление</span><span>♡ Поддержка менеджера</span></div>
+      <div class="screen digital-shop-page digital-v2">
+        <button class="digital-back" data-action="store-select" type="button">‹ <span>Все магазины</span></button>
+        <section class="digital-hero-v2">
+          <div class="digital-hero-top"><span class="digital-brand-mark">IR<span>✦</span></span><span class="digital-status"><i></i> DIGITAL STORE</span></div>
+          <div class="digital-hero-copy"><div class="eyebrow">ЦИФРОВОЙ МАРКЕТПЛЕЙС</div><h1>Всё цифровое.<br><span>В одном месте.</span></h1><p>Пополнение баланса, игровые сервисы и подписки.</p></div>
+          <div class="digital-hero-decoration"><span>✦</span><i></i><b></b></div>
+          <div class="digital-hero-bottom"><span>Быстрое оформление</span><span>Поддержка менеджера</span></div>
         </section>
 
-        <div class="digital-section-head"><div><div class="eyebrow">ВЫБЕРИ РАЗДЕЛ</div><h2>Что ищем?</h2></div><span class="digital-count">${categories.length} разделов</span></div>
-        <div class="digital-category-grid">
-          ${categories.map(category => { const [icon, desc, cls] = categoryVisual(category.name); return `
-            <button class="digital-category-card ${cls} ${String(selectedCategory || "") === String(category.id) ? "selected" : ""}" data-digital-category="${escapeHtml(category.id)}" type="button">
-              <span class="digital-category-icon">${icon}</span><span class="digital-category-text"><strong>${escapeHtml(category.name)}</strong><small>${desc}</small></span><span class="digital-category-arrow">↗</span>
-            </button>`; }).join("")}
-        </div>
+        <section class="digital-quick-section">
+          <div class="digital-section-head"><div><div class="eyebrow">БЫСТРЫЙ ДОСТУП</div><h2>Популярные сервисы</h2></div><span class="digital-count">01 — 05</span></div>
+          <div class="digital-quick-grid">
+            ${quickServices.map(service => {
+              const category = categories.find(c => service.match.test(String(c.name || "")));
+              return `<button class="digital-quick-card ${service.cls}" data-digital-category="${category ? escapeHtml(category.id) : ""}" type="button"><span class="quick-icon">${service.icon}</span><strong>${service.name}</strong><small>${service.subtitle}</small><span class="quick-arrow">↗</span></button>`;
+            }).join("")}
+          </div>
+        </section>
 
-        <div class="digital-section-head digital-products-head"><div><div class="eyebrow">КАТАЛОГ</div><h2>${selectedCategory ? escapeHtml(categories.find(c => String(c.id) === String(selectedCategory))?.name || "Товары") : "Популярные товары"}</h2></div>${selectedCategory ? '<button class="digital-reset" data-digital-category="" type="button">Все товары ×</button>' : ""}</div>
-        ${query ? `<p class="digital-query">Результаты поиска: «${escapeHtml(state.search)}»</p>` : ""}
-        ${products.length ? `<div class="product-grid digital-product-grid">${products.map(productCard).join("")}</div>` : `<div class="digital-empty"><span>✦</span><strong>Товары скоро появятся</strong><p>${categories.length ? "Выбери другой раздел или загляни позже — каталог можно пополнять через админ-панель." : "Разделы цифровых товаров пока не найдены. Проверь категории в админ-панели."}</p>${selectedCategory ? '<button class="secondary-button" data-digital-category="" type="button">Показать все разделы</button>' : ""}</div>`}
-        <section class="digital-help-card"><div class="digital-help-icon">♡</div><div><strong>Нужна помощь с заказом?</strong><p>Менеджер поможет подобрать нужный регион и тип подписки.</p></div><a href="https://t.me/iroom_24" target="_blank" rel="noopener">Написать ↗</a></section>
+        <section class="digital-categories-section">
+          <div class="digital-section-head"><div><div class="eyebrow">КАТАЛОГ IROOM</div><h2>Все категории</h2></div><span class="digital-count">${categories.length} разделов</span></div>
+          ${categories.length ? `<div class="digital-category-grid digital-category-grid-v2">${categories.map(category => { const [icon, desc, cls] = categoryVisual(category.name); return `<button class="digital-category-card ${cls} ${String(selectedCategory || "") === String(category.id) ? "selected" : ""}" data-digital-category="${escapeHtml(category.id)}" type="button"><span class="digital-category-icon">${icon}</span><span class="digital-category-text"><strong>${escapeHtml(category.name)}</strong><small>${desc}</small></span><span class="digital-category-arrow">↗</span></button>`; }).join("")}</div>` : `<div class="digital-empty"><span>✦</span><strong>Каталог скоро появится</strong><p>Разделы цифровых товаров можно добавить через админ-панель.</p></div>`}
+        </section>
+
+        <section class="digital-products-section">
+          <div class="digital-section-head digital-products-head"><div><div class="eyebrow">ВЫБОР IROOM</div><h2>${selectedCategory ? escapeHtml(categories.find(c => String(c.id) === String(selectedCategory))?.name || "Товары") : "Товары и предложения"}</h2></div>${selectedCategory ? '<button class="digital-reset" data-digital-category="" type="button">Сбросить ×</button>' : ""}</div>
+          ${query ? `<p class="digital-query">Результаты поиска: «${escapeHtml(state.search)}»</p>` : ""}
+          ${products.length ? `<div class="product-grid digital-product-grid">${products.map(productCard).join("")}</div>` : `<div class="digital-empty digital-products-empty"><span>✧</span><strong>Пока нет доступных товаров</strong><p>${selectedCategory ? "В этом разделе товары ещё не добавлены." : "Как только товары появятся в каталоге, они отобразятся здесь."}</p>${selectedCategory ? '<button class="secondary-button" data-digital-category="" type="button">Показать все товары</button>' : ""}</div>`}
+        </section>
+        <section class="digital-help-card"><div class="digital-help-icon">♡</div><div><strong>Нужна помощь?</strong><p>Напишите менеджеру — поможем с выбором и оформлением.</p></div><a href="https://t.me/iroom_24" target="_blank" rel="noopener">Связаться ↗</a></section>
+        <div class="digital-footer-mark">IROOM <span>MARKET</span> · DIGITAL</div>
       </div>`;
 
     $$('[data-digital-category]').forEach(button => button.addEventListener('click', () => {
@@ -4826,6 +4845,10 @@
     bindStaticEvents();
     updateCartBadge();
     loadViewedProducts();
+
+    // Показываем первый экран сразу: медленный API не должен оставлять
+    // Telegram Mini App полностью чёрным и пустым.
+    render();
 
     try {
       await loadInitialData();
