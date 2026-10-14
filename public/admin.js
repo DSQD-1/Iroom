@@ -2437,16 +2437,28 @@
         </label>
 
         <label>
-          <span>Изображение URL</span>
+          <span>Описание</span>
+          <textarea id="categoryDescription" rows="3" placeholder="Краткое описание категории">${escapeHtml(category?.description || "")}</textarea>
+        </label>
 
-          <input
-            id="categoryImage"
-            type="url"
-            value="${escapeHtml(
-              category?.image_url || ""
-            )}"
-            placeholder="https://..."
-          >
+        <label>
+          <span>Изображение категории</span>
+          <input id="categoryImageFile" type="file" accept="image/*">
+          <small>Можно выбрать фото из галереи iPhone (до 8 МБ).</small>
+          <input id="categoryImage" type="url" value="${escapeHtml(category?.image_url || "")}" placeholder="Или вставь URL изображения">
+        </label>
+
+        <label>
+          <span>Родительская категория (для подкатегории)</span>
+          <select id="categoryParent">
+            <option value="">Без родительской категории</option>
+            ${state.categories.filter(item => String(item.id) !== String(category?.id || "")).map(item => `<option value="${escapeHtml(item.id)}" ${String(category?.parent_id || "") === String(item.id) ? "selected" : ""}>${escapeHtml(item.name)}</option>`).join("")}
+          </select>
+        </label>
+
+        <label>
+          <span>Порядок отображения</span>
+          <input id="categorySortOrder" type="number" value="${Number(category?.sort_order || 0)}" step="1">
         </label>
 
         <button
@@ -2465,18 +2477,29 @@
           event.preventDefault();
 
           const payload = {
-            name:
-              $("#categoryName")
-                .value
-                .trim(),
-
-            image_url:
-              $("#categoryImage")
-                .value
-                .trim()
+            name: $("#categoryName").value.trim(),
+            description: $("#categoryDescription").value.trim(),
+            image_url: $("#categoryImage").value.trim(),
+            parent_id: $("#categoryParent").value || null,
+            sort_order: Number($("#categorySortOrder").value || 0)
           };
 
           try {
+            const imageFile = $("#categoryImageFile")?.files?.[0];
+            if (imageFile) {
+              if (!imageFile.type.startsWith("image/")) throw new Error("Выбери файл изображения");
+              if (imageFile.size > 8 * 1024 * 1024) throw new Error("Фото должно быть не больше 8 МБ");
+              const fd = new FormData();
+              fd.append("file", imageFile);
+              const response = await fetch("/api/admin/upload", {
+                method: "POST",
+                headers: { "x-telegram-init-data": init() },
+                body: fd
+              });
+              const uploaded = await response.json();
+              if (!response.ok) throw new Error(uploaded.error || "Не удалось загрузить изображение");
+              payload.image_url = uploaded.url;
+            }
             if (category) {
               await api(
                 `/api/admin/categories/${encodeURIComponent(category.id)}`,

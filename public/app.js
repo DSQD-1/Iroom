@@ -722,6 +722,11 @@
       renderCatalog(screen);
     } else if (
       state.route ===
+      "digital-shop"
+    ) {
+      renderDigitalShop(screen);
+    } else if (
+      state.route ===
       "product"
     ) {
       renderProduct(screen);
@@ -1281,6 +1286,71 @@
       </div>
     `;
 
+    bindDynamicEvents();
+  }
+
+  /* =========================================================
+     DIGITAL GOODS STORE — separate storefront inside IRoom
+  ========================================================= */
+
+  function renderDigitalShop(screen) {
+    const digitalNames = [
+      "PlayStation / PS Plus",
+      "Подписки",
+      "Другое",
+      "Apple / iTunes",
+      "Telegram Stars"
+    ];
+    const categories = state.categories.filter(category =>
+      digitalNames.some(name => String(category.name || "").trim().toLowerCase() === name.toLowerCase())
+    );
+    const selectedCategory = state.categoryId;
+    let products = [...state.products].filter(product =>
+      categories.some(category => String(category.id) === String(product.category_id))
+    );
+    if (selectedCategory) products = products.filter(product => String(product.category_id) === String(selectedCategory));
+    const query = String(state.search || "").trim().toLowerCase();
+    if (query) products = products.filter(product => [product.name, product.description].filter(Boolean).join(" ").toLowerCase().includes(query));
+
+    const categoryVisual = name => {
+      const n = String(name || "").toLowerCase();
+      if (n.includes("playstation")) return ["◉", "PS Store и PS Plus", "digital-ps"];
+      if (n.includes("apple")) return ["⌘", "Apple / iTunes", "digital-apple"];
+      if (n.includes("telegram")) return ["✦", "Звёзды Telegram", "digital-stars"];
+      if (n.includes("подпис")) return ["♛", "Сервисы и подписки", "digital-subscriptions"];
+      return ["✧", "Другие цифровые товары", "digital-other"];
+    };
+
+    screen.innerHTML = `
+      <div class="screen digital-shop-page">
+        <button class="digital-back" data-action="catalog" type="button">‹ <span>Вернуться в iroom</span></button>
+        <section class="digital-hero">
+          <div class="digital-hero-glow"></div>
+          <div class="eyebrow">IROOM MARKET · DIGITAL</div>
+          <h1>Цифровые<br><span>товары</span></h1>
+          <p>Подписки, игровые сервисы и пополнения — в отдельном магазине внутри IRoom.</p>
+          <div class="digital-hero-tags"><span>✦ Быстрое оформление</span><span>♡ Поддержка менеджера</span></div>
+        </section>
+
+        <div class="digital-section-head"><div><div class="eyebrow">ВЫБЕРИ РАЗДЕЛ</div><h2>Что ищем?</h2></div><span class="digital-count">${categories.length} разделов</span></div>
+        <div class="digital-category-grid">
+          ${categories.map(category => { const [icon, desc, cls] = categoryVisual(category.name); return `
+            <button class="digital-category-card ${cls} ${String(selectedCategory || "") === String(category.id) ? "selected" : ""}" data-digital-category="${escapeHtml(category.id)}" type="button">
+              <span class="digital-category-icon">${icon}</span><span class="digital-category-text"><strong>${escapeHtml(category.name)}</strong><small>${desc}</small></span><span class="digital-category-arrow">↗</span>
+            </button>`; }).join("")}
+        </div>
+
+        <div class="digital-section-head digital-products-head"><div><div class="eyebrow">КАТАЛОГ</div><h2>${selectedCategory ? escapeHtml(categories.find(c => String(c.id) === String(selectedCategory))?.name || "Товары") : "Популярные товары"}</h2></div>${selectedCategory ? '<button class="digital-reset" data-digital-category="" type="button">Все товары ×</button>' : ""}</div>
+        ${query ? `<p class="digital-query">Результаты поиска: «${escapeHtml(state.search)}»</p>` : ""}
+        ${products.length ? `<div class="product-grid digital-product-grid">${products.map(productCard).join("")}</div>` : `<div class="digital-empty"><span>✦</span><strong>Товары скоро появятся</strong><p>${categories.length ? "Выбери другой раздел или загляни позже — каталог можно пополнять через админ-панель." : "Разделы цифровых товаров пока не найдены. Проверь категории в админ-панели."}</p>${selectedCategory ? '<button class="secondary-button" data-digital-category="" type="button">Показать все разделы</button>' : ""}</div>`}
+        <section class="digital-help-card"><div class="digital-help-icon">♡</div><div><strong>Нужна помощь с заказом?</strong><p>Менеджер поможет подобрать нужный регион и тип подписки.</p></div><a href="https://t.me/iroom_24" target="_blank" rel="noopener">Написать ↗</a></section>
+      </div>`;
+
+    $$('[data-digital-category]').forEach(button => button.addEventListener('click', () => {
+      state.categoryId = button.dataset.digitalCategory || null;
+      render();
+      requestAnimationFrame(() => { const el = document.querySelector('.digital-products-head'); if (el) el.scrollIntoView({behavior:'smooth', block:'start'}); });
+    }));
     bindDynamicEvents();
   }
 
@@ -3042,19 +3112,27 @@
 
         <section class="order-card" style="margin-bottom:14px">
           <div style="display:flex;align-items:center;gap:14px">
-            <div style="width:54px;height:54px;border-radius:18px;background:var(--pink-soft);border:1px solid var(--pink-line);display:flex;align-items:center;justify-content:center;font-size:24px">
-              ${escapeHtml((name[0] || "U").toUpperCase())}
+            <div class="profile-avatar">
+              ${user.photo_url ? `<img src="${escapeHtml(user.photo_url)}" alt="Аватар" loading="lazy">` : escapeHtml((name[0] || "U").toUpperCase())}
             </div>
-            <div>
+            <div style="min-width:0;flex:1">
               <strong style="font-size:18px">${escapeHtml(name)}</strong>
-              <div style="color:#8c8c94;margin-top:4px">${escapeHtml(username)}</div>
+              <div style="color:#a69ba4;margin-top:4px">${escapeHtml(username)}</div>
+              <div class="profile-account-status"><span></span> Аккаунт Telegram</div>
             </div>
+            <button class="profile-refresh" data-action="profile" type="button" aria-label="Обновить профиль">↻</button>
           </div>
         </section>
 
+        <div class="profile-shortcuts">
+          <button type="button" data-action="orders"><span>▣</span><strong>Мои заказы</strong><small>${state.orders.length} заказов</small><b>›</b></button>
+          <button type="button" data-action="cart"><span>🛍</span><strong>Корзина</strong><small>Твои товары</small><b>›</b></button>
+          <a href="https://t.me/iroom_24" target="_blank" rel="noopener"><span>♡</span><strong>Поддержка</strong><small>Связаться с нами</small><b>↗</b></a>
+        </div>
+
         <section class="section">
           <div class="section-heading">
-            <div><h2>Мои заказы</h2><p>${state.orders.length ? `Заказов: ${state.orders.length}` : "История покупок"}</p></div>
+            <div><h2>Мои заказы</h2><p>${state.orders.length ? `История: ${state.orders.length}` : "История покупок"}</p></div>
             <button class="text-link" data-action="orders" type="button">Открыть →</button>
           </div>
           ${state.orders.length ? state.orders.slice(0,3).map(orderCard).join("") : `
@@ -4331,6 +4409,13 @@
   function handleAction(
     action
   ) {
+    if (action === "digital-shop") {
+      state.categoryId = null;
+      state.search = "";
+      navigate("digital-shop");
+      return;
+    }
+
     if (
       action ===
       "catalog"
