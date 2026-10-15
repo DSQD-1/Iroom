@@ -984,7 +984,7 @@
   ========================================================= */
 
   const DIGITAL_CATEGORY_NAMES = [
-    "PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes",
+    "PlayStation / PS Plus", "Подписки", "Прочее цифровое", "Apple / iTunes",
     "Telegram Stars", "Steam", "OpenAI", "Быстрое пополнение"
   ];
 
@@ -1425,7 +1425,12 @@
   ========================================================= */
 
   function renderDigitalShop(screen) {
-    const categories = state.categories.filter(isDigitalCategory);
+    const digitalProductCategoryIds = new Set(state.products
+      .filter(product => String(product.store_type || "").toLowerCase() === "digital")
+      .map(product => String(product.category_id)));
+    const categories = state.categories
+      .filter(category => isDigitalCategory(category) || (String(category.name || "").trim().toLowerCase() === "другое" && digitalProductCategoryIds.has(String(category.id))))
+      .filter(category => String(category.name || "").trim().toLowerCase() !== "другое");
     const selectedCategory = state.categoryId;
     const selected = selectedCategory
       ? categories.find(category => String(category.id) === String(selectedCategory))
