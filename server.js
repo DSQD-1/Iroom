@@ -1269,13 +1269,30 @@ async function migrate() {
   await addColumnIfMissing("products", "digital_code", "TEXT DEFAULT ''");
   await db.execute("UPDATE products SET image_url = '' WHERE image_url LIKE '/product-images/%'");
 
+  // Safely rename the legacy digital category without touching product/order data.
+  // If a Telegram category already exists, leave both records intact for manual cleanup.
+  const telegramCategory = await db.execute({
+    sql: "SELECT id FROM categories WHERE LOWER(TRIM(name)) = 'telegram' LIMIT 1",
+    args: []
+  });
+  const legacyTelegramCategory = await db.execute({
+    sql: "SELECT id FROM categories WHERE LOWER(TRIM(name)) = 'telegram stars' LIMIT 1",
+    args: []
+  });
+  if (!telegramCategory.rows.length && legacyTelegramCategory.rows.length) {
+    await db.execute({
+      sql: "UPDATE categories SET name = 'Telegram' WHERE id = ?",
+      args: [legacyTelegramCategory.rows[0].id]
+    });
+  }
+
   // Ensure the Digital Goods section exists without duplicating categories.
   for (const categoryName of [
     "PlayStation / PS Plus",
     "Подписки",
     "Другое",
     "Apple / iTunes",
-    "Telegram Stars",
+    "Telegram",
     "Steam",
     "OpenAI"
   ]) {
@@ -4119,33 +4136,37 @@ app.put(
 app.delete(
   "/api/admin/categories/:id",
   requireAdmin,
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
     try {
-      await db.execute({
-        sql: `
-          DELETE FROM categories
-          WHERE id = ?
-        `,
-        args: [
-          integerId(
-            req.params.id
-          )
-        ]
-      });
+      const id = integerId(req.params.id);
+      if (!id) return res.status(400).json({ error: "Некорректный ID категории" });
 
-      res.json({
-        ok: true
+      const existing = await db.execute({
+        sql: "SELECT id, name FROM categories WHERE id = ? LIMIT 1",
+        args: [id]
       });
-    } catch (error) {
-      res
-        .status(500)
-        .json({
-          error:
-            error.message
+      if (!existing.rows.length) return res.status(404).json({ error: "Категория не найдена" });
+
+      const [products, children] = await Promise.all([
+        db.execute({ sql: "SELECT COUNT(*) AS total FROM products WHERE category_id = ?", args: [id] }),
+        db.execute({ sql: "SELECT COUNT(*) AS total FROM categories WHERE parent_id = ?", args: [id] })
+      ]);
+      const productCount = Number(products.rows[0]?.total || 0);
+      const childCount = Number(children.rows[0]?.total || 0);
+      if (productCount || childCount) {
+        const reasons = [];
+        if (productCount) reasons.push(`товаров: ${productCount}`);
+        if (childCount) reasons.push(`подкатегорий: ${childCount}`);
+        return res.status(409).json({
+          error: `Нельзя удалить категорию «${String(existing.rows[0].name || "")}": ${reasons.join(", ")}. Сначала перенесите товары и подкатегории.`
         });
+      }
+
+      await db.execute({ sql: "DELETE FROM categories WHERE id = ?", args: [id] });
+      return res.json({ ok: true });
+    } catch (error) {
+      console.error("Delete category error:", error);
+      return res.status(500).json({ error: "Не удалось удалить категорию. Данные не были намеренно очищены." });
     }
   }
 );
@@ -6436,13 +6457,7 @@ async function processAdminTextMessage(message) {
 
   if (/^\/adminclear101(?:@\w+)?$/i.test(text)) {
     adminClearState(chatId);
-    try {
-      await clearCatalogOnly();
-      await ensureBaseCatalogCategories();
-      await sendTelegramMessage(chatId, "🧹 <b>Каталог очищен</b>\n\nТовары и варианты удалены. Заказы, пользователи, промокоды и настройки не затронуты.", { reply_markup: adminMainKeyboard() });
-    } catch (error) {
-      await sendTelegramMessage(chatId, `❌ <b>Очистка не выполнена</b>\n\n${escapeTelegramHtml(error.message || "Ошибка")}`, { reply_markup: adminMainKeyboard() });
-    }
+    await sendTelegramMessage(chatId, "🛡 Полная очистка каталога отключена для защиты товаров. Удаляйте отдельные позиции через админ-панель.", { reply_markup: adminMainKeyboard() });
     return true;
   }
 
