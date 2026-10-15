@@ -190,7 +190,17 @@
     }
 
     const media = mediaOf(item);
-    return media.find((entry) => entry.type === "image")?.url || "";
+    const uploadedImage = media.find((entry) => entry.type === "image")?.url || "";
+    if (uploadedImage) return uploadedImage;
+
+    // Use an official Apple product-page image when an Apple item has no uploaded photo.
+    const name = String(item?.name || item?.product_name || "");
+    const category = String(item?.category_name || item?.category || "");
+    const appleText = `${name} ${category}`;
+    if (/iphone|airpods|earpods|apple\s*watch|ipad|macbook|mac\s*mini|mac\s*studio|imac|magic\s*(mouse|keyboard)|studio\s*display|apple\s*pencil|vision\s*pro|homepod|apple\s*tv/i.test(appleText)) {
+      return `/api/apple-product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
+    }
+    return "";
   }
 
   function videoOf(item) {
@@ -1822,10 +1832,14 @@
     const inquiryOnly = isProductInquiry(product, variant, currentPrice);
     const inquiryUrl = inquiryOnly ? inquiryChatUrl(product, variant) : "";
 
+    const simValues = options.sims.map(item => String(item.name || "").toLowerCase());
+    const simLabel = simValues.length && simValues.every(value => value === "вилка" || value === "переходник") ? "Тип вилки" : "SIM";
+    const memoryValues = options.memories.map(item => String(item.name || ""));
+    const memoryLabel = memoryValues.some(value => /\d+\s*\/\s*\d+/.test(value)) ? "Память / конфигурация" : "Память";
     const optionGroups = [
-      ["color","Цвет",options.colors],
-      ["memory","Память",options.memories],
-      ["sim","SIM",options.sims]
+      ["color","Цвет / версия",options.colors],
+      ["memory",memoryLabel,options.memories],
+      ["sim",simLabel,options.sims]
     ].filter(
       ([, , values]) =>
         values.length
@@ -1899,7 +1913,7 @@
         </h1>
 
         <div class="detail-price">
-          ${escapeHtml(inquiryOnly ? "По запросу" : (variant?.price_text && !/по\s+запросу/i.test(variant.price_text) ? variant.price_text : money(currentPrice)))}
+          ${escapeHtml(inquiryOnly ? "По запросу" : (variant?.price_text && !/по\s+запросу/i.test(variant.price_text) ? variant.price_text : (/[–—]/.test(String(product.price_text || "")) ? product.price_text : money(currentPrice))))}
         </div>
 
         ${
