@@ -23,7 +23,7 @@
     me: null,
     viewedProducts: [],
 
-    route: "store-select",
+    route: "catalog",
     activeStore: "tech",
     categoryId: null,
     search: "",
@@ -712,7 +712,9 @@
     if (!screen) return;
 
     if (state.route === "store-select") {
-      renderStoreSelect(screen);
+      state.activeStore = "tech";
+      navigate("catalog");
+      return;
     } else if (
       state.route ===
       "home"
@@ -973,18 +975,14 @@
       <div class="screen store-select-screen">
         <section class="store-select-hero">
           <div class="store-select-logo"><span>IR</span>oom <small>market</small></div>
-          <div class="eyebrow">ОДИН БРЕНД · ДВА МАГАЗИНА</div>
-          <h1>Выбери свой<br><span>магазин</span></h1>
-          <p>Техника и цифровые товары — отдельно, удобно и без смешивания корзин.</p>
+          <div class="eyebrow">ЕДИНЫЙ КАТАЛОГ</div>
+          <h1>Каталог<br><span>IRoom</span></h1>
+          <p>Техника и аксессуары в одном каталоге.</p>
         </section>
         <div class="store-choice-grid">
           <button class="store-choice-card tech-choice" data-store-choice="tech" type="button">
             <span class="store-choice-art"><span class="store-choice-glow"></span><span class="store-choice-symbol">⌁</span></span>
             <span class="store-choice-copy"><strong>Магазин техники</strong><small>iPhone, iPad, MacBook, AirPods и аксессуары</small><b>Перейти в магазин <span>↗</span></b></span>
-          </button>
-          <button class="store-choice-card digital-choice" data-store-choice="digital" type="button">
-            <span class="store-choice-art"><span class="store-choice-glow"></span><span class="store-choice-symbol">✦</span></span>
-            <span class="store-choice-copy"><strong>Цифровой магазин</strong><small>Telegram, Apple, Steam, OpenAI, PlayStation</small><b>Открыть цифровой <span>↗</span></b></span>
           </button>
         </div>
         <p class="store-select-foot">Чёрный интерфейс · фирменные розовые акценты</p>
@@ -3835,7 +3833,7 @@
     if (!container) return;
 
     container.innerHTML =
-      state.categories.filter(category => state.activeStore === "digital" ? isDigitalCategory(category) : !isDigitalCategory(category))
+      state.categories.filter(category => !isDigitalCategory(category))
         .map(
           (category) => `
             <button
@@ -3864,7 +3862,7 @@
         button.addEventListener(
           "click",
           () => {
-            navigate(state.activeStore === "digital" ? "digital-shop" : "catalog", { categoryId: button.dataset.drawerCategory });
+            navigate("catalog", { categoryId: button.dataset.drawerCategory });
           }
         );
       });
@@ -4462,10 +4460,10 @@
   function handleAction(
     action
   ) {
-    if (action === "digital-shop") { switchStore("digital"); return; }
+    if (action === "digital-shop") { switchStore("tech"); navigate("catalog"); return; }
     if (action === "store-tech") { switchStore("tech"); return; }
 
-    if (action === "store-select") { navigate("store-select"); return; }
+    if (action === "store-select") { state.activeStore = "tech"; navigate("catalog"); return; }
 
     if (
       action ===
