@@ -79,6 +79,49 @@
     return `${num(value).toLocaleString("ru-RU")} ₽`;
   }
 
+  function isInquiryPrice(priceText, numericPrice) {
+    const text = String(priceText || "").trim();
+    if (/по\s+запросу/i.test(text)) return true;
+    if (/^от\s*0(?:[\s.,]*0)*\s*(?:₽|руб(?:лей|ля|ль)?|р\.?)*$/i.test(text)) return true;
+    if (text) return false;
+    return !(Number(numericPrice) > 0);
+  }
+
+  function displayProductPrice(product, fallbackPrice = product?.price) {
+    const text = String(product?.price_text || "").trim();
+    if (isInquiryPrice(text, fallbackPrice)) return "По запросу";
+    if (text) return text;
+    return `От ${money(fallbackPrice)}`;
+  }
+
+  function isProductInquiry(product, variant = null, currentPrice = null) {
+    // A concrete price for the selected variant always wins over a generic
+    // product-level "По запросу" label. Consultation is only for genuinely
+    // unpriced products/variants.
+    const variantPrice = Number(variant?.price);
+    const variantText = String(variant?.price_text || "").trim();
+    if (variantPrice > 0 && !/по\s+запросу/i.test(variantText)) return false;
+    const text = variantText || product?.price_text || "";
+    const price = currentPrice ?? variant?.price ?? product?.price;
+    return isInquiryPrice(text, price);
+  }
+
+  function inquiryChatUrl(product, variant = null) {
+    const manager = String(state.config?.contact_url || "https://t.me/iroom_24").trim();
+    const cleanBase = manager.split("?")[0];
+    const options = state.selectedOptions || {};
+    const variantText = makeVariantText(product, options, variant);
+    const details = [
+      product?.name || "Товар",
+      variantText && variantText !== product?.name ? variantText : "",
+      options.color ? `Цвет: ${options.color}` : "",
+      options.memory ? `Память: ${options.memory}` : "",
+      options.sim ? `SIM: ${options.sim}` : ""
+    ].filter(Boolean);
+    const message = `Здравствуйте! Подскажите, пожалуйста, есть ли в наличии этот товар?\n${[...new Set(details)].join("\n")}`;
+    return `${cleanBase}${cleanBase.includes("?") ? "&" : "?"}text=${encodeURIComponent(message)}`;
+  }
+
   function parseJson(value, fallback = null) {
     if (
       value === null ||
@@ -618,7 +661,8 @@
       id: product.id,
       name: product.name || "Товар",
       image_url: imageOf(product),
-      price: product.price
+      price: product.price,
+      price_text: product.price_text || ""
     };
     state.viewedProducts = [item, ...state.viewedProducts.filter(x => String(x.id) !== String(item.id))].slice(0, 12);
     saveViewedProducts();
@@ -1488,7 +1532,7 @@
           </p>
 
           <div class="product-price">
-            От ${money(product.price)}
+            ${escapeHtml(displayProductPrice(product))}
           </div>
         </div>
       </article>
@@ -1775,6 +1819,9 @@
             state.selectedOptions
           );
 
+    const inquiryOnly = isProductInquiry(product, variant, currentPrice);
+    const inquiryUrl = inquiryOnly ? inquiryChatUrl(product, variant) : "";
+
     const optionGroups = [
       ["color","Цвет",options.colors],
       ["memory","Память",options.memories],
@@ -1852,7 +1899,7 @@
         </h1>
 
         <div class="detail-price">
-          ${money(currentPrice)}
+          ${escapeHtml(inquiryOnly ? "По запросу" : (variant?.price_text && !/по\s+запросу/i.test(variant.price_text) ? variant.price_text : money(currentPrice)))}
         </div>
 
         ${
@@ -1917,28 +1964,26 @@
         }
 
         <div class="detail-actions">
-          <button
-            class="primary-button"
-            data-action="quick-buy"
-            type="button"
-          >
-            Купить в один клик ·
-            ${money(currentPrice)}
-          </button>
-
-          <button
-            class="secondary-button"
-            data-action="add-cart"
-            type="button"
-          >
-            Добавить в корзину
-          </button>
+          ${inquiryOnly ? `
+            <button class="primary-button" data-action="ask-admin" type="button">
+              Проконсультироваться — есть ли в наличии?
+            </button>
+          ` : `
+            <button class="primary-button" data-action="quick-buy" type="button">
+              Купить в один клик · ${money(currentPrice)}
+            </button>
+            <button class="secondary-button" data-action="add-cart" type="button">
+              Добавить в корзину
+            </button>
+          `}
         </div>
       </div>
     `;
 
     bindDynamicEvents();
-    loadAddOnServices(product).catch((error) => console.warn("Add-on services:", error));
+    if (!inquiryOnly) {
+      loadAddOnServices(product).catch((error) => console.warn("Add-on services:", error));
+    }
   }
 
   async function loadAddOnServices(product) {
@@ -3234,7 +3279,7 @@
               ${state.viewedProducts.slice(0,6).map((item) => `
                 <article class="product-card" data-product-id="${escapeHtml(item.id)}">
                   <div class="product-image">${item.image_url ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.name)}" loading="lazy">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#555;font-size:30px">IR</div>`}</div>
-                  <div class="product-info"><h3>${escapeHtml(item.name)}</h3><div class="product-price">От ${money(item.price)}</div></div>
+                  <div class="product-info"><h3>${escapeHtml(item.name)}</h3><div class="product-price">${escapeHtml(displayProductPrice(item))}</div></div>
                 </article>
               `).join("")}
             </div>
@@ -4564,6 +4609,13 @@
         navigate("home");
       }
 
+      return;
+    }
+
+    if (action === "ask-admin") {
+      if (!state.product) return;
+      const variant = findMatchingVariant();
+      window.location.href = inquiryChatUrl(state.product, variant);
       return;
     }
 
