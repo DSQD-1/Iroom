@@ -7056,9 +7056,11 @@ app.post(
           text === "/start" ||
           text === "/app"
         ) {
+          const firstName = String(message.from?.first_name || "").trim();
+          const greetingName = firstName ? `, ${firstName}` : "";
           await sendTelegramMessage(
             message.chat.id,
-            "Откройте магазин IRoom:",
+            `Здравствуйте${greetingName}! Добро пожаловать в IRoom.\n\nОткройте каталог техники и цифровых товаров кнопкой ниже.`,
             {
               reply_markup: {
                 inline_keyboard: [
