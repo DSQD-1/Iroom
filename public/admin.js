@@ -1848,6 +1848,7 @@
               `
             ).join("")}
           </select>
+          <small id="productModeHint" class="product-mode-hint">Параметры будут показаны по выбранной категории.</small>
         </label>
 
         <div
@@ -1924,6 +1925,7 @@
           )}</textarea>
         </label>
 
+        <div id="productDigitalFields" class="product-mode-fields">
         <label>
           <span>Выдача цифрового товара</span>
           <select id="productFulfillmentMode">
@@ -1937,6 +1939,8 @@
           <textarea id="productDigitalCode" rows="3" placeholder="Добавьте код только если товар выдаётся автоматически">${escapeHtml(product?.digital_code || "")}</textarea>
           <small style="color:#888;line-height:1.4">Для автоматической выдачи добавьте код заранее. Не используйте это поле для паролей или доступа к личным аккаунтам.</small>
         </label>
+
+        </div>
 
         <label>
           <span>Описание</span>
@@ -1976,7 +1980,7 @@
           </span>
         </label>
 
-        <div
+        <div id="productTechOptions" class="product-mode-fields"
           style="
             padding:15px;
             border:1px solid rgba(255,255,255,.08);
@@ -2082,6 +2086,34 @@
         "submit",
         saveProduct
       );
+
+    // Show only fields relevant to the selected catalog category.
+    const categorySelect = $("#productCategory");
+    const digitalFields = $("#productDigitalFields");
+    const techFields = $("#productTechOptions");
+    const updateProductModeFields = () => {
+      const selected = state.categories.find(c => String(c.id) === String(categorySelect?.value || ""));
+      const type = String(selected?.store_type || selected?.catalog_type || selected?.type || "").trim().toLowerCase();
+      const label = String(selected?.name || selected?.title || "").trim().toLowerCase();
+      const explicitDigital = /digital|цифр|электрон|подписк|пополн|код товара/.test(type + " " + label);
+      const explicitTech = /tech|техник|смартфон|телефон|планшет|ноутбук|аксессуар|консол[ьи]/.test(type + " " + label);
+      // Prefer the category's explicit catalog type. Name-based detection is a fallback
+      // for legacy categories that do not yet have store_type/catalog_type populated.
+      const digital = type ? (/digital|цифр|электрон/.test(type) || (!/tech|техник|physical/.test(type) && explicitDigital)) : (explicitDigital && !explicitTech);
+      if (digitalFields) digitalFields.hidden = !digital;
+      if (techFields) techFields.hidden = digital;
+      const hint = $("#productModeHint");
+      if (hint) {
+        hint.textContent = !categorySelect?.value
+          ? "Сначала выбери категорию — покажем только подходящие параметры."
+          : digital
+            ? "Цифровой товар: настройки способа выдачи и кода."
+            : "Техника: варианты цвета, памяти, SIM и региона.";
+      }
+      [digitalFields, techFields].forEach(el => { if (el) el.setAttribute("aria-hidden", String(el.hidden)); });
+    };
+    categorySelect?.addEventListener("change", updateProductModeFields);
+    updateProductModeFields();
 
     const mediaInput = $("#productMediaFiles");
     mediaInput?.addEventListener("change", async () => {
