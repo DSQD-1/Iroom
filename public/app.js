@@ -194,10 +194,17 @@
     if (uploadedImage) return uploadedImage;
 
     // Use an official Apple product-page image when an Apple item has no uploaded photo.
-    const name = String(item?.name || item?.product_name || "");
+    let name = String(item?.name || item?.product_name || "").trim();
     const category = String(item?.category_name || item?.category || "");
     const appleText = `${name} ${category}`;
-    if (/iphone|airpods|earpods|apple\s*watch|ipad|macbook|mac\s*mini|mac\s*studio|imac|magic\s*(mouse|keyboard)|studio\s*display|apple\s*pencil|vision\s*pro|homepod|apple\s*tv/i.test(appleText)) {
+    // Imported price lists often store variants as "17 Pro Max 256GB Orange"
+    // and the product row only has category_id, not category_name. Normalize that
+    // family to an explicit iPhone name so the Apple image endpoint can resolve it.
+    if (!/iphone/i.test(name) && /(?:^|\s)iPhone\b/i.test(category) === false && /^\s*(?:11|12|13|14|15|16|17|18)(?:\s+(?:pro|max|plus|mini|air|e))?\b/i.test(name)) {
+      name = `iPhone ${name}`;
+    }
+    const resolvedText = `${name} ${category}`;
+    if (/iphone|airpods|earpods|apple\s*watch|ipad|macbook|mac\s*mini|mac\s*studio|imac|magic\s*(mouse|keyboard)|studio\s*display|apple\s*pencil|vision\s*pro|homepod|apple\s*tv/i.test(resolvedText)) {
       return `/api/apple-product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
     }
     return "";
@@ -4912,7 +4919,11 @@
   function renderBootLoading() {
     const screen = $("#screen");
     if (!screen) return;
-    screen.innerHTML = `<section class="iroom-boot-screen" role="status" aria-live="polite"><div class="iroom-boot-orbit"><span>IR</span></div><div class="iroom-boot-wordmark"><b>IR</b>oom</div><p>Готовим каталог</p><div class="iroom-boot-progress"><i></i></div></section>`;
+    const user = telegramUser() || state.me || {};
+    const firstName = String(user.first_name || user.name || "").trim();
+    const username = user.username ? `@${user.username}` : "";
+    const greeting = firstName ? `Здравствуйте, ${escapeHtml(firstName)}${username ? ` (${escapeHtml(username)})` : ""}!` : "Здравствуйте!";
+    screen.innerHTML = `<section class="iroom-boot-screen" role="status" aria-live="polite"><div class="iroom-boot-orbit"><span>IR</span></div><div class="iroom-boot-wordmark"><b>IR</b>oom</div><h2 class="iroom-boot-greeting">${greeting}</h2><p>Загружаем каталог для вас</p><div class="iroom-boot-progress"><i></i></div></section>`;
   }
 
   async function boot() {
