@@ -5958,7 +5958,7 @@ function parseAdminPriceList(text) {
       continue;
     }
 
-    const priceMatch = line.match(/(?:^|\s)[-–—:]\s*(?:от\s*)?([\d\s.,]+)\s*(?:₽|руб(?:\.)?)?\s*$/iu);
+    const priceMatch = line.match(/(?:^|\s)[-–—:]\s*((?:от\s*)?[\d\s.,]+|по\s+запросу|уточнить(?:\s+цену)?)\s*(?:₽|руб(?:\.)?)?\s*$/iu);
     if (!priceMatch) {
       // Section labels such as "eSIM", "Samsung" and "Dyson" are not failed rows.
       if (/^(?:e\s*sim|1\s*sim\s*\+\s*e\s*sim|sim\s*\+\s*sim|e\s*sim\s*\+\s*e\s*sim|sim formats:?|apple|iphone|airpods|earpods|apple watch|ipad|macbook|dyson|playstation|xbox|nintendo|samsung|xiaomi|google pixel|oneplus|honor|huawei|accessories|аксессуары)$/iu.test(line)) continue;
