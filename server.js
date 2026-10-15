@@ -5828,17 +5828,37 @@ function parsePriceListNumber(value) {
 }
 
 function categoryNameForImport(model, descriptor = "") {
-  const text = `${model} ${descriptor}`.toLowerCase();
+  const text = `${model} ${descriptor}`.toLowerCase().replace(/[ё]/g, "е");
+  // Categories mirror the supplied price list. Keep the rules specific and ordered.
   if (/iphone/.test(text)) return "iPhone";
-  if (/airpods|earpods/.test(text)) return "AirPods";
-  if (/apple\s*watch|watch/.test(text)) return "Apple Watch";
-  if (/ipad/.test(text)) return "iPad";
+  if (/airpods|earpods/.test(text)) return "AirPods и EarPods";
+  if (/apple\s*watch|\bwatch\s*(?:se|[0-9]|ultra)/.test(text)) return "Apple Watch";
+  if (/ipad|apple pencil|magic keyboard ipad/.test(text)) return "iPad и аксессуары";
   if (/macbook|mac mini|mac studio|imac/.test(text)) return "MacBook";
-  if (/playstation|ps5|ps4|xbox|nintendo|switch|пристав/.test(text)) return "Приставки";
-  if (/samsung|xiaomi|redmi|pixel|google\s+pixel|oneplus|honor|huawei|android/.test(text)) return "Android-смартфоны";
-  if (/dyson/.test(text) && /supersonic|airwrap|airstrait|фен|hair\s*dryer/.test(text)) return "Фены";
-  if (/dyson/.test(text)) return "Dyson";
-  if (/canon|nikon|sony\s+(?:alpha|a7|a6)|fujifilm|camera|камера/.test(text)) return "Камеры";
+  if (/magic mouse|apple mouse/.test(text)) return "Аксессуары Apple";
+  if (/dyson/.test(text) && /supersonic|airwrap|airstrait|фен|hair\s*dryer|выпрямител|стайлер/.test(text)) return "Dyson — уход за волосами";
+  if (/dyson/.test(text) && /v8|v10|v11|v12|v15|v16|gen5|pencilvac|pencilwash|wash g1|clean\+wash|spot\+scrub|big ball|navi robot|пылесос/.test(text)) return "Dyson — пылесосы";
+  if (/dyson/.test(text) && /hj|ph05|bp04|tp10|tp11|tp12|очистител/.test(text)) return "Dyson — очистители воздуха";
+  if (/dyson/.test(text)) return "Dyson — другое";
+  if (/playstation|ps5|ps4|dualsense|pulse elite|pulse explore|ps portal|ps vr|psvr/.test(text)) return "PlayStation и аксессуары";
+  if (/xbox/.test(text)) return "Xbox";
+  if (/nintendo|switch 2|switch oled|switch lite|joy.con|micro sd express/.test(text)) return "Nintendo";
+  if (/steam deck|lenovo legion go|lenovo go s|rog ally|msi claw|portable/.test(text)) return "Портативные консоли";
+  if (/meta quest|\bvr2\b|virtual reality/.test(text)) return "VR-гарнитуры";
+  if (/sony wf|jbl boombox|powerbeats|headphones|наушник|\baudio\b|\bpulse\b/.test(text)) return "Наушники и аудио";
+  if (/plaud|ai voice recorder|voice recorder/.test(text)) return "Устройства AI";
+  if (/gopro|insta360|dji osmo|dji mic|dji ronin|kodak charmera|canon|nikon|fujifilm|instax|camera|камера|фотоаппарат/.test(text)) return "Камеры и съёмка";
+  if (/oura ring|whoop/.test(text)) return "Носимые устройства";
+  if (/meta ray.ban|wayfarer gen2|headliner gen2|smart glasses/.test(text)) return "Умные очки";
+  if (/remarkable|kindle/.test(text)) return "Электронные книги и аксессуары";
+  if (/logitech g29|logitech g923|driving force shifter|периферия/.test(text)) return "Игровая периферия";
+  if (/samsung/.test(text)) return "Samsung";
+  if (/xiaomi|redmi|poco/.test(text)) return "Xiaomi, Redmi и POCO";
+  if (/pixel|google\s+pixel/.test(text)) return "Google Pixel";
+  if (/oneplus/.test(text)) return "OnePlus";
+  if (/honor/.test(text)) return "Honor";
+  if (/huawei/.test(text)) return "Huawei";
+  if (/android/.test(text)) return "Android-смартфоны";
   if (/чехол|кабель|заряд|powerbank|аксессуар|accessor/.test(text)) return "Аксессуары";
   return "Другое";
 }
@@ -5858,16 +5878,36 @@ async function findOrCreateImportCategory(name) {
 
 const BASE_CATALOG_CATEGORIES = [
   "iPhone",
-  "AirPods",
+  "AirPods и EarPods",
   "Apple Watch",
-  "iPad",
+  "iPad и аксессуары",
   "MacBook",
+  "Аксессуары Apple",
+  "Samsung",
+  "Xiaomi, Redmi и POCO",
+  "Google Pixel",
+  "OnePlus",
+  "Honor",
+  "Huawei",
   "Android-смартфоны",
-  "Приставки",
-  "Фены",
-  "Dyson",
-  "Камеры",
-  "Аксессуары"
+  "Dyson — уход за волосами",
+  "Dyson — пылесосы",
+  "Dyson — очистители воздуха",
+  "Dyson — другое",
+  "PlayStation и аксессуары",
+  "Xbox",
+  "Nintendo",
+  "Портативные консоли",
+  "VR-гарнитуры",
+  "Наушники и аудио",
+  "Устройства AI",
+  "Камеры и съёмка",
+  "Носимые устройства",
+  "Умные очки",
+  "Электронные книги и аксессуары",
+  "Игровая периферия",
+  "Аксессуары",
+  "Другое"
 ];
 
 async function ensureBaseCatalogCategories() {
