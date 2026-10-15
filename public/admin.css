@@ -2301,3 +2301,14 @@ input,select,textarea{border-radius:12px!important;border-color:#3a2b3b!importan
 #modalContent{max-width:min(760px,calc(100vw - 24px));margin:12px auto;padding:clamp(16px,3vw,28px);border:1px solid var(--admin-border);border-radius:22px;background:#131016;box-shadow:0 24px 90px rgba(0,0,0,.5)}#modalBackdrop{overflow-y:auto;align-items:flex-start;padding:12px 0}
 #productForm{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px!important}#productForm label{min-width:0;display:flex;flex-direction:column;gap:7px}#productForm label span{font-size:12px;color:#cbbdcb;font-weight:650}#productForm input,#productForm select,#productForm textarea{width:100%;min-height:44px;padding:11px 12px;box-sizing:border-box}#productForm textarea{min-height:90px;resize:vertical}#productForm button[type=submit],#productForm .form-actions{grid-column:1/-1}
 @media(max-width:560px){#modalContent{margin:6px auto;border-radius:18px}#productForm{grid-template-columns:1fr;gap:12px!important}#productForm button[type=submit],#productForm .form-actions{grid-column:auto}.section-heading{gap:12px;align-items:flex-start}.section-heading h1{font-size:25px}}
+
+
+/* Media picker and consistent controls */
+.media-upload-field{display:flex;flex-direction:column;gap:9px;padding:14px;border:1px dashed rgba(255,45,141,.45);border-radius:16px;background:rgba(255,45,141,.055)}
+.media-upload-field input[type=file]{width:100%;padding:12px;border-radius:12px;background:var(--surface-2);color:var(--text);border:1px solid var(--border)}
+.media-upload-field small{color:var(--muted);line-height:1.45}
+.media-preview{display:flex;flex-wrap:wrap;gap:10px}
+.media-preview-item{width:92px;height:92px;object-fit:cover;border-radius:12px;background:#111;border:1px solid var(--border)}
+.digital-choice .store-choice-symbol{color:#ff4ba0}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+@media(max-width:600px){.media-preview-item{width:76px;height:76px}}

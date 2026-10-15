@@ -982,7 +982,11 @@
         <div class="store-choice-grid">
           <button class="store-choice-card tech-choice" data-store-choice="tech" type="button">
             <span class="store-choice-art"><span class="store-choice-glow"></span><span class="store-choice-symbol">⌁</span></span>
-            <span class="store-choice-copy"><strong>Магазин техники</strong><small>iPhone, iPad, MacBook, AirPods и аксессуары</small><b>Перейти в магазин <span>↗</span></b></span>
+            <span class="store-choice-copy"><strong>Техника</strong><small>iPhone, iPad, MacBook, AirPods и аксессуары</small><b>Открыть каталог <span>↗</span></b></span>
+          </button>
+          <button class="store-choice-card digital-choice" data-store-choice="digital" type="button">
+            <span class="store-choice-art"><span class="store-choice-glow"></span><span class="store-choice-symbol">✦</span></span>
+            <span class="store-choice-copy"><strong>Цифровые товары</strong><small>Подписки, игровые сервисы и цифровые коды</small><b>Открыть каталог <span>↗</span></b></span>
           </button>
         </div>
         <p class="store-select-foot">Чёрный интерфейс · фирменные розовые акценты</p>
@@ -1934,6 +1938,29 @@
     `;
 
     bindDynamicEvents();
+    loadAddOnServices(product).catch((error) => console.warn("Add-on services:", error));
+  }
+
+  async function loadAddOnServices(product) {
+    const screen = $(".product-page");
+    if (!screen || !product) return;
+    const response = await fetch(`/api/add-on-services?category_id=${encodeURIComponent(product.category_id || "")}`);
+    if (!response.ok) return;
+    const data = await response.json();
+    const services = Array.isArray(data.services) ? data.services : [];
+    if (!services.length || !screen.isConnected) return;
+    const section = document.createElement("section");
+    section.className = "addon-services";
+    section.innerHTML = `<h2>С этим покупают</h2><div class="addon-service-list">${services.map(service => `<article class="addon-service-card"><div class="addon-service-media">${service.image_url ? `<img src="${escapeHtml(service.image_url)}" alt="${escapeHtml(service.name)}" loading="lazy">` : `<span>＋</span>`}</div><div class="addon-service-info"><strong>${escapeHtml(service.name)}</strong><p>${escapeHtml(service.description || "Дополнительная услуга")}</p><b>${money(num(service.price))}</b></div><button type="button" class="secondary-button addon-add" data-addon-id="${Number(service.id)}">Добавить</button></article>`).join("")}</div>`;
+    const actions = screen.querySelector(".detail-actions");
+    if (actions) actions.before(section); else screen.append(section);
+    section.querySelectorAll("[data-addon-id]").forEach(button => button.addEventListener("click", () => {
+      const service = services.find(item => Number(item.id) === Number(button.dataset.addonId));
+      if (!service) return;
+      state.cart.push({ key: `service-${service.id}`, product_id: 0, product_name: service.name, price: num(service.price), quantity: 1, image_url: service.image_url || "", variant_id: null, variant_text: "Дополнительная услуга", selected_options: {}, is_addon_service: true, addon_service_id: Number(service.id) });
+      saveCart(); updateCartBadge();
+      button.textContent = "Добавлено ✓"; button.disabled = true;
+    }));
   }
 
   /* =========================================================
@@ -4460,7 +4487,7 @@
   function handleAction(
     action
   ) {
-    if (action === "digital-shop") { switchStore("tech"); navigate("catalog"); return; }
+    if (action === "digital-shop") { switchStore("digital"); return; }
     if (action === "store-tech") { switchStore("tech"); return; }
 
     if (action === "store-select") { state.activeStore = "tech"; navigate("catalog"); return; }

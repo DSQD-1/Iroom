@@ -314,6 +314,8 @@
       loadProducts();
     }
 
+    if (section === "addons") { loadAddOnServices(); }
+
     if (section === "categories") {
       loadCategories();
     }
@@ -1451,6 +1453,30 @@
   }
 
   /* =========================================================
+     ADD-ON SERVICES — "С этим покупают"
+  ========================================================= */
+  async function loadAddOnServices() {
+    const container = $("#addonsGrid");
+    if (!container) return;
+    container.innerHTML = `<div class="loading">Загрузка услуг…</div>`;
+    try {
+      const data = await api("/api/admin/add-on-services");
+      const services = Array.isArray(data.services) ? data.services : [];
+      const categories = Array.isArray(state.categories) ? state.categories : [];
+      if (!services.length) { container.innerHTML = `<div class="empty"><strong>Услуг пока нет</strong><p>Добавь услугу, чтобы предлагать её вместе с товарами.</p></div>`; return; }
+      container.innerHTML = services.map(item => `<article class="product-card"><div class="product-card-body"><strong>${escapeHtml(item.name)}</strong><p>${escapeHtml(item.description || "")}</p><b>${money(number(item.price))}</b><small>${escapeHtml(categories.find(c => String(c.id) === String(item.category_id))?.name || "Все категории")}</small><div class="card-actions"><button class="btn" data-addon-edit="${Number(item.id)}">Изменить</button><button class="btn danger" data-addon-delete="${Number(item.id)}">Удалить</button></div></div></article>`).join("");
+      container.querySelectorAll("[data-addon-edit]").forEach(button => button.addEventListener("click", () => editAddOnService(services.find(x => Number(x.id) === Number(button.dataset.addonEdit)))));
+      container.querySelectorAll("[data-addon-delete]").forEach(button => button.addEventListener("click", () => deleteAddOnService(button.dataset.addonDelete)));
+    } catch (error) { container.innerHTML = `<div class="empty">${escapeHtml(error.message || "Не удалось загрузить услуги")}</div>`; }
+  }
+  function editAddOnService(item = {}) {
+    const categories = Array.isArray(state.categories) ? state.categories : [];
+    openModal(`<h2>${item.id ? "Изменить услугу" : "Новая услуга"}</h2><form id="addonForm" class="form-grid"><label class="field">Название<input name="name" required maxlength="120" value="${escapeHtml(item.name || "")}"></label><label class="field">Цена<input name="price" type="number" min="0" step="0.01" required value="${number(item.price)}"></label><label class="field">Категория<select name="category_id"><option value="">Все категории</option>${categories.map(c => `<option value="${Number(c.id)}" ${String(c.id)===String(item.category_id)?"selected":""}>${escapeHtml(c.name)}</option>`).join("")}</select></label><label class="field">Ссылка на фото<input name="image_url" value="${escapeHtml(item.image_url || "")}" placeholder="https://…"></label><label class="field">Описание<textarea name="description">${escapeHtml(item.description || "")}</textarea></label><label class="field"><input name="active" type="checkbox" ${item.active === 0 ? "" : "checked"}> Показывать покупателям</label><button class="btn primary" type="submit">Сохранить услугу</button></form>`);
+    $("#addonForm")?.addEventListener("submit", async event => { event.preventDefault(); const f = new FormData(event.currentTarget); const payload = { name: String(f.get("name")||"").trim(), price: Number(f.get("price")||0), category_id: f.get("category_id") ? Number(f.get("category_id")) : null, image_url: String(f.get("image_url")||"").trim(), description: String(f.get("description")||"").trim(), active: f.get("active") === "on" }; try { await api(item.id ? `/api/admin/add-on-services/${item.id}` : "/api/admin/add-on-services", { method: item.id ? "PUT" : "POST", body: payload }); closeModal(); toast("Услуга сохранена"); await loadAddOnServices(); } catch (error) { toast(error.message || "Не удалось сохранить услугу"); } });
+  }
+  async function deleteAddOnService(id) { if (!confirm("Удалить дополнительную услугу?")) return; try { await api(`/api/admin/add-on-services/${id}`, {method:"DELETE"}); toast("Услуга удалена"); await loadAddOnServices(); } catch(error) { toast(error.message || "Не удалось удалить услугу"); } }
+
+  /* =========================================================
      PRODUCTS
   ========================================================= */
 
@@ -1723,10 +1749,17 @@
   }
 
   function parseImages(value) {
-    return String(value || "")
-      .split("\n")
-      .map((item) => item.trim())
-      .filter(Boolean);
+    const raw = String(value || "").trim();
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.map(item => {
+        if (typeof item === "string") return item.trim();
+        if (item && typeof item === "object" && item.url) return {url:String(item.url), type:item.type === "video" ? "video" : "image"};
+        return null;
+      }).filter(Boolean);
+    } catch {}
+    return raw.split("\n").map(item => item.trim()).filter(Boolean);
   }
 
   function openProductEditor(id = null) {
@@ -1854,6 +1887,13 @@
           </label>
         </div>
 
+        <label class="media-upload-field">
+          <span>Загрузить фото или видео с iPhone</span>
+          <input id="productMediaFiles" type="file" accept="image/*,video/mp4,video/webm,video/quicktime" multiple>
+          <small>Выбери файлы из галереи. Для надёжной загрузки используй файлы до 8 МБ каждый.</small>
+        </label>
+        <div id="productMediaPreview" class="media-preview"></div>
+
         <label>
           <span>Главное изображение URL</span>
 
@@ -1878,16 +1918,8 @@
             rows="4"
             placeholder="https://..."
           >${escapeHtml(
-            Array.isArray(
-              parseJson(
-                product?.images,
-                []
-              )
-            )
-              ? parseJson(
-                  product?.images,
-                  []
-                ).join("\n")
+            Array.isArray(parseJson(product?.images, []))
+              ? parseJson(product?.images, []).map(item => typeof item === "string" ? item : item?.url || "").filter(Boolean).join("\n")
               : ""
           )}</textarea>
         </label>
@@ -2050,6 +2082,37 @@
         "submit",
         saveProduct
       );
+
+    const mediaInput = $("#productMediaFiles");
+    mediaInput?.addEventListener("change", async () => {
+      const files = Array.from(mediaInput.files || []);
+      const urls = [];
+      for (const file of files) {
+        if (!(file.type.startsWith("image/") || ["video/mp4", "video/webm", "video/quicktime"].includes(file.type))) {
+          toast(`Формат ${file.name} не поддерживается`); continue;
+        }
+        if (file.size > 8 * 1024 * 1024) { toast(`${file.name}: максимум 8 МБ`); continue; }
+        try {
+          const url = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ""));
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+          urls.push({url, type:file.type.startsWith("video/") ? "video" : "image"});
+        } catch { toast(`Не удалось прочитать ${file.name}`); }
+      }
+      const existing = parseImages($("#productImages")?.value || "").map(url => ({url, type:/^data:video\//i.test(url) || /\.(mp4|webm|mov)(\?|$)/i.test(url) ? "video" : "image"}));
+      const all = [...existing, ...urls];
+      if (urls.length) {
+        $("#productImages").value = JSON.stringify(all);
+        const firstImage = urls.find(x => x.type === "image");
+        if (firstImage && !$("#productImage").value.trim()) $("#productImage").value = firstImage.url;
+        const preview = $("#productMediaPreview");
+        if (preview) preview.innerHTML = urls.map(x => x.type === "video" ? `<video controls src="${x.url}" class="media-preview-item"></video>` : `<img src="${x.url}" class="media-preview-item" alt="Предпросмотр">`).join("");
+        toast(`Добавлено файлов: ${urls.length}`);
+      }
+    });
   }
 
   async function saveProduct(event) {
@@ -4486,6 +4549,7 @@
 
     /* Categories */
 
+    $("#addAddonButton")?.addEventListener("click", () => editAddOnService());
     $("#addCategoryButton")
       ?.addEventListener(
         "click",
