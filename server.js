@@ -5794,6 +5794,7 @@ function isAutoProductImage(url) {
 const PRICE_LIST_MODELS = [
   "iPhone 18 Pro Max", "iPhone 18 Pro", "iPhone 18 Air", "iPhone 18",
   "iPhone 17 Pro Max", "iPhone 17 Pro", "iPhone 17 Air", "iPhone 17e", "iPhone 17",
+  "iPhone 16e",
   "iPhone 16 Pro Max", "iPhone 16 Pro", "iPhone 16 Plus", "iPhone 16",
   "iPhone 15 Pro Max", "iPhone 15 Pro", "iPhone 15 Plus", "iPhone 15",
   "iPhone 14 Pro Max", "iPhone 14 Pro", "iPhone 14 Plus", "iPhone 14",
@@ -5949,53 +5950,45 @@ function parseAdminPriceList(text) {
 
   for (const originalLine of lines) {
     const line = originalLine.replace(/^[-•*]\s*/, "").trim();
-    // Determine the text before the FINAL price separator. Do not split on
-    // ordinary hyphens inside names such as "USB-C".
-    const linePricePart = line.match(/^(.*?)\s+[-–—]\s*(?:от\s*)?[\d\s.,]+\s*(?:₽)?\s*$/iu);
-    const leftOfDash = (linePricePart ? linePricePart[1] : line).trim();
-    const explicitFamily = PRICE_LIST_MODELS.find(name => leftOfDash.toLowerCase().startsWith(name.toLowerCase() + " ") || leftOfDash.toLowerCase() === name.toLowerCase());
-    if (explicitFamily && /[-–—]/.test(line)) currentModel = leftOfDash;
-    const compactStart = leftOfDash.match(/^(\d{2})\s+(Pro(?:\s+Max)?|Air|Plus|e)\b/i);
-    if (compactStart && /[-–—]/.test(line)) currentModel = `iPhone ${compactStart[1]} ${compactStart[2]}`.replace(/\be$/i, "e");
-    const model = PRICE_LIST_MODELS.find(name => line.toLowerCase() === name.toLowerCase());
-    if (model) {
-      currentModel = model;
-      continue;
-    }
-    const shortModel = line.match(/^(\d{2})\s+(Pro(?:\s+Max)?|Air|Plus|e)(?:\s*[:—-])?$/i);
-    if (shortModel) {
-      currentModel = `iPhone ${shortModel[1]} ${shortModel[2]}`.replace(/\be$/i, "e");
+    // Model headings (for example "iPhone 18 Pro") establish a family for
+    // the compact iPhone rows below. Other products are parsed independently.
+    const heading = PRICE_LIST_MODELS.find(name => line.toLowerCase() === name.toLowerCase());
+    if (heading) {
+      currentModel = heading;
       continue;
     }
 
-    // Header/category lines are allowed and don't count as failures.
-    if (!/[-–—:]/.test(line) && !/\b(?:GB|TB|eSim|SIM|sim)\b/i.test(line)) continue;
-    if (!currentModel) {
-      // Support compact lines such as: "18 Pro 256GB Black eSim - 122.000".
-      const compact = line.match(/^(\d{2})\s+(Pro(?:\s+Max)?|Air|Plus|e)\b(.*?)[-–—]\s*(.+)$/iu);
-      if (compact) {
-        currentModel = `iPhone ${compact[1]} ${compact[2]}`.replace(/\be$/i, "e");
-      } else {
-        // Generic one-line product: "Dyson ... - 19.000"
-        const generic = line.match(/^(.+?)\s*[-–—:]\s*(.+)$/u);
-        if (!generic) { skipped.push(originalLine); continue; }
-        currentModel = generic[1].trim();
-      }
-    }
-
-    // A price row may contain several dashes (for example
-    // "Apple Watch 12 - 42mm - 46 500"). The LAST dash before the
-    // numeric price is the price separator. Never split on the first dash.
-    const priceMatch = line.match(/(?:^|\s)[-–—]\s*(?:от\s*)?([\d\s.,]+)\s*(?:₽)?\s*$/iu);
+    const priceMatch = line.match(/(?:^|\s)[-–—:]\s*(?:от\s*)?([\d\s.,]+)\s*(?:₽|руб(?:\.)?)?\s*$/iu);
     if (!priceMatch) {
+      // Section labels such as "eSIM", "Samsung" and "Dyson" are not failed rows.
+      if (/^(?:e\s*sim|1\s*sim\s*\+\s*e\s*sim|sim\s*\+\s*sim|e\s*sim\s*\+\s*e\s*sim|sim formats:?|apple|iphone|airpods|earpods|apple watch|ipad|macbook|dyson|playstation|xbox|nintendo|samsung|xiaomi|google pixel|oneplus|honor|huawei|accessories|аксессуары)$/iu.test(line)) continue;
+      if (!/[-–—:]\s*(?:от\s*)?[\d]/iu.test(line)) continue;
       skipped.push(originalLine);
       continue;
     }
 
     const priceStart = priceMatch.index;
-    let descriptor = line.slice(0, priceStart).replace(/\s*[-–—]\s*$/u, '').trim();
-    const priceParts = [priceMatch[1].trim()];
-    if (!priceParts.length) { skipped.push(originalLine); continue; }
+    const left = line.slice(0, priceStart).replace(/\s*[-–—:]\s*$/u, "").trim();
+    if (!left) { skipped.push(originalLine); continue; }
+
+    // Compact iPhone rows inherit the family heading so all memory/color/SIM
+    // combinations become variants of one product. Non-iPhone rows are their
+    // own products unless a future explicit variant format is added.
+    const familyPrefix = String(currentModel || "").replace(/^iPhone\s+/i, "");
+    const isCompactFamilyRow = /^\d{2}\s+(?:Pro(?:\s+Max)?|Air|Plus)\b/i.test(left);
+    const isIphoneRow = /^iPhone\s/i.test(currentModel || "") &&
+      (left.toLowerCase().startsWith((familyPrefix + " ").toLowerCase()) || isCompactFamilyRow);
+    let model = isIphoneRow ? currentModel : left;
+    let descriptor = isIphoneRow ? left : "";
+
+    // Also accept full model names directly on a priced line (e.g. "iPhone 17 Pro 256GB ...").
+    if (/^iphone\s/i.test(left)) {
+      const family = PRICE_LIST_MODELS.find(name => left.toLowerCase().startsWith(name.toLowerCase() + " "));
+      if (family) {
+        model = family;
+        descriptor = left.slice(family.length).trim();
+      }
+    }
 
     const regionMatch = descriptor.match(/(🇯🇵|🇮🇳|🇭🇰|🇨🇳|🇺🇸)/u);
     const region = regionMatch?.[1] || "";
@@ -6009,32 +6002,29 @@ function parseAdminPriceList(text) {
     const memory = memoryMatch?.[1]?.toUpperCase() || "";
     descriptor = descriptor.replace(memoryMatch?.[0] || "", "").trim();
 
-    const modelPrefix = currentModel.replace(/^iPhone\s+/i, "");
-    if (descriptor.toLowerCase().startsWith(modelPrefix.toLowerCase())) {
-      descriptor = descriptor.slice(modelPrefix.length).trim();
+    if (isIphoneRow) {
+      const modelPrefix = currentModel.replace(/^iPhone\s+/i, "");
+      if (descriptor.toLowerCase().startsWith(modelPrefix.toLowerCase())) {
+        descriptor = descriptor.slice(modelPrefix.length).trim();
+      }
     }
 
     const color = descriptor.replace(/\s+/g, " ").trim() || "";
     const simType = sim ? sim.replace(/\s+/g, "") : (/🇯🇵|🇺🇸/.test(region) ? "eSim+eSim" : /🇮🇳|🇭🇰/.test(region) ? "1Sim+eSim" : /🇨🇳/.test(region) ? "Sim+Sim" : "");
+    const parsed = parseImportPrice(priceMatch[1].trim());
+    const importKey = normalizeImportKey([model, region, memory, color, simType].join("|"));
 
-    priceParts.forEach((priceRaw, index) => {
-      const parsed = parseImportPrice(priceRaw);
-      const variantSuffix = priceParts.length > 1 ? ` / ${index + 1}` : "";
-      const importKey = normalizeImportKey([
-        currentModel, region, memory, color, simType, variantSuffix
-      ].join("|"));
-      items.push({
-        model: currentModel,
-        category: categoryNameForImport(currentModel, color),
-        region,
-        memory,
-        color,
-        sim_type: simType,
-        price: parsed.numeric,
-        price_text: parsed.text,
-        import_key: importKey,
-        source_line: originalLine
-      });
+    items.push({
+      model,
+      category: categoryNameForImport(model, color),
+      region,
+      memory,
+      color,
+      sim_type: simType,
+      price: parsed.numeric,
+      price_text: parsed.text,
+      import_key: importKey,
+      source_line: originalLine
     });
   }
 
