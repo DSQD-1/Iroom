@@ -2289,3 +2289,15 @@ a {
     font-size: 25px !important;
   }
 }
+
+/* Refined IRoom admin: unified components and clearer product editor */
+:root{--admin-accent:#f06ab3;--admin-accent-soft:rgba(240,106,179,.12);--admin-border:#302631;--admin-surface:#141116;--admin-surface-raised:#1a151d}
+body{background:radial-gradient(ellipse at 75% 0,rgba(240,106,179,.055),transparent 35%),#09080b}
+.sidebar,.admin-header{backdrop-filter:blur(18px)}.sidebar{border-right:1px solid var(--admin-border)}.admin-header{border-bottom:1px solid var(--admin-border);background:rgba(10,9,12,.92)}
+.admin-section{animation:adminSectionIn .18s ease-out}@keyframes adminSectionIn{from{opacity:.55;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.panel,.table-panel,.stat-card,.card,.modal,.modal-content{border-color:var(--admin-border)!important;box-shadow:0 12px 32px rgba(0,0,0,.14)}
+.btn{transition:transform .15s,border-color .15s,background .15s}.btn:active{transform:scale(.98)}.btn.primary{background:linear-gradient(135deg,#f47cbd,#dc4d9a);border-color:transparent;color:#210b19;font-weight:750;box-shadow:0 5px 18px rgba(240,106,179,.14)}
+input,select,textarea{border-radius:12px!important;border-color:#3a2b3b!important;background:#100d12!important}input:focus,select:focus,textarea:focus{outline:2px solid rgba(240,106,179,.25);border-color:var(--admin-accent)!important}
+#modalContent{max-width:min(760px,calc(100vw - 24px));margin:12px auto;padding:clamp(16px,3vw,28px);border:1px solid var(--admin-border);border-radius:22px;background:#131016;box-shadow:0 24px 90px rgba(0,0,0,.5)}#modalBackdrop{overflow-y:auto;align-items:flex-start;padding:12px 0}
+#productForm{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px!important}#productForm label{min-width:0;display:flex;flex-direction:column;gap:7px}#productForm label span{font-size:12px;color:#cbbdcb;font-weight:650}#productForm input,#productForm select,#productForm textarea{width:100%;min-height:44px;padding:11px 12px;box-sizing:border-box}#productForm textarea{min-height:90px;resize:vertical}#productForm button[type=submit],#productForm .form-actions{grid-column:1/-1}
+@media(max-width:560px){#modalContent{margin:6px auto;border-radius:18px}#productForm{grid-template-columns:1fr;gap:12px!important}#productForm button[type=submit],#productForm .form-actions{grid-column:auto}.section-heading{gap:12px;align-items:flex-start}.section-heading h1{font-size:25px}}
