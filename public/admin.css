@@ -2357,3 +2357,37 @@ input:focus, textarea:focus, select:focus { border-color: var(--pink) !important
 .nav-item.active { background: var(--pink-soft); color: #fff; box-shadow: inset 3px 0 var(--pink); }
 .toast { border: 1px solid rgba(240,90,171,.28); box-shadow: 0 16px 42px rgba(0,0,0,.35); }
 @media (max-width: 640px) { .admin-main { padding: 16px 12px calc(28px + env(safe-area-inset-bottom)); } .section-heading { flex-direction: column; align-items: stretch; } .section-heading > button, .section-actions > .btn { width: 100%; } .section-actions { display: grid; grid-template-columns: 1fr; gap: 9px; } #productForm > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; } .product-mode-fields { padding: 12px !important; } .btn, .primary-button { min-height: 44px; } }
+
+
+/* IRoom admin: dark controls with restrained pink accents across the whole panel */
+.admin-product-image, .admin-product-image img, .image-upload-preview, .image-upload-preview img,
+.image-preview, .image-preview img, .media-preview, .media-preview img, .media-preview-item {
+  background-color: transparent !important;
+}
+.admin-product-image img { width:100%; height:100%; display:block; object-fit:contain; padding:0; }
+button, .btn, .primary-button, .secondary-button, .text-button, .filter-button,
+.admin-product-actions button, .table-actions button, .danger-button, button[type=submit],
+input[type=file]::file-selector-button {
+  background: #151116 !important;
+  color: #ffe8f3 !important;
+  border: 1px solid rgba(240,90,171,.38) !important;
+  box-shadow: none !important;
+}
+.primary-button, .btn.primary, button[type=submit], #productForm button[type=submit] {
+  background: linear-gradient(135deg,#25121f,#321326) !important;
+  color: #ff9acb !important;
+  border: 1px solid rgba(240,90,171,.72) !important;
+  box-shadow: 0 0 0 1px rgba(240,90,171,.06), 0 5px 18px rgba(240,90,171,.08) !important;
+}
+button:hover, .btn:hover, .primary-button:hover, .secondary-button:hover, .filter-button:hover,
+.admin-product-actions button:hover, .table-actions button:hover, input[type=file]::file-selector-button:hover {
+  background: #291522 !important;
+  color: #ffc2df !important;
+  border-color: rgba(255,105,184,.78) !important;
+}
+button:active, .btn:active, .primary-button:active, .secondary-button:active { transform: scale(.985); }
+.text-button { background: transparent !important; color: #ff8dc5 !important; border-color: transparent !important; }
+.nav-item.active, .filter-button.active, .tab.active, [aria-pressed=true] {
+  background: rgba(240,90,171,.14) !important; border-color: rgba(240,90,171,.6) !important; color: #ffabd3 !important;
+}
+.danger-button { color: #ff9aaf !important; border-color: rgba(255,100,130,.4) !important; background:#1b1015 !important; }
