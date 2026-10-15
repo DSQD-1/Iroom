@@ -193,7 +193,7 @@
     const uploadedImage = media.find((entry) => entry.type === "image")?.url || "";
     if (uploadedImage) return uploadedImage;
 
-    // Use an official Apple product-page image when an Apple item has no uploaded photo.
+    // Use a non-Apple image source when no uploaded product photo exists.
     let name = String(item?.name || item?.product_name || "").trim();
     const category = String(item?.category_name || item?.category || "");
     const appleText = `${name} ${category}`;
@@ -205,7 +205,7 @@
     }
     const resolvedText = `${name} ${category}`;
     if (/iphone|airpods|earpods|apple\s*watch|ipad|macbook|mac\s*mini|mac\s*studio|imac|magic\s*(mouse|keyboard)|studio\s*display|apple\s*pencil|vision\s*pro|homepod|apple\s*tv/i.test(resolvedText)) {
-      return `/api/apple-product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
+      return `/api/product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
     }
     return "";
   }
@@ -620,6 +620,23 @@
 
     state.config =
       config || {};
+
+    // Preload product and banner images while the greeting screen is visible.
+    // Failed external image endpoints time out rather than blocking the shop forever.
+    const imageUrls = [...new Set([
+      ...state.products.map(item => imageOf(item)),
+      ...state.banners.map(item => String(item.image_url || '').trim())
+    ].filter(Boolean))];
+    await Promise.race([
+      Promise.all(imageUrls.map(url => new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+        if (img.complete) resolve(img.naturalWidth > 0);
+      }))),
+      new Promise(resolve => window.setTimeout(resolve, 7000))
+    ]);
 
     if (
       !state.checkout.pickupPointId &&
@@ -1069,22 +1086,15 @@
       state.banners[0];
 
     const storeItems = storeProducts("tech");
-    const newest =
-      storeItems
-        .filter(
-          (item) =>
-            Number(item.is_new) ===
-            1
-        )
-        .slice(0, 6);
-
-    const products =
-      newest.length
-        ? newest
-        : storeItems.slice(
-            0,
-            6
-          );
+    // «Новинки» are reserved exclusively for the iPhone 18 family.
+    // Do not fall back to older products when these models are absent.
+    const products = storeItems
+      .filter(item => /\biphone\s*18(?:\s|$)/i.test(String(item.name || item.product_name || '')))
+      .sort((a, b) => {
+        const rank = name => /pro\s*max/i.test(name) ? 0 : /pro/i.test(name) ? 1 : /air/i.test(name) ? 2 : 3;
+        return rank(String(a.name || '')) - rank(String(b.name || '')) || String(a.name || '').localeCompare(String(b.name || ''), 'ru');
+      })
+      .slice(0, 12);
 
     screen.innerHTML = `
       <div class="screen">
@@ -1253,6 +1263,7 @@
 
             ${state.categories
               .filter(category => !["PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes", "Telegram Stars"].some(name => String(category.name || "").toLowerCase() === name.toLowerCase()))
+              .concat(state.categories.filter(category => String(category.name || '').trim().toLowerCase() === 'другое'))
               .map(
                 (category) => `
                   <button
@@ -1370,6 +1381,7 @@
           </button>
 
           ${state.categories.filter(category => !isDigitalCategory(category))
+            .sort((a, b) => (String(a.name || '').trim().toLowerCase() === 'другое') - (String(b.name || '').trim().toLowerCase() === 'другое'))
             .map(
               (category) => `
                 <button
@@ -1437,7 +1449,7 @@
       .map(product => String(product.category_id)));
     const categories = state.categories
       .filter(category => isDigitalCategory(category) || (String(category.name || "").trim().toLowerCase() === "другое" && digitalProductCategoryIds.has(String(category.id))))
-      .filter(category => String(category.name || "").trim().toLowerCase() !== "другое");
+      .sort((a, b) => (String(a.name || '').trim().toLowerCase() === 'другое') - (String(b.name || '').trim().toLowerCase() === 'другое'));
     const selectedCategory = state.categoryId;
     const selected = selectedCategory
       ? categories.find(category => String(category.id) === String(selectedCategory))
@@ -1485,15 +1497,34 @@
      PRODUCT CARD
   ========================================================= */
 
+  function productCardTone(product) {
+    const value = String(product?.name || product?.product_name || "").toLowerCase();
+    const tones = [
+      [/\b(?:blue|голуб|син|ультрамарин|небесн)\w*/i, ["#153a5b", "#10283f"]],
+      [/\b(?:orange|оранжев)\w*/i, ["#63351d", "#301c15"]],
+      [/\b(?:pink|розов)\w*/i, ["#5b2945", "#2e1829"]],
+      [/\b(?:purple|фиолетов|лаванд)\w*/i, ["#44305f", "#241a35"]],
+      [/\b(?:green|зел[её]н|teal|бирюз)\w*/i, ["#214a42", "#142b29"]],
+      [/\b(?:silver|серебр|natural titanium|натуральн.*титан)\w*/i, ["#454a51", "#24272d"]],
+      [/\b(?:gold|золот)\w*/i, ["#5a4828", "#2d2518"]],
+      [/\b(?:white|бел)\w*/i, ["#4a4c52", "#26282d"]],
+      [/\b(?:black|черн|чёрн|midnight|полноч)\w*/i, ["#25272e", "#111216"]]
+    ];
+    const match = tones.find(([pattern]) => pattern.test(value));
+    const colors = match ? match[1] : ["#25232b", "#111014"];
+    return `--product-tone-start:${colors[0]};--product-tone-end:${colors[1]}`;
+  }
+
   function productCard(product) {
     return `
       <article
         class="product-card"
+        style="${productCardTone(product)}"
         data-product-id="${escapeHtml(
           product.id
         )}"
       >
-        <div class="product-image">
+        <div class="product-image" style="${productCardTone(product)}">
           ${
             imageOf(product)
               ? `
@@ -1709,20 +1740,22 @@
     const matrix = priceOptions.priceMatrix;
     if (matrix.length) {
       const selected = options || {};
-      const matches = matrix.filter((item) => {
-        const eq = (a, b) => {
-          if (a === undefined || a === null || a === "") return true;
-          if (b === undefined || b === null || b === "") return true;
-          return String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
-        };
-        return eq(selected.color, item.color) &&
-          eq(selected.memory, item.memory) &&
-          eq(selected.sim, item.sim) &&
-          eq(selected.region, item.region);
-      }).filter(item => Number.isFinite(Number(item.price)) && Number(item.price) > 0);
-      if (matches.length) {
-        return Math.min(...matches.map(item => num(item.price)));
-      }
+      const keys = ["color", "memory", "sim", "region"];
+      const matches = matrix.map(item => {
+        let score = 0;
+        for (const key of keys) {
+          const chosen = String(selected[key] ?? "").trim().toLowerCase();
+          const candidate = String(item[key] ?? "").trim().toLowerCase();
+          if (chosen) {
+            if (candidate !== chosen) return null;
+            score += 1;
+          }
+        }
+        const price = Number(item.price);
+        if (!Number.isFinite(price) || price <= 0) return null;
+        return { item, score };
+      }).filter(Boolean).sort((a, b) => b.score - a.score);
+      if (matches.length) return num(matches[0].item.price);
     }
 
     let result = num(product.price);
