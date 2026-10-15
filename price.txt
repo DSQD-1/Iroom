@@ -322,62 +322,18 @@ iMac — По запросу
 Magic Mouse — По запросу
 
 Dyson — уход за волосами
-Dyson Supersonic — По запросу
-Dyson Airwrap — По запросу
-Dyson Airstrait — По запросу
-Dyson Corrale — По запросу
 
 Dyson — пылесосы
-Dyson V8 — По запросу
-Dyson V10 — По запросу
-Dyson V11 — По запросу
-Dyson V12 — По запросу
-Dyson V15 — По запросу
-Dyson V16 — По запросу
-Dyson Gen5detect — По запросу
-Dyson PencilVac — По запросу
-Dyson PencilWash — По запросу
-Dyson Wash G1 — По запросу
-Dyson Clean+Wash — По запросу
-Dyson Spot+Scrub — По запросу
-Dyson Big Ball — По запросу
-Dyson Navi Robot — По запросу
 
 Dyson — очистители воздуха
-Dyson HJ — По запросу
-Dyson PH05 — По запросу
-Dyson BP04 — По запросу
-Dyson TP10 — По запросу
-Dyson TP11 — По запросу
-Dyson TP12 — По запросу
 
 PlayStation и аксессуары
-PlayStation 5 — По запросу
-PlayStation 5 Pro — По запросу
-PlayStation Portal — По запросу
-DualSense — По запросу
-Pulse Elite — По запросу
-Pulse Explore — По запросу
-PlayStation VR2 — По запросу
 
 Xbox
-Xbox Series S — По запросу
-Xbox Series X — По запросу
-Xbox Controller — По запросу
 
 Nintendo
-Nintendo Switch 2 — По запросу
-Nintendo Switch OLED — По запросу
-Nintendo Switch Lite — По запросу
-Joy-Con — По запросу
-Micro SD Express — По запросу
 
 Портативные консоли
-Steam Deck — По запросу
-Lenovo Legion Go — По запросу
-Lenovo Legion Go S — По запросу
-ASUS ROG Ally — По запросу
-MSI Claw — По запросу
 
 VR-гарнитуры
 Meta Quest — По запросу
@@ -420,26 +376,18 @@ Logitech G923 — По запросу
 Driving Force Shifter — По запросу
 
 Samsung
-Samsung Galaxy S — По запросу
-Samsung Galaxy Z — По запросу
-Samsung Galaxy A — По запросу
 
 Xiaomi, Redmi и POCO
-Xiaomi — По запросу
 Redmi — По запросу
 POCO — По запросу
 
 Google Pixel
-Google Pixel — По запросу
 
 OnePlus
-OnePlus — По запросу
 
 Honor
-Honor — По запросу
 
 Huawei
-Huawei — По запросу
 
 Аксессуары
 Зарядные устройства — По запросу
@@ -655,8 +603,7 @@ Sony Pulse Elite White - 12.500
 Sony Pulse Elite Black - 12.500
 Pulse Explore White - 13.800
 PS5 3D Pulse Camo - 9.800
-Sony WF-1000XM6 (цена 1) - 26.500
-Sony WF-1000XM6 (цена 2) - 26.700
+Sony WF-1000XM6 - 26.500–26.700
 PowerBeats Pro 2 - 19.000
 JBL Boombox 3 Squad - 27.500
 Plaud Note Pin S AI Voice Recorder - 22.500
@@ -678,8 +625,7 @@ MSI Claw - от 49.500
 Nintendo Switch 2 - 45.000
 Nintendo Switch OLED Neon - 29.000
 Nintendo Switch OLED White - 30.000
-Nintendo Switch Lite (цена 1) - 20.300
-Nintendo Switch Lite (цена 2) - 20.400
+Nintendo Switch Lite - 20.300–20.400
 Nintendo Switch 2 Pro Controller - 8.700
 NSW2 Pro Controller Resident Evil - 11.000
 Switch 2 Joy-Con Green/Pink - 8.500
@@ -734,8 +680,7 @@ REMARKABLE / KINDLE / ПЕРИФЕРИЯ
 ==============================
 Remarkable Marker - 12.000
 Remarkable Type Folio - 33.000
-Remarkable Book Folio (цена 1) - 18.000
-Remarkable Book Folio (цена 2) - 21.000
+Remarkable Book Folio - 18.000–21.000
 Kindle Colorsoft - 24.000
 Kindle Colorsoft Kids - 25.500
 Logitech G29 - 23.500

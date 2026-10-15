@@ -13,10 +13,12 @@ const BOT_TOKEN = String(
   process.env.BOT_TOKEN || ""
 ).trim();
 
-const ADMIN_IDS = [
-  "5082864281",
-  "5975037118"
-];
+// Configure allowed Telegram user IDs in Render as ADMIN_IDS=123456789,987654321.
+// The fallback preserves the current trusted admins; access still requires valid Telegram initData.
+const ADMIN_IDS = String(process.env.ADMIN_IDS || "5082864281,5975037118")
+  .split(/[\s,;]+/)
+  .map(value => value.trim())
+  .filter(Boolean);
 
 const OPENAI_API_KEY = String(
   process.env.OPENAI_API_KEY || ""
@@ -102,6 +104,129 @@ app.use(
 
 // Explicit admin routes prevent a renamed/missing extension from producing
 // a confusing "Cannot GET /admin.html" on Render/Telegram WebView.
+// Official Apple product-image fallback. Resolve Apple product-page og:image and persist it locally.
+const appleImageCache = new Map();
+const appleImageDiskDir = path.join(publicDir, "catalog-images", "apple-auto");
+try { fs.mkdirSync(appleImageDiskDir, { recursive: true }); } catch (error) { console.warn("Apple image cache directory:", error.message); }
+// Prefer the official Apple product page for the exact model family in the price list.
+// The endpoint resolves that page's official og:image at runtime; it never invents image URLs.
+const APPLE_IMAGE_PAGES = [
+  // iPhone: specific models first so a Pro/Plus/Air model never falls into a generic family page.
+  { test: /iphone\s*18\s*pro\s*max/i, url: "https://www.apple.com/iphone-18-pro/" },
+  { test: /iphone\s*18\s*pro/i, url: "https://www.apple.com/iphone-18-pro/" },
+  { test: /iphone\s*18\s*air/i, url: "https://www.apple.com/iphone-air/" },
+  { test: /iphone\s*18(?!\s*(?:pro|air))/i, url: "https://www.apple.com/iphone/" },
+  { test: /iphone\s*17\s*pro\s*max/i, url: "https://www.apple.com/iphone-17-pro/" },
+  { test: /iphone\s*17\s*pro/i, url: "https://www.apple.com/iphone-17-pro/" },
+  { test: /iphone\s*17\s*air/i, url: "https://www.apple.com/iphone-air/" },
+  { test: /iphone\s*17e/i, url: "https://www.apple.com/iphone-17e/" },
+  { test: /iphone\s*17(?!\s*(?:pro|air|e))/i, url: "https://www.apple.com/iphone-17/" },
+  { test: /iphone\s*16\s*pro\s*max/i, url: "https://www.apple.com/iphone-16-pro/" },
+  { test: /iphone\s*16\s*pro/i, url: "https://www.apple.com/iphone-16-pro/" },
+  { test: /iphone\s*16\s*plus/i, url: "https://www.apple.com/iphone-16/" },
+  { test: /iphone\s*16e/i, url: "https://www.apple.com/iphone-16e/" },
+  { test: /iphone\s*16/i, url: "https://www.apple.com/iphone-16/" },
+  { test: /iphone\s*15\s*pro\s*max/i, url: "https://www.apple.com/iphone-15-pro/" },
+  { test: /iphone\s*15\s*pro/i, url: "https://www.apple.com/iphone-15-pro/" },
+  { test: /iphone\s*15\s*plus/i, url: "https://www.apple.com/iphone-15/" },
+  { test: /iphone\s*15/i, url: "https://www.apple.com/iphone-15/" },
+  { test: /iphone\s*14\s*plus/i, url: "https://www.apple.com/iphone-14/" },
+  { test: /iphone\s*14/i, url: "https://www.apple.com/iphone-14/" },
+  { test: /iphone\s*13/i, url: "https://www.apple.com/iphone-13/" },
+  { test: /iphone/i, url: "https://www.apple.com/iphone/" },
+
+  // AirPods and Apple Watch
+  { test: /airpods\s*max\s*2/i, url: "https://www.apple.com/airpods-max/" },
+  { test: /airpods\s*max/i, url: "https://www.apple.com/airpods-max/" },
+  { test: /airpods\s*pro\s*3/i, url: "https://www.apple.com/airpods-pro/" },
+  { test: /airpods\s*pro/i, url: "https://www.apple.com/airpods-pro/" },
+  { test: /airpods|earpods/i, url: "https://www.apple.com/airpods/" },
+  { test: /watch.*ultra\s*4|ultra\s*4.*watch/i, url: "https://www.apple.com/apple-watch-ultra-3/" },
+  { test: /watch.*ultra\s*3|ultra\s*3.*watch/i, url: "https://www.apple.com/apple-watch-ultra-3/" },
+  { test: /watch.*ultra/i, url: "https://www.apple.com/apple-watch-ultra-2/" },
+  { test: /apple\s*watch.*se|watch\s*se/i, url: "https://www.apple.com/apple-watch-se/" },
+  { test: /apple\s*watch\s*12|watch\s*series\s*12/i, url: "https://www.apple.com/apple-watch-series-12/" },
+  { test: /apple\s*watch\s*11|watch\s*series\s*11/i, url: "https://www.apple.com/apple-watch-series-11/" },
+  { test: /apple\s*watch\s*10|watch\s*series\s*10/i, url: "https://www.apple.com/apple-watch-series-10/" },
+  { test: /apple\s*watch\s*9|watch\s*series\s*9/i, url: "https://www.apple.com/apple-watch-series-9/" },
+  { test: /apple\s*watch|watch\s*series/i, url: "https://www.apple.com/watch/" },
+
+  // iPad, Mac, and Apple accessories in this price list
+  { test: /ipad.*pro\s*m5/i, url: "https://www.apple.com/ipad-pro/" },
+  { test: /ipad.*pro/i, url: "https://www.apple.com/ipad-pro/" },
+  { test: /ipad.*air\s*m4|ipad\s*air/i, url: "https://www.apple.com/ipad-air/" },
+  { test: /ipad.*mini\s*7|ipad\s*mini/i, url: "https://www.apple.com/ipad-mini/" },
+  { test: /ipad\s*11|ipad\s*\(a16\)/i, url: "https://www.apple.com/ipad-11/" },
+  { test: /ipad|apple\s*pencil|magic\s*keyboard.*ipad/i, url: "https://www.apple.com/ipad/" },
+  { test: /macbook.*pro/i, url: "https://www.apple.com/macbook-pro/" },
+  { test: /macbook.*air/i, url: "https://www.apple.com/macbook-air/" },
+  { test: /macbook\s*neo/i, url: "https://www.apple.com/macbook-neo/" },
+  { test: /mac\s*mini/i, url: "https://www.apple.com/mac-mini/" },
+  { test: /mac\s*studio/i, url: "https://www.apple.com/mac-studio/" },
+  { test: /imac/i, url: "https://www.apple.com/imac/" },
+  { test: /magic\s*mouse|magic\s*keyboard|studio\s*display/i, url: "https://www.apple.com/shop/accessories/all" },
+  { test: /apple\s*vision|vision\s*pro/i, url: "https://www.apple.com/apple-vision-pro/" },
+  { test: /apple\s*tv/i, url: "https://www.apple.com/apple-tv-4k/" },
+  { test: /homepod/i, url: "https://www.apple.com/homepod/" },
+  { test: /airtag/i, url: "https://www.apple.com/airtag/" }
+];
+
+function officialApplePageFor(name, category) {
+  const value = `${String(name || "")} ${String(category || "")}`.trim();
+  return APPLE_IMAGE_PAGES.find(entry => entry.test.test(value))?.url || "";
+}
+
+app.get("/api/apple-product-image", async (req, res) => {
+  const name = String(req.query.name || "").slice(0, 180);
+  const category = String(req.query.category || "").slice(0, 100);
+  const pageUrl = officialApplePageFor(name, category);
+  if (!pageUrl) return res.status(404).end();
+
+  // One persistent image per official model-family page; product variants with the
+  // same exterior share this cached source image. Uploaded product photos override it.
+  const cacheKey = crypto.createHash("sha1").update(pageUrl).digest("hex");
+  const prefix = path.join(appleImageDiskDir, cacheKey);
+  const existing = [".png", ".jpg", ".jpeg", ".webp"].map(ext => prefix + ext).find(file => {
+    try { return fs.statSync(file).isFile() && fs.statSync(file).size > 1000; } catch { return false; }
+  });
+  if (existing) return res.sendFile(existing);
+  if (appleImageCache.has(pageUrl) && !appleImageCache.get(pageUrl)) return res.status(404).end();
+
+  try {
+    const page = await fetch(pageUrl, {
+      headers: { "user-agent": "Mozilla/5.0 (compatible; IRoomCatalog/1.0)", "accept-language": "en-US,en;q=0.9" },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!page.ok) throw new Error(`Apple page status ${page.status}`);
+    const html = await page.text();
+    const match = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["'][^>]*>/i);
+    const imageUrl = String(match?.[1] || "").replace(/&amp;/g, "&");
+    const host = (() => { try { return new URL(imageUrl).hostname; } catch { return ""; } })();
+    if (!imageUrl.startsWith("https://") || !(host === "apple.com" || host.endsWith(".apple.com"))) {
+      throw new Error("No valid official Apple product image found");
+    }
+    const image = await fetch(imageUrl, {
+      headers: { "user-agent": "Mozilla/5.0 (compatible; IRoomCatalog/1.0)" },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!image.ok) throw new Error(`Apple image status ${image.status}`);
+    const type = String(image.headers.get("content-type") || "").toLowerCase();
+    if (!type.startsWith("image/")) throw new Error("Apple image URL did not return an image");
+    const ext = type.includes("png") ? ".png" : type.includes("webp") ? ".webp" : type.includes("jpeg") || type.includes("jpg") ? ".jpg" : ".jpg";
+    const bytes = Buffer.from(await image.arrayBuffer());
+    if (bytes.length < 1000 || bytes.length > 15 * 1024 * 1024) throw new Error("Unexpected Apple image size");
+    const target = prefix + ext;
+    fs.writeFileSync(target, bytes);
+    appleImageCache.set(pageUrl, imageUrl);
+    return res.sendFile(target);
+  } catch (error) {
+    console.warn("Apple product image lookup failed:", error.message);
+    appleImageCache.set(pageUrl, "");
+    return res.status(404).end();
+  }
+});
+
 app.get("/admin.html", (req, res) => {
   res.sendFile(path.join(publicDir, "admin.html"));
 });
@@ -5778,7 +5903,16 @@ function normalizeProductImageKey(value) {
 }
 
 function getProductImageUrl(modelName) {
-  // Intentionally empty: images are added by the owner in the admin panel.
+  // Bundled local catalogue artwork keeps imported products from appearing
+  // without an image. Owners can replace these defaults with real photos in
+  // the admin panel at any time.
+  const model = String(modelName || "").toLowerCase();
+  if (/^iphone\s/.test(model)) {
+    if (/pro/.test(model)) return "/catalog-images/iphone-pro.svg";
+    if (/air/.test(model)) return "/catalog-images/iphone-air.svg";
+    if (/mini|11|12|13|14|15|16e/.test(model)) return "/catalog-images/iphone-classic.svg";
+    return "/catalog-images/iphone-standard.svg";
+  }
   return "";
 }
 
@@ -5812,6 +5946,12 @@ function parseImportPrice(value) {
   const raw = String(value || "").trim();
   if (!raw) return { numeric: null, text: "По запросу" };
   if (/по\s+запросу/i.test(raw)) return { numeric: null, text: "По запросу" };
+  const range = raw.match(/^([\d\s.,]+)\s*[–—-]\s*([\d\s.,]+)$/);
+  if (range) {
+    const low = parsePriceListNumber(range[1]);
+    const high = parsePriceListNumber(range[2]);
+    if (low && high) return { numeric: Math.min(low, high), text: `${Math.min(low, high).toLocaleString("ru-RU")}–${Math.max(low, high).toLocaleString("ru-RU")} ₽` };
+  }
   const m = raw.match(/от\s*([\d\s.,]+)/i);
   const candidate = m ? `от ${m[1].trim()}` : raw;
   const n = parsePriceListNumber(candidate.replace(/^от\s*/i, ""));
@@ -5937,6 +6077,81 @@ function normalizeImportKey(value) {
     .replace(/\s+/g, " ");
 }
 
+function parseGroupedCatalogRow(left, currentModel = "") {
+  const raw = String(left || "").trim();
+  const lower = raw.toLowerCase();
+  const out = { model: raw, descriptor: "", region: "", sim: "", memory: "", color: "" };
+
+  // Dyson: model family is the appliance/code; colour and plug type become selectable variants.
+  const dysonRules = [
+    [/^dyson\s+выпрямитель\s+ht01\b/i, "Dyson выпрямитель HT01"],
+    [/^dyson\s+стайлер\s+hs05\b/i, "Dyson стайлер HS05"],
+    [/^dyson\s+стайлер\s+hs08\b/i, "Dyson стайлер HS08"],
+    [/^dyson\s+стайлер\s+hs09\b/i, "Dyson стайлер HS09"],
+    [/^dyson\s+фен\s+(hd\d+)\b/i, (_, code) => `Dyson фен ${code.toUpperCase()}`],
+    [/^dyson\s+пылесос\s+(v\d+s?)\b/i, (_, code) => `Dyson пылесос ${code}`],
+    [/^dyson\s+очиститель\s+(hj\d+|ph\d+|bp\d+|tp\d+)\b/i, (_, code) => `Dyson очиститель ${code.toUpperCase()}`],
+    [/^dyson\s+(pencilvac|pencilwash|wash g1|clean\+wash hygiene|spot\+scrub ai|big ball|360 navi robot|gen5)\b/i, (_, code) => `Dyson ${code.replace(/\b\w/g, c => c.toUpperCase())}`]
+  ];
+  for (const [re, family] of dysonRules) {
+    const match = raw.match(re);
+    if (match) {
+      out.model = typeof family === "function" ? family(...match) : family;
+      out.descriptor = raw.slice(match[0].length).trim();
+      const plug = out.descriptor.match(/\((вилка|переходник)\)/i);
+      if (plug) {
+        out.sim = /^вилка$/i.test(plug[1]) ? "Вилка" : "Переходник";
+        out.descriptor = out.descriptor.replace(plug[0], "").trim();
+      }
+      out.color = out.descriptor;
+      return out;
+    }
+  }
+
+  // Android phones: memory/RAM configuration is a product option, not a separate listing.
+  const android = raw.match(/^(Samsung Galaxy .+?|Redmi .+?|Xiaomi .+?|Google Pixel .+?|OnePlus .+?|Honor .+?|Huawei .+?)\s+(\d{1,2}\s*\/\s*(?:\d{2,4}|1TB|2TB))(?:\s+(NFC))?$/i);
+  if (android) {
+    out.model = android[1].trim();
+    out.memory = android[2].replace(/\s+/g, "").toUpperCase() + (android[3] ? " NFC" : "");
+    return out;
+  }
+  const pixel = raw.match(/^(Google Pixel .+?)\s+(64|128|256|512|1TB|2TB)$/i);
+  if (pixel) { out.model = pixel[1].trim(); out.memory = pixel[2].toUpperCase(); return out; }
+
+  // Repeated colour variants of the same accessories/consoles.
+  const colorRules = [
+    [/^(Sony Pulse Elite)\s+(White|Black)$/i],
+    [/^(PS5 Portal)\s+(White|Black)$/i],
+    [/^(PlayStation Portal)\s+(White|Black)$/i],
+    [/^(Xbox Series X)\s+1TB\s+(Disc|Disk|Digital)$/i],
+    [/^(Nintendo Switch OLED)\s+(Neon|White)$/i],
+    [/^(PlayStation 5 Slim)\s+(Digital\s+825GB|Digital\s+1TB|Disc\s+1TB)$/i],
+    [/^(Meta Quest 3S)\s+(128GB|256GB)$/i],
+    [/^(Meta Quest 3)\s+(512GB)$/i],
+    [/^(Steam Deck OLED)\s+(512GB|1TB)$/i],
+    [/^(ASUS ROG Ally X)\s+(512GB|1TB)$/i],
+    [/^(Lenovo Go S)\s+(1TB)$/i]
+  ];
+  for (const [re] of colorRules) {
+    const m = raw.match(re);
+    if (m) {
+      out.model = m[1].trim();
+      out.color = m[2].trim();
+      if (/цена/i.test(m[0])) out.color = `Цена ${m[2]}`;
+      if (/^(PlayStation 5 Slim|Xbox Series X)$/i.test(out.model)) out.color = m[2].trim();
+      if (/^(Meta Quest 3S|Meta Quest 3|Steam Deck OLED|ASUS ROG Ally X|Lenovo Go S)$/i.test(out.model)) {
+        out.memory = m[2].trim().toUpperCase();
+        out.color = "";
+      }
+      return out;
+    }
+  }
+
+  // For iPhone, retain the existing heading-based memory/colour/SIM parsing.
+  out.model = raw;
+  return out;
+}
+
 function parseAdminPriceList(text) {
   const lines = String(text || "")
     .replace(/\r/g, "")
@@ -5958,7 +6173,7 @@ function parseAdminPriceList(text) {
       continue;
     }
 
-    const priceMatch = line.match(/(?:^|\s)[-–—:]\s*((?:от\s*)?[\d\s.,]+|по\s+запросу|уточнить(?:\s+цену)?)\s*(?:₽|руб(?:\.)?)?\s*$/iu);
+    const priceMatch = line.match(/(?:^|\s)[-–—:]\s*((?:от\s*)?[\d\s.,]+(?:\s*[–—-]\s*[\d\s.,]+)?|по\s+запросу|уточнить(?:\s+цену)?)\s*(?:₽|руб(?:\.)?)?\s*$/iu);
     if (!priceMatch) {
       // Section labels such as "eSIM", "Samsung" and "Dyson" are not failed rows.
       if (/^(?:e\s*sim|1\s*sim\s*\+\s*e\s*sim|sim\s*\+\s*sim|e\s*sim\s*\+\s*e\s*sim|sim formats:?|apple|iphone|airpods|earpods|apple watch|ipad|macbook|dyson|playstation|xbox|nintendo|samsung|xiaomi|google pixel|oneplus|honor|huawei|accessories|аксессуары)$/iu.test(line)) continue;
@@ -5971,45 +6186,34 @@ function parseAdminPriceList(text) {
     const left = line.slice(0, priceStart).replace(/\s*[-–—:]\s*$/u, "").trim();
     if (!left) { skipped.push(originalLine); continue; }
 
-    // Compact iPhone rows inherit the family heading so all memory/color/SIM
-    // combinations become variants of one product. Non-iPhone rows are their
-    // own products unless a future explicit variant format is added.
+    const groupedRow = parseGroupedCatalogRow(left, currentModel);
     const familyPrefix = String(currentModel || "").replace(/^iPhone\s+/i, "");
-    const isCompactFamilyRow = /^\d{2}\s+(?:Pro(?:\s+Max)?|Air|Plus)\b/i.test(left);
+    const isCompactFamilyRow = /^\d{2}\s+(?:Pro(?:\s+Max)?|Air|Plus|e)\b/i.test(left);
     const isIphoneRow = /^iPhone\s/i.test(currentModel || "") &&
       (left.toLowerCase().startsWith((familyPrefix + " ").toLowerCase()) || isCompactFamilyRow);
-    let model = isIphoneRow ? currentModel : left;
-    let descriptor = isIphoneRow ? left : "";
+    let model = isIphoneRow ? currentModel : groupedRow.model;
+    let descriptor = isIphoneRow ? left : groupedRow.descriptor;
 
-    // Also accept full model names directly on a priced line (e.g. "iPhone 17 Pro 256GB ...").
     if (/^iphone\s/i.test(left)) {
       const family = PRICE_LIST_MODELS.find(name => left.toLowerCase().startsWith(name.toLowerCase() + " "));
-      if (family) {
-        model = family;
-        descriptor = left.slice(family.length).trim();
-      }
+      if (family) { model = family; descriptor = left.slice(family.length).trim(); }
     }
 
     const regionMatch = descriptor.match(/(🇯🇵|🇮🇳|🇭🇰|🇨🇳|🇺🇸)/u);
-    const region = regionMatch?.[1] || "";
+    const region = regionMatch?.[1] || groupedRow.region || "";
     descriptor = descriptor.replace(region, "").trim();
-
     const simMatch = descriptor.match(/\b(1?\s*Sim\s*\+\s*eSim|eSim\s*\+\s*eSim|eSim|Sim\s*\+\s*Sim|Dual\s*SIM|2\s*SIM)\b/i);
-    const sim = simMatch?.[1] || "";
+    const sim = simMatch?.[1] || groupedRow.sim || "";
     descriptor = descriptor.replace(simMatch?.[0] || "", "").trim();
-
     const memoryMatch = descriptor.match(/\b(64GB|128GB|256GB|512GB|1TB|2TB|3TB|4TB)\b/i);
-    const memory = memoryMatch?.[1]?.toUpperCase() || "";
+    const memory = groupedRow.memory || memoryMatch?.[1]?.toUpperCase() || "";
     descriptor = descriptor.replace(memoryMatch?.[0] || "", "").trim();
 
     if (isIphoneRow) {
       const modelPrefix = currentModel.replace(/^iPhone\s+/i, "");
-      if (descriptor.toLowerCase().startsWith(modelPrefix.toLowerCase())) {
-        descriptor = descriptor.slice(modelPrefix.length).trim();
-      }
+      if (descriptor.toLowerCase().startsWith(modelPrefix.toLowerCase())) descriptor = descriptor.slice(modelPrefix.length).trim();
     }
-
-    const color = descriptor.replace(/\s+/g, " ").trim() || "";
+    const color = (groupedRow.color || descriptor).replace(/\s+/g, " ").trim() || "";
     const simType = sim ? sim.replace(/\s+/g, "") : (/🇯🇵|🇺🇸/.test(region) ? "eSim+eSim" : /🇮🇳|🇭🇰/.test(region) ? "1Sim+eSim" : /🇨🇳/.test(region) ? "Sim+Sim" : "");
     const parsed = parseImportPrice(priceMatch[1].trim());
     const importKey = normalizeImportKey([model, region, memory, color, simType].join("|"));
