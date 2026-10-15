@@ -89,7 +89,7 @@
 
   function displayProductPrice(product, fallbackPrice = product?.price) {
     const text = String(product?.price_text || "").trim();
-    if (isInquiryPrice(text, fallbackPrice)) return "По запросу";
+    if (isInquiryPrice(text, fallbackPrice)) return "";
     if (text) return text;
     return `От ${money(fallbackPrice)}`;
   }
@@ -1498,6 +1498,7 @@
                     product.name
                   )}"
                   loading="lazy"
+                  onerror="this.style.display='none'; this.parentElement.classList.add('image-unavailable');"
                 >
               `
               : `
@@ -1546,9 +1547,7 @@
             )}
           </p>
 
-          <div class="product-price">
-            ${escapeHtml(displayProductPrice(product))}
-          </div>
+          ${displayProductPrice(product) ? `<div class="product-price">${escapeHtml(displayProductPrice(product))}</div>` : ""}
         </div>
       </article>
     `;
@@ -1917,9 +1916,7 @@
           )}
         </h1>
 
-        <div class="detail-price">
-          ${escapeHtml(inquiryOnly ? "По запросу" : (variant?.price_text && !/по\s+запросу/i.test(variant.price_text) ? variant.price_text : (/[–—]/.test(String(product.price_text || "")) ? product.price_text : money(currentPrice))))}
-        </div>
+        ${(inquiryOnly ? "" : `<div class="detail-price">${escapeHtml(variant?.price_text && !/по\s+запросу/i.test(variant.price_text) ? variant.price_text : (/[–—]/.test(String(product.price_text || "")) ? product.price_text : money(currentPrice)))}</div>`)}
 
         ${
           optionGroups
@@ -4912,15 +4909,21 @@
      BOOT
   ========================================================= */
 
+  function renderBootLoading() {
+    const screen = $("#screen");
+    if (!screen) return;
+    screen.innerHTML = `<section class="iroom-boot-screen" role="status" aria-live="polite"><div class="iroom-boot-orbit"><span>IR</span></div><div class="iroom-boot-wordmark"><b>IR</b>oom</div><p>Готовим каталог</p><div class="iroom-boot-progress"><i></i></div></section>`;
+  }
+
   async function boot() {
     initTelegram();
     bindStaticEvents();
     updateCartBadge();
     loadViewedProducts();
 
-    // Показываем первый экран сразу: медленный API не должен оставлять
-    // Telegram Mini App полностью чёрным и пустым.
-    render();
+    // Показываем брендированный экран загрузки до получения каталога,
+    // чтобы пустой каталог не мигал до ответа API.
+    renderBootLoading();
 
     try {
       await loadInitialData();

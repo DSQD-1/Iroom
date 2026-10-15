@@ -2620,8 +2620,9 @@ main {
 }
 
 
-/* Transparent product artwork: no baked-in card plate or extra gray bars. */
-.product-card, .product-image, .detail-image, .product-detail-image,
+/* Keep the catalogue card itself dark; only the image canvas is transparent. */
+.product-card { background: #0b0b0e !important; }
+.product-image, .detail-image, .product-detail-image,
 .product-gallery, .product-gallery-main, .gallery-main {
   background: transparent !important;
 }
@@ -2631,3 +2632,14 @@ main {
   display: block; width: 100%; height: 100%; padding: 0 !important;
   background: transparent !important; object-fit: contain; object-position: center;
 }
+
+
+/* Brand loading screen while the first catalogue request is in flight */
+.iroom-boot-screen{min-height:58vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;padding:36px 20px;color:#f6f3f6;text-align:center;background:radial-gradient(ellipse at 50% 45%,rgba(244,114,182,.10),transparent 58%)}
+.iroom-boot-orbit{width:76px;height:76px;border:1px solid rgba(244,114,182,.32);border-top-color:#f472b6;border-radius:50%;display:grid;place-items:center;animation:iroom-spin 1.2s linear infinite;box-shadow:0 0 32px rgba(244,114,182,.09)}
+.iroom-boot-orbit span{font-size:21px;font-weight:900;letter-spacing:-2px;color:#f9a8d4;animation:iroom-counterspin 1.2s linear infinite}
+.iroom-boot-wordmark{font-size:28px;letter-spacing:-1.4px;font-weight:500}.iroom-boot-wordmark b{color:#f472b6}.iroom-boot-screen p{margin:0;color:#a9a0aa;font-size:13px}
+.iroom-boot-progress{width:136px;height:3px;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.08)}.iroom-boot-progress i{display:block;width:40%;height:100%;border-radius:10px;background:linear-gradient(90deg,#be185d,#f9a8d4);animation:iroom-load 1.4s ease-in-out infinite}
+@keyframes iroom-spin{to{transform:rotate(360deg)}}@keyframes iroom-counterspin{to{transform:rotate(-360deg)}}@keyframes iroom-load{0%{transform:translateX(-120%)}100%{transform:translateX(350%)}}
+.product-image.image-unavailable:after{content:' ';display:block;width:100%;height:100%;background:transparent}
+.product-image img{background:transparent!important;mix-blend-mode:normal}
