@@ -929,7 +929,7 @@
 
   const DIGITAL_CATEGORY_NAMES = [
     "PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes",
-    "Telegram Stars", "Steam", "OpenAI", "Быстрое пополнение"
+    "Telegram", "Telegram Stars", "Steam", "OpenAI", "Быстрое пополнение"
   ];
 
   function isDigitalCategory(category) {
@@ -1173,7 +1173,7 @@
               <div><strong style="display:block;font-size:16px">Цифровые товары</strong><span style="display:block;color:#999;font-size:12px;margin-top:3px">Коды, пополнения и подписки</span></div>
             </div>
             <div class="catalog-tools">
-              ${state.categories.filter(category => ["PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes", "Telegram Stars"].some(name => String(category.name || "").toLowerCase() === name.toLowerCase())).map(category => `
+              ${state.categories.filter(category => ["PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes", "Telegram", "Telegram Stars", "Steam", "OpenAI"].some(name => String(category.name || "").toLowerCase() === name.toLowerCase())).map(category => `
                 <button class="chip" data-category="${escapeHtml(category.id)}" type="button">${escapeHtml(category.name)}</button>
               `).join("")}
             </div>
@@ -1189,7 +1189,7 @@
             </button>
 
             ${state.categories
-              .filter(category => !["PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes", "Telegram Stars"].some(name => String(category.name || "").toLowerCase() === name.toLowerCase()))
+              .filter(category => !["PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes", "Telegram", "Telegram Stars", "Steam", "OpenAI"].some(name => String(category.name || "").toLowerCase() === name.toLowerCase()))
               .map(
                 (category) => `
                   <button
