@@ -104,6 +104,58 @@ app.use(
 
 // Explicit admin routes prevent a renamed/missing extension from producing
 // a confusing "Cannot GET /admin.html" on Render/Telegram WebView.
+
+// Alternative product-image source: Wikimedia Commons (not Apple pages).
+// Search results are downloaded and cached locally so the catalog does not depend on
+// a third-party image URL on every page view.
+const commonsImageDir = path.join(publicDir, "catalog-images", "commons-auto");
+try { fs.mkdirSync(commonsImageDir, { recursive: true }); } catch (error) { console.warn("Commons image cache directory:", error.message); }
+app.get("/api/product-image", async (req, res) => {
+  const name = String(req.query.name || "").trim().slice(0, 160);
+  const category = String(req.query.category || "").trim().slice(0, 80);
+  if (!name && !category) return res.status(400).end();
+  const queryText = `${name} ${category}`.trim();
+  const key = crypto.createHash("sha1").update(queryText.toLowerCase()).digest("hex");
+  const prefix = path.join(commonsImageDir, key);
+  const cached = [".jpg", ".jpeg", ".png", ".webp"].map(ext => prefix + ext).find(file => {
+    try { return fs.statSync(file).isFile() && fs.statSync(file).size > 1000; } catch { return false; }
+  });
+  if (cached) return res.sendFile(cached);
+  try {
+    // Strip storage/color/region details to improve the chance of finding a clean product photo.
+    const family = queryText
+      .replace(/\b(?:\d{2,4}\s?gb|\d+\s?tb|\d+\s?ram|dual\s?sim|esim|nano.?sim)\b/ig, " ")
+      .replace(/\b(?:black|white|blue|green|pink|purple|orange|silver|gold|grey|gray|черный|чёрный|белый|синий|голубой|зеленый|зелёный|розовый|фиолетовый|оранжевый|серебристый|титановый)\b/ig, " ")
+      .replace(/\s+/g, " ").trim();
+    const searchUrl = new URL("https://commons.wikimedia.org/w/api.php");
+    searchUrl.search = new URLSearchParams({ action: "query", generator: "search", gsrsearch: `${family} product photo`, gsrnamespace: "6", gsrlimit: "8", prop: "imageinfo", iiprop: "url|mime", iiurlwidth: "1000", format: "json", origin: "*" }).toString();
+    const response = await fetch(searchUrl, { headers: { "user-agent": "IRoomCatalog/1.0 (product catalog image lookup)", "accept": "application/json" }, signal: AbortSignal.timeout(10000) });
+    if (!response.ok) throw new Error(`Wikimedia search status ${response.status}`);
+    const payload = await response.json();
+    const pages = Object.values(payload?.query?.pages || {});
+    const candidate = pages.map(page => page.imageinfo?.[0]).find(info => {
+      const mime = String(info?.mime || "").toLowerCase();
+      const url = String(info?.thumburl || info?.url || "");
+      return mime.startsWith("image/") && /^https:\/\//i.test(url) && !/\.svg(?:$|\?)/i.test(url);
+    });
+    if (!candidate) throw new Error("No matching Wikimedia Commons image found");
+    const imageUrl = candidate.thumburl || candidate.url;
+    const imageResponse = await fetch(imageUrl, { headers: { "user-agent": "IRoomCatalog/1.0" }, signal: AbortSignal.timeout(12000) });
+    if (!imageResponse.ok) throw new Error(`Image source status ${imageResponse.status}`);
+    const mime = String(imageResponse.headers.get("content-type") || candidate.mime || "image/jpeg").toLowerCase();
+    const ext = mime.includes("png") ? ".png" : mime.includes("webp") ? ".webp" : mime.includes("jpeg") ? ".jpg" : ".jpg";
+    const bytes = Buffer.from(await imageResponse.arrayBuffer());
+    if (bytes.length < 1000 || !mime.startsWith("image/")) throw new Error("Downloaded file is not a valid image");
+    const file = prefix + ext;
+    fs.writeFileSync(file, bytes);
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    return res.sendFile(file);
+  } catch (error) {
+    console.warn("Alternative product image lookup failed:", error.message);
+    return res.status(404).end();
+  }
+});
+
 // Official Apple product-image fallback. Resolve Apple product-page og:image and persist it locally.
 const appleImageCache = new Map();
 const appleImageDiskDir = path.join(publicDir, "catalog-images", "apple-auto");
@@ -7052,15 +7104,13 @@ app.post(
           return;
         }
 
-        if (
-          text === "/start" ||
-          text === "/app"
-        ) {
+        if (/^\/(?:start|app)(?:@[A-Za-z0-9_]+)?(?:\s|$)/i.test(text.trim())) {
           const firstName = String(message.from?.first_name || "").trim();
           const greetingName = firstName ? `, ${firstName}` : "";
+          const miniAppUrl = `${MINIAPP_URL.replace(/\/+$/, "")}/index.html`;
           await sendTelegramMessage(
             message.chat.id,
-            `Здравствуйте${greetingName}! Добро пожаловать в IRoom.\n\nОткройте каталог техники и цифровых товаров кнопкой ниже.`,
+            `Здравствуйте${greetingName}! 👋\nДобро пожаловать в IRoom.\n\nНажмите кнопку ниже, чтобы открыть каталог техники и цифровых товаров.`,
             {
               reply_markup: {
                 inline_keyboard: [
@@ -7068,7 +7118,7 @@ app.post(
                     {
                       text: "Открыть IRoom",
                       web_app: {
-                        url: `${MINIAPP_URL}/index.html`
+                        url: miniAppUrl
                       }
                     }
                   ]
