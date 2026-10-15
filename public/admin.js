@@ -75,7 +75,11 @@
     currentOrder: null,
     currentProduct: null,
 
-    adminUser: null
+    adminUser: null,
+    productStoreFilter: "all",
+    categoryStoreFilter: "all",
+    knownOrderIds: new Set(),
+    notifications: []
   };
 
   /* =========================================================
@@ -358,6 +362,26 @@
     $("#sidebarOverlay")?.classList.remove("open");
   }
 
+  function isDigitalCategory(category) {
+    const name = String(category?.name || category?.title || "").trim().toLowerCase();
+    return ["telegram", "telegram stars", "apple / itunes", "apple", "steam", "openai", "playstation / ps plus", "подписки", "другое"].includes(name);
+  }
+
+  function productStore(product) {
+    const category = state.categories.find(c => String(c.id) === String(product?.category_id));
+    return isDigitalCategory(category) || String(product?.store_type || "").toLowerCase() === "digital" ? "digital" : "tech";
+  }
+
+  function pushNotification(title, detail) {
+    state.notifications.unshift({ title, detail, at: new Date().toLocaleTimeString("ru-RU", {hour:"2-digit", minute:"2-digit"}) });
+    state.notifications = state.notifications.slice(0, 30);
+    const badge = $("#notificationBadge");
+    if (badge) { badge.textContent = String(state.notifications.length); badge.classList.remove("hidden"); }
+    const items = $("#notificationItems");
+    if (items) items.innerHTML = state.notifications.map(n => `<div class="notification-item"><strong>${escapeHtml(n.title)}</strong><div>${escapeHtml(n.detail)}</div><small>${escapeHtml(n.at)}</small></div>`).join("");
+    try { tg?.HapticFeedback?.notificationOccurred?.("success"); } catch {}
+  }
+
   /* =========================================================
      STATUS HELPERS
   ========================================================= */
@@ -417,10 +441,8 @@
         api("/api/products")
       ]);
 
-      state.orders =
-        Array.isArray(ordersData.orders)
-          ? ordersData.orders
-          : [];
+      state.orders = Array.isArray(ordersData.orders) ? ordersData.orders : [];
+      state.orders.forEach(order => state.knownOrderIds.add(String(order.id)));
 
       state.products =
         Array.isArray(productsData.products)
@@ -579,10 +601,14 @@
           "/api/admin/orders"
         );
 
-      state.orders =
-        Array.isArray(data.orders)
-          ? data.orders
-          : [];
+      const incomingOrders = Array.isArray(data.orders) ? data.orders : [];
+      if (state.knownOrderIds.size) {
+        incomingOrders.filter(order => !state.knownOrderIds.has(String(order.id))).forEach(order => {
+          pushNotification("Новый заказ", `${order.display_id || `#${order.id}`} · ${order.product_name || order.name || "Заказ"}`);
+        });
+      }
+      incomingOrders.forEach(order => state.knownOrderIds.add(String(order.id)));
+      state.orders = incomingOrders;
 
       renderOrders();
       updateOrdersBadge();
@@ -1512,8 +1538,8 @@
         .trim()
         .toLowerCase();
 
-    let products =
-      [...state.products];
+    let products = [...state.products];
+    if (state.productStoreFilter !== "all") products = products.filter(product => productStore(product) === state.productStoreFilter);
 
     if (query) {
       products =
@@ -1784,6 +1810,14 @@
         </label>
 
         <label>
+          <span>Магазин</span>
+          <select id="productStoreType">
+            <option value="tech" ${product && productStore(product) === "tech" ? "selected" : ""}>Магазин техники</option>
+            <option value="digital" ${product && productStore(product) === "digital" ? "selected" : (!product ? "" : "")}>Цифровой магазин</option>
+          </select>
+        </label>
+
+        <label>
           <span>Категория</span>
 
           <select
@@ -1793,7 +1827,7 @@
               Без категории
             </option>
 
-            ${state.categories.map(
+            ${state.categories.filter(category => (isDigitalCategory(category) ? "digital" : "tech") === (product ? productStore(product) : "tech")).map(
               (category) => `
                 <option
                   value="${escapeHtml(category.id)}"
@@ -2045,11 +2079,14 @@
       </form>
     `);
 
-    $("#productForm")
-      ?.addEventListener(
-        "submit",
-        saveProduct
-      );
+    $("#productStoreType")?.addEventListener("change", () => {
+      const selectedStore = $("#productStoreType").value;
+      const currentCategory = $("#productCategory")?.value;
+      const available = state.categories.filter(category => (isDigitalCategory(category) ? "digital" : "tech") === selectedStore);
+      $("#productCategory").innerHTML = `<option value="">Без категории</option>` + available.map(category => `<option value="${escapeHtml(category.id)}">${escapeHtml(category.name || category.title || "Категория")}</option>`).join("");
+      if (available.some(category => String(category.id) === String(currentCategory))) $("#productCategory").value = currentCategory;
+    });
+    $("#productForm")?.addEventListener("submit", saveProduct);
   }
 
   async function saveProduct(event) {
@@ -2058,7 +2095,9 @@
     const product =
       state.currentProduct;
 
+    const previousPriceOptions = parseJson(product?.price_options, {}) || {};
     const priceOptions = {
+      ...previousPriceOptions,
       colors: optionLines(
         $("#optionColors")?.value
       ),
@@ -2329,8 +2368,9 @@
       return;
     }
 
+    const visibleCategories = state.categoryStoreFilter === "all" ? state.categories : state.categories.filter(category => (isDigitalCategory(category) ? "digital" : "tech") === state.categoryStoreFilter);
     container.innerHTML =
-      state.categories.map(
+      visibleCategories.map(
         (category) => `
           <article class="category-card">
             <h3>
@@ -4481,6 +4521,20 @@
         }
       );
 
+    $("#productStoreFilter")?.addEventListener("change", event => {
+      state.productStoreFilter = event.target.value;
+      renderProducts();
+    });
+
+    $("#categoryStoreFilter")?.addEventListener("change", event => {
+      state.categoryStoreFilter = event.target.value;
+      renderCategories();
+    });
+
+    $("#notificationButton")?.addEventListener("click", () => {
+      $("#notificationFeed")?.classList.toggle("hidden");
+    });
+
     $("#importPriceButton")
       ?.addEventListener("click", importPriceList);
 
@@ -4728,6 +4782,8 @@
     ]);
 
     await loadDashboard();
+    // Refresh orders in the background so admins are alerted about new orders without manual reload.
+    window.setInterval(() => { if (document.visibilityState === "visible") loadOrders(); }, 30000);
     if (requestedSection && requestedSection !== "dashboard") {
       await showSection(requestedSection);
     }

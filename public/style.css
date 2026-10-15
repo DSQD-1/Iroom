@@ -2578,3 +2578,24 @@ main {
 .digital-category-title-icon { margin-bottom:2px; }
 .digital-minimal-empty { padding:30px 18px; border:1px solid #292329; border-radius:16px; text-align:center; color:#a49aa4; }
 .digital-minimal .product-grid { margin-top:0; }
+
+
+/* Digital shop redesign: compact category-first storefront with restrained rose accents */
+.digital-minimal { background:radial-gradient(ellipse at 90% 0%,rgba(255,67,157,.09),transparent 38%),#080709; padding:18px 16px 42px; }
+.digital-minimal-header { margin-bottom:22px; padding-bottom:14px; border-bottom:1px solid rgba(255,255,255,.07); }
+.digital-minimal-brand { font-size:17px; letter-spacing:-.4px; }
+.digital-minimal-intro { margin:20px 0 20px; }
+.digital-minimal-intro h1,.digital-category-title h1 { font-size:29px; font-weight:800; letter-spacing:-1.1px; }
+.digital-minimal-intro p,.digital-category-title p { line-height:1.5; }
+.digital-minimal-category-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.digital-minimal-category { min-height:112px; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:12px; padding:14px; border-radius:16px; background:linear-gradient(145deg,#19141a,#100e12); border-color:#2d242d; box-shadow:0 7px 24px rgba(0,0,0,.12); transition:transform .16s,border-color .16s; }
+.digital-minimal-category:active { transform:scale(.98); }
+.digital-minimal-category-icon { width:39px;height:39px;border-radius:12px;font-size:20px; }
+.digital-minimal-category-name { font-size:13px; line-height:1.25; }
+.digital-minimal-chevron { align-self:flex-end; margin-top:-22px; font-size:22px; }
+.digital-category-title { padding:17px; border:1px solid #2b222c; border-radius:18px; background:linear-gradient(135deg,rgba(255,66,155,.08),rgba(255,255,255,.015)); }
+.digital-minimal .digital-product-grid { gap:11px; }
+.digital-minimal .product-card { border:1px solid #2a242c; border-radius:16px; overflow:hidden; background:#121014; }
+.digital-minimal .product-card .product-image { background:linear-gradient(145deg,#1b171d,#0d0c0f); }
+.digital-minimal-empty { margin-top:12px; background:#100e12; }
+@media(max-width:370px){.digital-minimal-category-list{grid-template-columns:1fr}.digital-minimal-category{min-height:76px;flex-direction:row;align-items:center}.digital-minimal-chevron{margin:0}}
