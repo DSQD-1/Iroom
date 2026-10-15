@@ -1269,27 +1269,22 @@ async function migrate() {
   await addColumnIfMissing("products", "digital_code", "TEXT DEFAULT ''");
   await db.execute("UPDATE products SET image_url = '' WHERE image_url LIKE '/product-images/%'");
 
-  // Ensure the Digital Goods section exists without duplicating categories.
-  for (const categoryName of [
-    "PlayStation / PS Plus",
-    "Подписки",
-    "Другое",
-    "Apple / iTunes",
-    "Telegram Stars",
-    "Steam",
-    "OpenAI"
-  ]) {
-    const existing = await db.execute({
-      sql: "SELECT id FROM categories WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) LIMIT 1",
-      args: [categoryName]
-    });
-    if (!existing.rows.length) {
-      await db.execute({
-        sql: "INSERT INTO categories (name, image_url, created_at) VALUES (?, '', CURRENT_TIMESTAMP)",
-        args: [categoryName]
-      });
-    }
-  }
+  // Add-on services for "С этим покупают". Safe, repeatable migration.
+  await db.execute(`CREATE TABLE IF NOT EXISTS add_on_services (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    price REAL DEFAULT 0,
+    image_url TEXT DEFAULT '',
+    category_id INTEGER,
+    active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+
+  // Digital categories are no longer created automatically. Existing database rows are preserved.
+
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS product_variants (
@@ -2028,15 +2023,16 @@ app.post(
     // Render's local filesystem is ephemeral. Store uploaded product photos
     // as compact data URLs so they survive redeploys/restarts and remain
     // directly usable by the Mini App without a separate storage service.
-    if (!String(req.file.mimetype || "").startsWith("image/")) {
-      return res.status(400).json({ error: "Для галереи нужен файл изображения" });
+    const mime = String(req.file.mimetype || "");
+    if (!(mime.startsWith("image/") || ["video/mp4", "video/webm", "video/quicktime"].includes(mime))) {
+      return res.status(400).json({ error: "Поддерживаются фото и видео MP4, WebM, MOV" });
     }
 
     if (Number(req.file.size || 0) > 8 * 1024 * 1024) {
-      return res.status(413).json({ error: "Фото слишком большое" });
+      return res.status(413).json({ error: "Файл слишком большой: максимум 8 МБ" });
     }
 
-    const url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+    const url = `data:${mime};base64,${req.file.buffer.toString("base64")}`;
 
     res.json({
       ok: true,
@@ -2114,6 +2110,59 @@ app.get(
     }
   }
 );
+
+
+app.get("/api/add-on-services", async (req, res) => {
+  try {
+    const categoryId = Number(req.query.category_id || 0);
+    const result = await db.execute({
+      sql: `SELECT * FROM add_on_services WHERE active = 1 AND (category_id IS NULL OR category_id = ? ) ORDER BY id DESC`,
+      args: [categoryId]
+    });
+    res.json({ services: result.rows });
+  } catch (error) {
+    console.error("Add-on services:", error);
+    res.status(500).json({ error: "Не удалось загрузить дополнительные услуги" });
+  }
+});
+
+app.get("/api/admin/add-on-services", requireAdmin, async (req, res) => {
+  try {
+    const result = await db.execute("SELECT * FROM add_on_services ORDER BY id DESC");
+    res.json({ services: result.rows });
+  } catch (error) { res.status(500).json({ error: "Не удалось загрузить услуги" }); }
+});
+
+app.post("/api/admin/add-on-services", requireAdmin, async (req, res) => {
+  try {
+    const b = req.body || {};
+    if (!stringValue(b.name).trim()) return res.status(400).json({ error: "Укажи название услуги" });
+    const result = await db.execute({
+      sql: `INSERT INTO add_on_services (name, description, price, image_url, category_id, active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      args: [stringValue(b.name).trim(), stringValue(b.description), Math.max(0, numberValue(b.price)), stringValue(b.image_url), integerId(b.category_id), b.active === false ? 0 : 1]
+    });
+    res.json({ ok: true, id: Number(result.lastInsertRowid) });
+  } catch (error) { console.error(error); res.status(500).json({ error: "Не удалось создать услугу" }); }
+});
+
+app.put("/api/admin/add-on-services/:id", requireAdmin, async (req, res) => {
+  try {
+    const b = req.body || {};
+    if (!stringValue(b.name).trim()) return res.status(400).json({ error: "Укажи название услуги" });
+    await db.execute({
+      sql: `UPDATE add_on_services SET name=?, description=?, price=?, image_url=?, category_id=?, active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?`,
+      args: [stringValue(b.name).trim(), stringValue(b.description), Math.max(0, numberValue(b.price)), stringValue(b.image_url), integerId(b.category_id), b.active === false ? 0 : 1, integerId(req.params.id)]
+    });
+    res.json({ ok: true });
+  } catch (error) { res.status(500).json({ error: "Не удалось сохранить услугу" }); }
+});
+
+app.delete("/api/admin/add-on-services/:id", requireAdmin, async (req, res) => {
+  try {
+    await db.execute({ sql: "DELETE FROM add_on_services WHERE id=?", args: [integerId(req.params.id)] });
+    res.json({ ok: true });
+  } catch (error) { res.status(500).json({ error: "Не удалось удалить услугу" }); }
+});
 
 app.get(
   "/api/products/:id",
