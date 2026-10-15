@@ -2054,9 +2054,12 @@ app.get(
     try {
       const result =
         await db.execute(`
-          SELECT *
+          SELECT categories.*
           FROM categories
-          ORDER BY id ASC
+          WHERE EXISTS (
+            SELECT 1 FROM products WHERE products.category_id = categories.id
+          )
+          ORDER BY categories.id ASC
         `);
 
       res.json({
@@ -4068,9 +4071,12 @@ app.get(
   ) => {
     const result =
       await db.execute(`
-        SELECT *
+        SELECT categories.*
         FROM categories
-        ORDER BY sort_order ASC, id ASC
+        WHERE EXISTS (
+          SELECT 1 FROM products WHERE products.category_id = categories.id
+        )
+        ORDER BY categories.sort_order ASC, categories.id ASC
       `);
 
     res.json({
@@ -5917,6 +5923,17 @@ async function ensureBaseCatalogCategories() {
   }
 }
 
+// Remove category rows that do not contain any products. This only affects
+// empty categories; products, variants, orders and customer data are untouched.
+async function removeEmptyCatalogCategories() {
+  await db.execute(`
+    DELETE FROM categories
+    WHERE NOT EXISTS (
+      SELECT 1 FROM products WHERE products.category_id = categories.id
+    )
+  `);
+}
+
 async function clearCatalogOnly() {
   await db.execute("DELETE FROM product_variants");
   await db.execute("DELETE FROM products");
@@ -6131,6 +6148,7 @@ app.post("/api/admin/price-import", requireAdmin, async (req, res) => {
     const text = String(req.body?.text || "");
     if (!text.trim()) return res.status(400).json({ error: "Вставьте текст прайса" });
     const result = await syncAdminPriceList(text, req.telegramUser.id);
+    await removeEmptyCatalogCategories();
     return res.json({ ok: true, result });
   } catch (error) {
     console.error("ADMIN PRICE IMPORT:", error);
@@ -6517,7 +6535,7 @@ async function processAdminTextMessage(message) {
     adminClearState(chatId);
     try {
       await clearCatalogOnly();
-      await ensureBaseCatalogCategories();
+      await removeEmptyCatalogCategories();
       await sendTelegramMessage(chatId, "🧹 <b>Каталог очищен</b>\n\nТовары и варианты удалены. Заказы, пользователи, промокоды и настройки не затронуты.", { reply_markup: adminMainKeyboard() });
     } catch (error) {
       await sendTelegramMessage(chatId, `❌ <b>Очистка не выполнена</b>\n\n${escapeTelegramHtml(error.message || "Ошибка")}`, { reply_markup: adminMainKeyboard() });
@@ -6999,13 +7017,14 @@ async function start() {
           `Product images: ${path.join(publicDir, "product-images")}`
         );
 
-        // Keep the catalog category structure present even when a section has no
-        // products yet. Products themselves still come only from price.txt.
-        await ensureBaseCatalogCategories();
-
-        // price.txt is the single catalog source. Sync immediately and then hourly.
+        // price.txt is the single catalog source. Sync immediately, then remove
+        // categories without products. Repeat after each hourly sync.
         await syncPriceFileAutomatically();
-        setInterval(syncPriceFileAutomatically, 60 * 60 * 1000);
+        await removeEmptyCatalogCategories();
+        setInterval(async () => {
+          await syncPriceFileAutomatically();
+          await removeEmptyCatalogCategories();
+        }, 60 * 60 * 1000);
 
         await setupWebhook();
       }
