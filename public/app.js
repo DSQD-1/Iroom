@@ -23,7 +23,7 @@
     me: null,
     viewedProducts: [],
 
-    route: "home",
+    route: "store-select",
     activeStore: "tech",
     categoryId: null,
     search: "",
@@ -929,7 +929,7 @@
 
   const DIGITAL_CATEGORY_NAMES = [
     "PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes",
-    "Telegram", "Telegram Stars", "Steam", "OpenAI", "Быстрое пополнение"
+    "Telegram Stars", "Steam", "OpenAI", "Быстрое пополнение"
   ];
 
   function isDigitalCategory(category) {
@@ -1173,7 +1173,7 @@
               <div><strong style="display:block;font-size:16px">Цифровые товары</strong><span style="display:block;color:#999;font-size:12px;margin-top:3px">Коды, пополнения и подписки</span></div>
             </div>
             <div class="catalog-tools">
-              ${state.categories.filter(category => ["PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes", "Telegram", "Telegram Stars", "Steam", "OpenAI"].some(name => String(category.name || "").toLowerCase() === name.toLowerCase())).map(category => `
+              ${state.categories.filter(category => ["PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes", "Telegram Stars"].some(name => String(category.name || "").toLowerCase() === name.toLowerCase())).map(category => `
                 <button class="chip" data-category="${escapeHtml(category.id)}" type="button">${escapeHtml(category.name)}</button>
               `).join("")}
             </div>
@@ -1189,7 +1189,7 @@
             </button>
 
             ${state.categories
-              .filter(category => !["PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes", "Telegram", "Telegram Stars", "Steam", "OpenAI"].some(name => String(category.name || "").toLowerCase() === name.toLowerCase()))
+              .filter(category => !["PlayStation / PS Plus", "Подписки", "Другое", "Apple / iTunes", "Telegram Stars"].some(name => String(category.name || "").toLowerCase() === name.toLowerCase()))
               .map(
                 (category) => `
                   <button
@@ -1378,6 +1378,7 @@
     if (selected) products = products.filter(product => String(product.category_id) === String(selected.id));
     const query = String(state.search || "").trim().toLowerCase();
     if (query) products = products.filter(product => [product.name, product.description].filter(Boolean).join(" ").toLowerCase().includes(query));
+
     const categoryVisual = name => {
       const n = String(name || "").toLowerCase();
       if (n.includes("playstation") || n.includes("ps plus")) return "◉";
@@ -1388,14 +1389,22 @@
       if (n.includes("подпис")) return "♛";
       return "✧";
     };
+
     screen.innerHTML = `
-      <div class="screen">
-        <div class="page-head">
-          <div class="eyebrow">IRoom · КАТАЛОГ</div>
-          ${selected ? `<button class="chip active" data-digital-category="" type="button">← Все категории</button><h1>${escapeHtml(selected.name)}</h1><p>${escapeHtml(selected.description || "Цифровые товары и подписки")}</p>` : `<h1>Цифровые товары</h1><p>Выберите категорию</p>`}
-        </div>
-        ${!selected ? (categories.length ? `<div class="catalog-tools digital-category-tools">${categories.map(category => `<button class="chip digital-category-chip" data-digital-category="${escapeHtml(category.id)}" type="button"><span aria-hidden="true">${categoryVisual(category.name)}</span> ${escapeHtml(category.name)} <span>›</span></button>`).join("")}</div>` : `<div class="empty"><strong>Категории пока не добавлены</strong><p>Добавьте цифровые категории в панели управления.</p></div>`) : (products.length ? `<div class="product-grid">${products.map(productCard).join("")}</div>` : `<div class="empty"><strong>В этой категории пока нет товаров</strong><p>Попробуйте выбрать другую категорию.</p></div>`)}
+      <div class="screen digital-shop-page digital-minimal">
+        <header class="digital-minimal-header">
+          ${selected ? `<button class="digital-minimal-back" data-digital-category="" type="button">‹ Все категории</button>` : `<button class="digital-minimal-back" data-action="store-select" type="button">‹ Магазины</button>`}
+          <div class="digital-minimal-brand">IR<span>✦</span>oom <small>DIGITAL</small></div>
+        </header>
+        ${selected ? `
+          <section class="digital-category-title"><span class="digital-category-title-icon">${categoryVisual(selected.name)}</span><h1>${escapeHtml(selected.name)}</h1>${selected.description ? `<p>${escapeHtml(selected.description)}</p>` : ""}</section>
+          ${products.length ? `<div class="product-grid digital-product-grid">${products.map(productCard).join("")}</div>` : `<div class="digital-minimal-empty">В этой категории пока нет товаров.</div>`}
+        ` : `
+          <section class="digital-minimal-intro"><h1>Цифровой магазин</h1><p>Выберите категорию</p></section>
+          ${categories.length ? `<div class="digital-minimal-category-list">${categories.map(category => `<button class="digital-minimal-category" data-digital-category="${escapeHtml(category.id)}" type="button"><span class="digital-minimal-category-icon">${categoryVisual(category.name)}</span><span class="digital-minimal-category-name">${escapeHtml(category.name)}</span><span class="digital-minimal-chevron">›</span></button>`).join("")}</div>` : `<div class="digital-minimal-empty">Категории пока не добавлены.</div>`}
+        `}
       </div>`;
+
     $$('[data-digital-category]').forEach(button => button.addEventListener('click', () => {
       state.categoryId = button.dataset.digitalCategory || null;
       render();
