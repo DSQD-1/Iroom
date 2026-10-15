@@ -190,8 +190,8 @@ app.get("/api/apple-product-image", async (req, res) => {
     try { return fs.statSync(file).isFile() && fs.statSync(file).size > 1000; } catch { return false; }
   });
   if (existing) return res.sendFile(existing);
-  if (appleImageCache.has(pageUrl) && !appleImageCache.get(pageUrl)) return res.status(404).end();
-
+  // Failed lookups are not cached permanently: a temporary Apple/CDN failure
+  // must not leave every iPhone without an image until the server restarts.
   try {
     const page = await fetch(pageUrl, {
       headers: { "user-agent": "Mozilla/5.0 (compatible; IRoomCatalog/1.0)", "accept-language": "en-US,en;q=0.9" },
@@ -199,9 +199,19 @@ app.get("/api/apple-product-image", async (req, res) => {
     });
     if (!page.ok) throw new Error(`Apple page status ${page.status}`);
     const html = await page.text();
-    const match = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i)
-      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["'][^>]*>/i);
-    const imageUrl = String(match?.[1] || "").replace(/&amp;/g, "&");
+    const metaTags = html.match(/<meta\b[^>]*>/gi) || [];
+    let imageUrl = "";
+    for (const tag of metaTags) {
+      const property = (tag.match(/(?:property|name)=["']([^"']+)["']/i) || [])[1] || "";
+      if (!/^(og:image|twitter:image)$/i.test(property)) continue;
+      imageUrl = (tag.match(/content=["']([^"']+)["']/i) || [])[1] || "";
+      if (imageUrl) break;
+    }
+    imageUrl = imageUrl.replace(/&amp;/g, "&");
+    if (!imageUrl) {
+      const cdnMatch = html.match(/https?:[^\s"'<>]*images\.apple\.com[^\s"'<>]*/i);
+      imageUrl = String(cdnMatch?.[0] || "").replace(/\\u002F/g, "/").replace(/\\u0026/g, "&").replace(/\\\\/g, "/");
+    }
     const host = (() => { try { return new URL(imageUrl).hostname; } catch { return ""; } })();
     if (!imageUrl.startsWith("https://") || !(host === "apple.com" || host.endsWith(".apple.com"))) {
       throw new Error("No valid official Apple product image found");
@@ -222,7 +232,6 @@ app.get("/api/apple-product-image", async (req, res) => {
     return res.sendFile(target);
   } catch (error) {
     console.warn("Apple product image lookup failed:", error.message);
-    appleImageCache.set(pageUrl, "");
     return res.status(404).end();
   }
 });
@@ -5944,8 +5953,8 @@ const PRICE_LIST_MODELS = [
 
 function parseImportPrice(value) {
   const raw = String(value || "").trim();
-  if (!raw) return { numeric: null, text: "По запросу" };
-  if (/по\s+запросу/i.test(raw)) return { numeric: null, text: "По запросу" };
+  if (!raw) return { numeric: null, text: "" };
+  if (/по\s+запросу/i.test(raw)) return { numeric: null, text: "" };
   const range = raw.match(/^([\d\s.,]+)\s*[–—-]\s*([\d\s.,]+)$/);
   if (range) {
     const low = parsePriceListNumber(range[1]);
@@ -5956,7 +5965,7 @@ function parseImportPrice(value) {
   const candidate = m ? `от ${m[1].trim()}` : raw;
   const n = parsePriceListNumber(candidate.replace(/^от\s*/i, ""));
   if (n) return { numeric: n, text: /^от\s/i.test(raw) ? `От ${n.toLocaleString("ru-RU")} ₽` : `${n.toLocaleString("ru-RU")} ₽` };
-  return { numeric: null, text: raw.replace(/\s+/g, " ").trim() || "По запросу" };
+  return { numeric: null, text: raw.replace(/\s+/g, " ").trim() };
 }
 
 function parsePriceListNumber(value) {
@@ -6264,7 +6273,7 @@ async function syncAdminPriceList(text, requestedBy) {
 
     const numericPrices = variants.map(v => v.price).filter(v => Number.isFinite(v) && v > 0);
     const minPrice = numericPrices.length ? Math.min(...numericPrices) : 0;
-    const priceText = variants.length === 1 ? first.price_text : (minPrice ? `От ${minPrice.toLocaleString("ru-RU")} ₽` : "По запросу");
+    const priceText = variants.length === 1 ? first.price_text : (minPrice ? `От ${minPrice.toLocaleString("ru-RU")} ₽` : "");
 
     const priceMatrix = variants.map(v => ({
       region: v.region, memory: v.memory, color: v.color,
@@ -6509,7 +6518,7 @@ async function adminProductsMessage() {
   }
 
   const rows = result.rows.map((product) => {
-    const price = product.price_text || (Number(product.price) ? formatPrice(product.price) : "По запросу");
+    const price = product.price_text || (Number(product.price) ? formatPrice(product.price) : "");
     return [{
       text: `${Number(product.id)} · ${String(product.name || "Товар").slice(0, 42)} · ${price}`.slice(0, 64),
       callback_data: `adm:product:${Number(product.id)}`
@@ -6550,7 +6559,7 @@ async function adminProductMessage(productId) {
     args: [productId]
   });
 
-  const price = product.price_text || (Number(product.price) ? formatPrice(product.price) : "По запросу");
+  const price = product.price_text || (Number(product.price) ? formatPrice(product.price) : "");
   const lines = [
     `🛍 <b>${escapeTelegramHtml(product.name)}</b>`,
     "",
@@ -6562,7 +6571,7 @@ async function adminProductMessage(productId) {
   if (variants.rows.length) {
     lines.push("", "Варианты:");
     for (const variant of variants.rows) {
-      const vp = variant.price_text || (Number(variant.price) ? formatPrice(variant.price) : "По запросу");
+      const vp = variant.price_text || (Number(variant.price) ? formatPrice(variant.price) : "");
       lines.push(`• ${escapeTelegramHtml(variant.name || "Вариант")} — ${escapeTelegramHtml(vp)}`);
     }
   }
