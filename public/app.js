@@ -193,7 +193,7 @@
     const uploadedImage = media.find((entry) => entry.type === "image")?.url || "";
     if (uploadedImage) return uploadedImage;
 
-    // Use M.Video product-image resolver when no uploaded photo exists.
+    // Use MediaMarkt Germany product-image resolver when no uploaded photo exists.
     let name = String(item?.name || item?.product_name || "").trim();
     const category = String(item?.category_name || item?.category || "");
     const appleText = `${name} ${category}`;
@@ -204,8 +204,8 @@
       name = `iPhone ${name}`;
     }
     const resolvedText = `${name} ${category}`;
-    // Try M.Video for every product category, not only Apple devices.
-    if (name) return `/api/mvideo-product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
+    // Try MediaMarkt Germany for every product category, not only Apple devices.
+    if (name) return `/api/mediamarkt-product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
     return "";
   }
 
