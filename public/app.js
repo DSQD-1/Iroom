@@ -204,9 +204,8 @@
       name = `iPhone ${name}`;
     }
     const resolvedText = `${name} ${category}`;
-    if (/iphone|airpods|earpods|apple\s*watch|ipad|macbook|mac\s*mini|mac\s*studio|imac|magic\s*(mouse|keyboard)|studio\s*display|apple\s*pencil|vision\s*pro|homepod|apple\s*tv/i.test(resolvedText)) {
-      return `/api/mvideo-product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
-    }
+    // Try M.Video for every product category, not only Apple devices.
+    if (name) return `/api/mvideo-product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
     return "";
   }
 
@@ -1500,7 +1499,7 @@
   function productCardTone(product) {
     const value = String(product?.name || product?.product_name || "").toLowerCase();
     const tones = [
-      [/\b(?:blue|голуб|син|ультрамарин|небесн)\w*/i, ["#153a5b", "#10283f"]],
+      [/\b(?:blue|голуб|син|ультрамарин|небесн)\w*/i, ["#25232b", "#111014"]],
       [/\b(?:orange|оранжев)\w*/i, ["#63351d", "#301c15"]],
       [/\b(?:pink|розов)\w*/i, ["#5b2945", "#2e1829"]],
       [/\b(?:purple|фиолетов|лаванд)\w*/i, ["#44305f", "#241a35"]],
@@ -1511,7 +1510,8 @@
       [/\b(?:black|черн|чёрн|midnight|полноч)\w*/i, ["#25272e", "#111216"]]
     ];
     const match = tones.find(([pattern]) => pattern.test(value));
-    const colors = match ? match[1] : ["#25232b", "#111014"];
+    // Store cards share a dark neutral theme; product colour belongs in the product photo.
+    const colors = ["#19191c", "#0b0b0d"];
     return `--product-tone-start:${colors[0]};--product-tone-end:${colors[1]}`;
   }
 
@@ -4955,7 +4955,7 @@
     const user = telegramUser() || state.me || {};
     const firstName = String(user.first_name || user.name || "").trim();
     const username = user.username ? `@${user.username}` : "";
-    const greeting = firstName ? `Здравствуйте, ${escapeHtml(firstName)}${username ? ` (${escapeHtml(username)})` : ""}!` : "Здравствуйте!";
+    const greeting = username ? `Здравствуйте @${escapeHtml(username)}!` : (firstName ? `Здравствуйте, ${escapeHtml(firstName)}!` : "Здравствуйте!");
     screen.innerHTML = `<section class="iroom-boot-screen" role="status" aria-live="polite"><div class="iroom-boot-orbit"><span>IR</span></div><div class="iroom-boot-wordmark"><b>IR</b>oom</div><h2 class="iroom-boot-greeting">${greeting}</h2><p>Загружаем каталог для вас</p><div class="iroom-boot-progress"><i></i></div></section>`;
   }
 

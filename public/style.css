@@ -2649,3 +2649,14 @@ main {
 .product-card { background: linear-gradient(155deg,var(--product-tone-start,#25232b),var(--product-tone-end,#111014)) !important; border-color: color-mix(in srgb,var(--product-tone-start,#25232b) 65%,white 8%); }
 .product-card .product-image { background: linear-gradient(155deg,var(--product-tone-start,#25232b),var(--product-tone-end,#111014)) !important; }
 .product-card .product-info { background: transparent; }
+
+
+/* IRoom dark card theme: keep all catalog and category cards neutral, never blue. */
+.product-card, .product-card .product-image, .digital-minimal-category, .store-choice-card, .addon-service-card, .order-card, .reservation-card, .manager-card, .ai-action-card, .digital-minimal-empty {
+  background-color: #101012;
+  color: #f7f7f8;
+}
+.product-card { background-image: linear-gradient(145deg, #19191c, #0b0b0d) !important; }
+.product-card .product-image { background: transparent !important; }
+.digital-minimal-category { background-image: linear-gradient(145deg, #19191c, #0b0b0d) !important; border-color: rgba(255,255,255,.09); }
+.store-choice-card { background-image: linear-gradient(120deg, #19191c, #0b0b0d) !important; }
