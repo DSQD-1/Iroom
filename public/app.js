@@ -193,7 +193,7 @@
     const uploadedImage = media.find((entry) => entry.type === "image")?.url || "";
     if (uploadedImage) return uploadedImage;
 
-    // Use the official Apple product-page image resolver when no uploaded photo exists.
+    // Use M.Video product-image resolver when no uploaded photo exists.
     let name = String(item?.name || item?.product_name || "").trim();
     const category = String(item?.category_name || item?.category || "");
     const appleText = `${name} ${category}`;
@@ -205,7 +205,7 @@
     }
     const resolvedText = `${name} ${category}`;
     if (/iphone|airpods|earpods|apple\s*watch|ipad|macbook|mac\s*mini|mac\s*studio|imac|magic\s*(mouse|keyboard)|studio\s*display|apple\s*pencil|vision\s*pro|homepod|apple\s*tv/i.test(resolvedText)) {
-      return `/api/apple-product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
+      return `/api/mvideo-product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
     }
     return "";
   }
