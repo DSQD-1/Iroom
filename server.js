@@ -371,6 +371,38 @@ app.get("/api/mediamarkt-product-image", async (req, res) => {
   }
 });
 
+// Resilient image resolver: try MediaMarkt first, official Apple assets for Apple products,
+// then Wikimedia Commons. A source failure must not immediately hide every catalog image.
+app.get("/api/product-image-auto", async (req, res) => {
+  const name = String(req.query.name || "").trim().slice(0, 180);
+  const category = String(req.query.category || "").trim().slice(0, 100);
+  if (!name) return res.status(400).end();
+  const qs = new URLSearchParams({ name, category }).toString();
+  const appleProduct = /\b(?:iphone|ipad|airpods|apple\s*watch|macbook|imac|mac\s*mini|mac\s*studio|homepod|airtag|apple\s*pencil|magic\s*keyboard|magic\s*mouse|vision\s*pro)\b/i.test(`${name} ${category}`);
+  const routes = [`/api/mediamarkt-product-image?${qs}`];
+  if (appleProduct) routes.push(`/api/apple-product-image?${qs}`);
+  routes.push(`/api/product-image?${qs}`);
+  for (const route of routes) {
+    try {
+      const response = await fetch(`http://127.0.0.1:${PORT}${route}`, {
+        headers: { "accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8" },
+        signal: AbortSignal.timeout(18000)
+      });
+      const type = String(response.headers.get("content-type") || "").toLowerCase();
+      if (!response.ok || !type.startsWith("image/")) continue;
+      const bytes = Buffer.from(await response.arrayBuffer());
+      if (bytes.length < 1000 || bytes.length > 15 * 1024 * 1024) continue;
+      res.setHeader("Content-Type", type);
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.setHeader("X-IRoom-Image-Source", route.split("?")[0].replace("/api/", ""));
+      return res.status(200).send(bytes);
+    } catch (error) {
+      console.warn(`Image fallback ${route.split("?")[0]} failed:`, error.message);
+    }
+  }
+  return res.status(404).end();
+});
+
 app.get("/admin.html", (req, res) => {
   res.sendFile(path.join(publicDir, "admin.html"));
 });
