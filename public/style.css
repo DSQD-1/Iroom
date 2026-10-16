@@ -2646,8 +2646,8 @@ main {
 
 
 /* Product color-matched canvases: each card and its image area share the variant tone. */
-.product-card { background: linear-gradient(155deg,var(--product-tone-start,#25232b),var(--product-tone-end,#111014)) !important; border-color: color-mix(in srgb,var(--product-tone-start,#25232b) 65%,white 8%); }
-.product-card .product-image { background: linear-gradient(155deg,var(--product-tone-start,#25232b),var(--product-tone-end,#111014)) !important; }
+.product-card { background: linear-gradient(145deg,#19191c,#0b0b0d) !important; border-color: rgba(255,255,255,.09) !important; }
+.product-card .product-image { background: #0b0b0d !important; }
 .product-card .product-info { background: transparent; }
 
 

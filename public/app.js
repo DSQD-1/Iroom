@@ -205,7 +205,7 @@
     }
     const resolvedText = `${name} ${category}`;
     // Try MediaMarkt Germany for every product category, not only Apple devices.
-    if (name) return `/api/mediamarkt-product-image?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
+    if (name) return `/api/product-image-auto?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
     return "";
   }
 
@@ -1536,7 +1536,7 @@
                     product.name
                   )}"
                   loading="lazy"
-                  onerror="this.style.display='none'; this.parentElement.classList.add('image-unavailable');"
+                  onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.add('image-unavailable');"
                 >
               `
               : `
