@@ -7187,18 +7187,19 @@ app.post(
         }
 
         if (/^\/(?:start|app)(?:@[A-Za-z0-9_]+)?(?:\s|$)/i.test(text.trim())) {
+          const username = String(message.from?.username || "").trim();
           const firstName = String(message.from?.first_name || "").trim();
-          const greetingName = firstName ? `, ${firstName}` : "";
+          const greeting = username ? `Здравствуйте @${username}!` : (firstName ? `Здравствуйте, ${firstName}!` : "Здравствуйте!");
           const miniAppUrl = `${MINIAPP_URL.replace(/\/+$/, "")}/index.html`;
           await sendTelegramMessage(
             message.chat.id,
-            `Здравствуйте${greetingName}! 👋\nДобро пожаловать в IRoom.\n\nНажмите кнопку ниже, чтобы открыть каталог техники и цифровых товаров.`,
+            `${greeting} 👋\nДобро пожаловать в IRoom.`,
             {
               reply_markup: {
                 inline_keyboard: [
                   [
                     {
-                      text: "Открыть IRoom",
+                      text: "Открыть приложение",
                       web_app: {
                         url: miniAppUrl
                       }
