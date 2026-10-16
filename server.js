@@ -289,83 +289,84 @@ app.get("/api/apple-product-image", async (req, res) => {
 });
 
 
-// M.Video product-image lookup. Only accepts image URLs discovered in M.Video
-// product/search pages; it never sends a generic search-engine thumbnail.
-const mvideoImageDir = path.join(publicDir, "catalog-images", "mvideo-auto");
-try { fs.mkdirSync(mvideoImageDir, { recursive: true }); } catch (error) { console.warn("M.Video image cache directory:", error.message); }
+// MediaMarkt Germany product-image lookup. Only images whose product name
+// matches the requested model are accepted; successful images are cached locally.
+const mediamarktImageDir = path.join(publicDir, "catalog-images", "mediamarkt-auto");
+try { fs.mkdirSync(mediamarktImageDir, { recursive: true }); } catch (error) { console.warn("MediaMarkt image cache directory:", error.message); }
 function decodeHtml(value) {
-  return String(value || "").replace(/&amp;/g, "&").replace(/\\u002F/g, "/").replace(/\\u0026/g, "&");
+  return String(value || "").replace(/&amp;/g, "&").replace(/\\u002F/g, "/").replace(/\\u0026/g, "&").replace(/&quot;/g, '"').replace(/&#x2F;/g, "/");
 }
 function normalizeProductText(value) {
   return String(value || "").toLowerCase().replace(/ё/g, "е").replace(/[^a-zа-я0-9]+/gi, " ").trim();
 }
-app.get("/api/mvideo-product-image", async (req, res) => {
+app.get("/api/mediamarkt-product-image", async (req, res) => {
   const name = String(req.query.name || "").slice(0, 180).trim();
   const category = String(req.query.category || "").slice(0, 100).trim();
   if (!name) return res.status(400).end();
   const query = `${name} ${category}`.trim();
   const cacheKey = crypto.createHash("sha1").update(normalizeProductText(query)).digest("hex");
-  const prefix = path.join(mvideoImageDir, cacheKey);
+  const prefix = path.join(mediamarktImageDir, cacheKey);
   const existing = [".jpg", ".png", ".webp", ".jpeg"].map(ext => prefix + ext).find(file => {
     try { return fs.statSync(file).isFile() && fs.statSync(file).size > 1000; } catch { return false; }
   });
   if (existing) return res.sendFile(existing);
   try {
-    const searchUrl = `https://www.mvideo.ru/search?query=${encodeURIComponent(query)}`;
+    const searchUrl = `https://www.mediamarkt.de/de/search.html?query=${encodeURIComponent(query)}`;
     const response = await fetch(searchUrl, {
-      headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131 Safari/537.36", "accept-language": "ru-RU,ru;q=0.9,en;q=0.8", "accept": "text/html,application/xhtml+xml" },
-      signal: AbortSignal.timeout(12000)
+      headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131 Safari/537.36", "accept-language": "de-DE,de;q=0.9,en;q=0.8", "accept": "text/html,application/xhtml+xml" },
+      signal: AbortSignal.timeout(15000), redirect: "follow"
     });
-    if (!response.ok) throw new Error(`M.Video search status ${response.status}`);
+    if (!response.ok) throw new Error(`MediaMarkt search status ${response.status}`);
     const html = await response.text();
     const target = normalizeProductText(name);
+    const tokens = target.split(" ").filter(t => t.length > 2);
+    if (!tokens.length) throw new Error("Product name is too short");
     const candidates = [];
-    // Prefer Product JSON-LD records whose name overlaps the requested model.
+    const addCandidate = (title, url) => {
+      const normalizedTitle = normalizeProductText(title);
+      const overlap = tokens.filter(t => normalizedTitle.includes(t)).length / tokens.length;
+      if (overlap >= 0.75 && typeof url === "string" && url) candidates.push({ overlap, url: decodeHtml(url) });
+    };
     for (const match of html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
       try {
         const parsed = JSON.parse(match[1]);
-        const records = Array.isArray(parsed) ? parsed : [parsed];
-        const walk = (obj) => {
+        const walk = obj => {
           if (!obj || typeof obj !== "object") return;
           if (Array.isArray(obj)) { obj.forEach(walk); return; }
-          const type = obj["@type"];
-          if ((type === "Product" || (Array.isArray(type) && type.includes("Product"))) && obj.name && obj.image) {
-            const title = normalizeProductText(obj.name);
-            const tokens = target.split(" ").filter(t => t.length > 2);
-            const overlap = tokens.filter(t => title.includes(t)).length / Math.max(1, tokens.length);
+          const types = Array.isArray(obj["@type"]) ? obj["@type"] : [obj["@type"]];
+          if (types.includes("Product") && obj.name && obj.image) {
             const imgs = Array.isArray(obj.image) ? obj.image : [obj.image];
-            if (overlap >= 0.6) for (const img of imgs) if (typeof img === "string") candidates.push({ overlap, url: img });
+            for (const img of imgs) addCandidate(obj.name, typeof img === "string" ? img : img?.url);
           }
           Object.values(obj).forEach(walk);
         };
-        records.forEach(walk);
+        walk(parsed);
       } catch {}
     }
-    // Fallback to product-card images only if their nearby alt text/title matches the query.
+    // Product cards often expose the exact product title in an enclosing link/alt text.
     if (!candidates.length) {
-      for (const match of html.matchAll(/<img\b[^>]*(?:alt|title)=["']([^"']+)["'][^>]*>/gi)) {
-        const tag = match[0]; const title = normalizeProductText(match[1]);
-        const tokens = target.split(" ").filter(t => t.length > 2);
-        const overlap = tokens.filter(t => title.includes(t)).length / Math.max(1, tokens.length);
-        if (overlap < 0.6) continue;
-        const src = (tag.match(/(?:src|data-src|data-original)=["']([^"']+)["']/i) || [])[1] || "";
-        if (src) candidates.push({ overlap, url: decodeHtml(src) });
+      for (const match of html.matchAll(/<(?:article|a|div)\b[^>]*>[\s\S]{0,3000}?<img\b[^>]*>/gi)) {
+        const block = match[0];
+        const imageTag = block.match(/<img\b[^>]*>/i)?.[0] || "";
+        const title = (block.match(/(?:aria-label|title|alt)=["']([^"']+)["']/i) || [])[1] || "";
+        const src = (imageTag.match(/(?:src|data-src|data-lazy-src|srcset)=["']([^"' ,]+)/i) || [])[1] || "";
+        addCandidate(title, src);
       }
     }
-    candidates.sort((a,b) => b.overlap-a.overlap);
-    const imageUrl = decodeHtml(candidates[0]?.url || "");
-    const parsedUrl = (() => { try { return new URL(imageUrl); } catch { return null; } })();
-    if (!parsedUrl || parsedUrl.protocol !== "https:" || !(parsedUrl.hostname === "mvideo.ru" || parsedUrl.hostname.endsWith(".mvideo.ru"))) throw new Error("No exact M.Video product image found");
-    const image = await fetch(parsedUrl.toString(), { headers: { "user-agent": "Mozilla/5.0 (compatible; IRoomCatalog/1.0)" }, signal: AbortSignal.timeout(12000) });
-    if (!image.ok || !String(image.headers.get("content-type") || "").toLowerCase().startsWith("image/")) throw new Error("M.Video image request failed");
+    candidates.sort((a, b) => b.overlap - a.overlap);
+    const imageUrl = candidates[0]?.url || "";
+    const parsedUrl = (() => { try { return new URL(imageUrl, response.url); } catch { return null; } })();
+    if (!parsedUrl || parsedUrl.protocol !== "https:" || !(parsedUrl.hostname === "mediamarkt.de" || parsedUrl.hostname.endsWith(".mediamarkt.de") || parsedUrl.hostname === "img.moebelplus.de")) throw new Error("No matching MediaMarkt product image found");
+    const image = await fetch(parsedUrl.toString(), { headers: { "user-agent": "Mozilla/5.0 (compatible; IRoomCatalog/1.0)", "referer": "https://www.mediamarkt.de/" }, signal: AbortSignal.timeout(15000) });
+    if (!image.ok || !String(image.headers.get("content-type") || "").toLowerCase().startsWith("image/")) throw new Error("MediaMarkt image request failed");
     const bytes = Buffer.from(await image.arrayBuffer());
-    if (bytes.length < 1000 || bytes.length > 15 * 1024 * 1024) throw new Error("Unexpected M.Video image size");
+    if (bytes.length < 1000 || bytes.length > 15 * 1024 * 1024) throw new Error("Unexpected MediaMarkt image size");
     const type = String(image.headers.get("content-type") || "").toLowerCase();
     const ext = type.includes("png") ? ".png" : type.includes("webp") ? ".webp" : type.includes("jpeg") ? ".jpeg" : ".jpg";
     fs.writeFileSync(prefix + ext, bytes);
     return res.sendFile(prefix + ext);
   } catch (error) {
-    console.warn("M.Video product image lookup failed:", error.message);
+    console.warn("MediaMarkt product image lookup failed:", error.message);
     return res.status(404).end();
   }
 });
